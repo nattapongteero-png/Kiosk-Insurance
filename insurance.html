@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiosk — Flow ตรวจสอบประกัน (Consent)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14265A; --ink-muted:#5B6B8A; --ink-soft:#8494AE;
+  --blue:#1E7BE0; --blue-deep:#0D5BC6; --blue-light:#5FB2FF; --blue-050:#EAF3FD;
+  --green:#1E9C78; --green-050:#E8F7F2;
+  --amber:#B45309; --amber-050:#FEF5E7;
+  --red:#D92D20; --red-050:#FEF3F2;
+  --line:#D7E4F2; --card:rgba(255,255,255,.93);
+  /* ---- ระยะห่างตาม 8-point grid: 8 · 16 · 24 · 32 · 40 · 48 · 64 · 80 ---- */
+  --gutter:80px;   /* ขอบซ้าย-ขวาของหน้า = ค่าเดียวกับหน้าแรก */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
+  display:flex;flex-direction:column;align-items:center;padding:20px 12px;gap:0}
+
+
+.stage{width:1080px;height:1920px;transform-origin:top center;flex:none}
+.screen{position:relative;width:1080px;height:1920px;overflow:hidden;border-radius:10px;
+  background:#EAF2FB url("bg_home.png") center/cover no-repeat;
+  box-shadow:0 30px 90px rgba(0,0,0,.5);display:flex;flex-direction:column;color:var(--ink)}
+.screen::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.86);z-index:0}
+.screen>*{position:relative;z-index:1}
+
+/* ---------- Header ---------- */
+.hdr{display:flex;align-items:center;gap:16px;padding:36px 56px 0;flex:none}
+.hdr .logo{width:88px;height:88px;border-radius:50%;flex:none;background:#fff;border:1.5px solid var(--line);
+  overflow:hidden;display:grid;place-items:center;box-shadow:0 10px 30px rgba(20,38,90,.12)}
+.hdr .logo img{width:72px;height:72px;object-fit:contain}
+.hdr h1{font-size:40px;font-weight:700;color:var(--ink);height:44px;line-height:44px;white-space:nowrap}
+.hdr .en{font-size:28px;letter-spacing:1px;color:var(--blue);font-weight:600;
+  height:44px;line-height:44px;white-space:nowrap}
+.hdr .clockbox{margin-left:auto;text-align:right;flex:none;line-height:1.15}
+.hdr .clockbox .d{font-size:28px;color:var(--ink-muted);font-weight:500;height:44px;line-height:44px}
+.hdr .clockbox .t{font-size:46px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
+  letter-spacing:1px;height:44px;line-height:44px}
+
+/* ---------- แถบผู้ป่วย ---------- */
+.pt{margin:22px 56px 0;background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:20px 26px;display:flex;align-items:center;gap:18px;flex:none;backdrop-filter:blur(8px)}
+.pt .av{width:58px;height:58px;border-radius:50%;background:var(--blue-050);border:1px solid var(--line);flex:none}
+.pt .nm{font-size:30px;font-weight:700}
+.pt .sub{font-size:22px;color:var(--ink-muted);margin-top:2px}
+.pt .tag{margin-left:auto;background:var(--blue-050);color:var(--blue-deep);border-radius:99px;
+  padding:10px 22px;font-size:22px;font-weight:600}
+
+/* ---------- Step indicator ---------- */
+.steps{display:flex;align-items:center;margin:24px 56px 0;flex:none}
+.steps .s{display:flex;align-items:center;gap:12px;flex:none}
+.steps .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  font-size:22px;font-weight:700;background:#fff;border:2px solid var(--line);color:var(--ink-soft)}
+.steps .lb{font-size:21px;color:var(--ink-soft);font-weight:600;white-space:nowrap}
+.steps .bar{flex:1;height:3px;background:var(--line);margin:0 14px;border-radius:2px}
+.steps .s.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+.steps .s.done .lb{color:var(--green)}
+.steps .s.now .dot{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 6px rgba(30,123,224,.16)}
+.steps .s.now .lb{color:var(--blue-deep)}
+
+/* ---------- เนื้อหา ---------- */
+.body{flex:1;min-height:0;overflow-y:auto;padding:28px 56px 20px;display:flex;flex-direction:column;gap:22px}
+.h2{font-size:52px;font-weight:700;line-height:1.18;letter-spacing:-.5px}
+.lead{font-size:27px;color:var(--ink-muted);line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:28px 30px;backdrop-filter:blur(8px)}
+.card.tight{padding:22px 26px}
+.card h3{font-size:26px;font-weight:700;color:var(--blue-deep);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card h3 .n{width:34px;height:34px;border-radius:9px;background:var(--blue-050);display:grid;place-items:center;
+  font-size:19px;color:var(--blue-deep);flex:none}
+.card p{font-size:26px;line-height:1.52;color:var(--ink)}
+.card p.muted{color:var(--ink-muted)}
+
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+.scope li{list-style:none;display:flex;gap:12px;align-items:flex-start;font-size:23px;line-height:1.4}
+.scope li i{width:25px;height:25px;border-radius:50%;background:var(--green-050);flex:none;margin-top:3px;
+  display:grid;place-items:center}
+.scope li i svg{width:14px;height:14px;stroke:var(--green)}
+.scope li small{display:block;font-size:19px;color:var(--ink-soft);margin-top:1px}
+.nosend{margin-top:16px;background:var(--red-050);border:1px solid #FDCFCA;border-radius:16px;padding:15px 20px;
+  font-size:22px;color:#98211A;line-height:1.45}
+.nosend b{color:var(--red)}
+
+.note{border-radius:20px;padding:20px 24px;font-size:24px;line-height:1.5;display:flex;gap:16px}
+.note i{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center}
+.note i svg{width:20px;height:20px}
+.note.amber{background:var(--amber-050);border:1px solid #F6DCB4;color:#7C3B06}
+.note.amber i{background:#FBE3BE} .note.amber i svg{stroke:var(--amber)}
+.note.blue{background:var(--blue-050);border:1px solid #C6DFF8;color:var(--blue-deep)}
+.note.blue i{background:#D5E8FB} .note.blue i svg{stroke:var(--blue-deep)}
+.note.green{background:var(--green-050);border:1px solid #BFE6D8;color:#0F6B51}
+.note.green i{background:#CFEEE2} .note.green i svg{stroke:var(--green)}
+
+.opt{display:flex;align-items:center;gap:22px;background:var(--card);border:2px solid var(--line);
+  border-radius:24px;padding:26px 28px;cursor:pointer;font:inherit;text-align:left;width:100%;color:var(--ink);
+  transition:border-color .15s, background .15s}
+.opt:hover{border-color:#A9CBEE}
+.opt[aria-checked="true"]{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 4px rgba(30,123,224,.12)}
+.opt .mk{width:38px;height:38px;border-radius:50%;border:2.5px solid var(--line);flex:none;display:grid;place-items:center}
+.opt[aria-checked="true"] .mk{border-color:var(--blue);background:var(--blue)}
+.opt[aria-checked="true"] .mk::after{content:"";width:15px;height:15px;border-radius:50%;background:#fff}
+.opt .co{width:74px;height:74px;border-radius:18px;background:var(--blue-050);border:1px solid var(--line);flex:none}
+.opt .tx b{display:block;font-size:31px;font-weight:700}
+.opt .tx span{display:block;font-size:23px;color:var(--ink-muted);margin-top:4px}
+.opt .eta{margin-left:auto;text-align:right;flex:none}
+.opt .eta b{display:block;font-size:26px;color:var(--blue-deep);font-weight:700}
+.opt .eta span{display:block;font-size:19px;color:var(--ink-soft)}
+
+/* ---------- Modal ความยินยอม ---------- */
+.ov{position:absolute;inset:0;z-index:6;background:rgba(10,25,60,.52);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:150px 64px}
+.sheet{width:952px;max-height:100%;background:#fff;border-radius:36px;display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 40px 100px rgba(6,20,50,.45);position:relative}
+.sheet .sh{padding:34px 44px 22px;border-bottom:1px solid var(--line);flex:none;display:flex;gap:20px;align-items:flex-start}
+.sheet .sh .ic{width:64px;height:64px;border-radius:18px;background:var(--blue-050);flex:none;display:grid;place-items:center}
+.sheet .sh .ic svg{width:34px;height:34px;stroke:var(--blue-deep)}
+.sheet .sh h2{font-size:38px;font-weight:700;line-height:1.2}
+.sheet .sh p{font-size:23px;color:var(--ink-muted);margin-top:6px}
+.sheet .sb{flex:1;min-height:0;overflow-y:auto;padding:26px 44px;display:flex;flex-direction:column;gap:18px}
+.sheet .sb .card{background:#F8FBFF;backdrop-filter:none}
+.sheet .sf{flex:none;border-top:1px solid var(--line);padding:24px 44px 28px;display:flex;flex-direction:column;gap:18px}
+.sheet .sf .row{display:flex;gap:16px;align-items:center}
+
+.agree{display:flex;gap:18px;align-items:flex-start;background:#fff;border:2px solid var(--line);
+  border-radius:20px;padding:20px 24px;cursor:pointer;font:inherit;text-align:left;width:100%;color:var(--ink)}
+.agree[aria-checked="true"]{border-color:var(--green);background:var(--green-050)}
+.agree .bx{width:40px;height:40px;border-radius:11px;border:2.5px solid var(--line);flex:none;
+  display:grid;place-items:center;background:#fff}
+.agree[aria-checked="true"] .bx{border-color:var(--green);background:var(--green)}
+.agree .bx svg{width:23px;height:23px;stroke:#fff;opacity:0}
+.agree[aria-checked="true"] .bx svg{opacity:1}
+.agree .tx{font-size:25px;line-height:1.45}
+.agree.locked{opacity:.45;pointer-events:none}
+
+.scrollcue{position:absolute;left:50%;transform:translateX(-50%);bottom:272px;z-index:7;
+  background:var(--blue-deep);color:#fff;font-size:21px;font-weight:600;border-radius:99px;
+  padding:12px 24px;display:flex;align-items:center;gap:9px;box-shadow:0 10px 26px rgba(13,91,198,.4)}
+.scrollcue svg{width:19px;height:19px;stroke:#fff}
+.scrollcue.hide{display:none}
+
+/* ---------- Footer ---------- */
+.ftr{flex:none;background:rgba(255,255,255,.94);border-top:1px solid var(--line);
+  padding:24px 56px;display:flex;align-items:center;gap:18px;backdrop-filter:blur(10px)}
+.btn{font:inherit;border:0;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:14px;
+  font-weight:700;transition:transform .12s;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn svg{width:26px;height:26px}
+.btn.primary{background:linear-gradient(135deg,var(--blue-light),var(--blue) 45%,var(--blue-deep));
+  color:#fff;font-size:33px;padding:25px 44px;box-shadow:0 10px 26px rgba(30,123,224,.32);margin-left:auto}
+.btn.primary svg{stroke:#fff}
+.btn.primary[disabled]{background:#C9D6E6;color:#fff;box-shadow:none;cursor:not-allowed}
+.btn.ghost{background:#fff;border:2px solid var(--line);color:var(--ink-muted);font-size:26px;padding:21px 30px}
+.btn.ghost svg{stroke:var(--ink-muted)}
+.btn.danger{background:var(--red-050);border:2px solid #FDA29B;color:var(--red);font-size:26px;padding:21px 30px}
+.btn.danger svg{stroke:var(--red)}
+.btn.green{background:linear-gradient(135deg,#34C39B,var(--green));color:#fff;font-size:32px;padding:25px 40px;
+  box-shadow:0 10px 26px rgba(30,156,120,.3);margin-left:auto}
+.btn.green svg{stroke:#fff}
+.btn.wide{flex:1;justify-content:center;margin-left:0}
+
+/* ---------- องค์ประกอบเฉพาะหน้า ---------- */
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:26px;padding:0 70px}
+.ring{width:190px;height:190px;border-radius:50%;border:10px solid var(--blue-050);
+  border-top-color:var(--blue);animation:spin 1.15s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tick{width:180px;height:180px;border-radius:50%;background:var(--green-050);border:3px solid #BFE6D8;
+  display:grid;place-items:center}
+.tick svg{width:92px;height:92px;stroke:var(--green)}
+.clock{width:180px;height:180px;border-radius:50%;background:var(--amber-050);border:3px solid #F6DCB4;
+  display:grid;place-items:center}
+.clock svg{width:88px;height:88px;stroke:var(--amber)}
+.reqid{font-size:26px;color:var(--ink-muted)}
+.reqid b{display:block;font-size:40px;color:var(--ink);letter-spacing:2px;margin-top:6px;font-variant-numeric:tabular-nums}
+.cnt{font-size:80px;font-weight:700;color:var(--blue-deep);font-variant-numeric:tabular-nums}
+.pbar{width:520px;height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue-light),var(--blue));border-radius:99px}
+
+.offer{background:#fff;border:2px solid var(--line);border-radius:26px;overflow:hidden;
+  width:100%;padding:0;font:inherit;text-align:left;cursor:pointer;display:block;
+  transition:border-color .15s, box-shadow .15s}
+.offer .top{background:#F4F7FB}
+.offer[aria-checked="true"]{border-color:var(--green);box-shadow:0 0 0 5px rgba(30,156,120,.13)}
+.offer[aria-checked="true"] .top{background:var(--green-050)}
+.offer .top .mk{width:34px;height:34px;border-radius:50%;border:2.5px solid var(--line);flex:none;margin-left:auto}
+.offer[aria-checked="true"] .top .mk{border-color:var(--green);background:var(--green);
+  box-shadow:inset 0 0 0 6px #fff}
+.offer .top{background:var(--green-050);padding:22px 28px;display:flex;align-items:center;gap:16px}
+.offer .top .co{width:56px;height:56px;border-radius:14px;background:#fff;border:1px solid #BFE6D8;flex:none}
+.offer .top b{font-size:29px}
+.offer .top span{font-size:22px;color:var(--ink-muted);display:block;margin-top:2px}
+.offer .top .badge{margin-left:auto;background:var(--green);color:#fff;border-radius:99px;padding:9px 20px;font-size:21px;font-weight:700}
+.offer .rows{padding:22px 28px;display:flex;flex-direction:column;gap:14px}
+.offer .row{display:flex;font-size:25px;gap:18px}
+.offer .row .k{color:var(--ink-muted);width:230px;flex:none}
+.offer .row .v{font-weight:600;flex:1}
+.offer .foot{padding:18px 28px 24px;font-size:21px;color:var(--ink-soft);border-top:1px dashed var(--line);line-height:1.4}
+
+/* ================= หน้าเลือกแบบประกัน — Figma KIOSK-Insurance-Health-Connect node 50:101 =================
+   กรอบ 1080x1920 · หัวจอ 0–248 (โปร่ง ไม่มีพื้น) · "แบบประกันที่แนะนำ" 248–797 (ขาวจากล่างจางขึ้นบน มุมล่างโค้ง 40)
+   "แบบประกันอื่น" หัวข้อ y845 · กริด 2x2 ที่ y976 / 1342 */
+.pp{position:absolute;inset:0;background:#EAF2FB url("bg_home.png") center/cover no-repeat;color:var(--ink)}
+
+.pp .band{position:absolute;left:0;top:0;width:1080px;height:208px;z-index:3;
+  display:flex;align-items:center;justify-content:space-between;padding:80px var(--gutter) 40px}
+.pp .id{display:flex;align-items:center;gap:16px}
+.pp .crest{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;
+  background:#fff;border:1.5px solid var(--line);box-shadow:0 10px 30px rgba(20,38,90,.12)}
+.pp .crest img{width:72px;height:72px;object-fit:contain}
+.pp .ttl{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
+.pp .sub{font-size:28px;font-weight:600;letter-spacing:1px;color:var(--blue);height:44px;line-height:44px;white-space:nowrap}
+.pp .clk{text-align:right}
+.pp .clk .d{font-size:28px;font-weight:500;color:var(--ink-muted);height:44px;line-height:44px}
+.pp .clk .t{font-size:46px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;height:44px;line-height:44px}
+
+/* แบบประกันที่แนะนำ */
+/* หัวจอ fix ไว้ 0–208 (ใต้โลโก้ 40 + ส่วนแนะนำเว้นบน 40 = ห่างเนื้อหา 80 เท่าขอบข้าง) · เนื้อหาใต้หัวจอเลื่อนขึ้น-ลงได้ ขอบบนจาง 32px เนื้อหาจึงไม่ถูกตัดเป็นเส้นแข็งใต้หัวจอ */
+.pp .scroll{position:absolute;left:0;right:0;top:496px;bottom:0;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;overscroll-behavior:contain;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16px);mask-image:linear-gradient(180deg,transparent 0,#000 16px)}
+.pp .scroll::-webkit-scrollbar{display:none}
+/* เมื่อเริ่มเลื่อน: ขอบบนจางยาวขึ้น 96px เนื้อหาค่อยๆ หายใต้ข้อมูลผู้ป่วย (ตอนยังไม่เลื่อนใช้ 16 ให้หัวข้อชัดเต็ม) */
+.pp .scroll.scrolled{-webkit-mask-image:linear-gradient(180deg,transparent 0,rgba(0,0,0,.35) 40px,#000 96px);
+                             mask-image:linear-gradient(180deg,transparent 0,rgba(0,0,0,.35) 40px,#000 96px)}
+/* ผู้ยืนยันตัวตน — Figma node 67:947: แถบขาวเต็มกว้าง padding 48/80 · 2 แถวห่าง 24
+   แถว 1: ตรา 88 + ชื่อ/HN (44+44) · แถว 2: 3 คอลัมน์เท่ากันห่าง 24 ป้าย 40 + ค่า 40 (ห่าง 8)
+   คงที่ใต้หัวจอ (y208–504) · เลขบัตรปิดไว้เหลือ 3 หลักท้าย เพราะจอตู้อยู่ในที่สาธารณะ */
+.pp .who{position:absolute;left:0;right:0;top:208px;z-index:3;
+  display:flex;flex-direction:column;gap:24px;padding:48px var(--gutter)}
+/* พื้นคงที่ผืนเดียวหลังเนื้อหา (ไม่เลื่อน — เลื่อนเฉพาะ content): y208 → ล่างสุดจอ
+   ขาวทึบที่มุมโค้งบน → จางจนใสที่ y1024 → กลับเป็นขาวสนิทที่ y1309 แล้วขาวจนสุดจอ */
+.pp .veil{position:absolute;left:0;right:0;top:208px;bottom:0;z-index:0;pointer-events:none;
+  border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.980) 68px,rgba(255,255,255,0.926) 136px,rgba(255,255,255,0.844) 204px,rgba(255,255,255,0.741) 272px,rgba(255,255,255,0.624) 340px,rgba(255,255,255,0.500) 408px,rgba(255,255,255,0.376) 476px,rgba(255,255,255,0.259) 544px,rgba(255,255,255,0.156) 612px,rgba(255,255,255,0.074) 680px,rgba(255,255,255,0.020) 748px,rgba(255,255,255,0.000) 816px,rgba(255,255,255,0.043) 852px,rgba(255,255,255,0.156) 887px,rgba(255,255,255,0.316) 923px,rgba(255,255,255,0.500) 958px,rgba(255,255,255,0.684) 994px,rgba(255,255,255,0.844) 1030px,rgba(255,255,255,0.957) 1065px,rgba(255,255,255,1.000) 1101px) 0 0/100% 1101px no-repeat,
+             linear-gradient(#fff,#fff) 0 1101px/100% calc(100% - 1101px) no-repeat}
+.pp .who .id{display:flex;align-items:center;gap:16px}
+.pp .who .av{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
+  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
+.pp .who .av svg{width:44px;height:44px;stroke:#A87C2A}
+.pp .who .nm{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
+.pp .who .hn{font-size:28px;font-weight:500;color:var(--ink-muted);height:44px;line-height:44px;white-space:nowrap}
+.pp .who .kv{display:flex;gap:24px}
+.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:40px;line-height:40px;white-space:nowrap}
+.pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pp .rec{position:relative;width:1080px;height:517px;overflow:visible;}   /* การ์ดจบที่ 469 + ห่างส่วนถัดไป 48 */
+.pp .hd{position:absolute;left:var(--gutter)}
+.pp .hd h2{font-size:48px;font-weight:700;line-height:68px;white-space:nowrap}
+.pp .hd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);white-space:nowrap}
+.pp .rec .hd{top:8px}   /* หัวข้อเริ่ม y504 ห่างข้อมูลผู้ป่วย 48 */
+.pp .rec .art{position:absolute;left:0;top:154px;width:615px;height:410px;object-fit:cover;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 45.0%,rgba(0,0,0,0.957) 50.4%,rgba(0,0,0,0.844) 55.8%,rgba(0,0,0,0.684) 61.1%,rgba(0,0,0,0.500) 66.5%,rgba(0,0,0,0.316) 71.9%,rgba(0,0,0,0.156) 77.2%,rgba(0,0,0,0.043) 82.6%,rgba(0,0,0,0.000) 88.0%);
+          mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 45.0%,rgba(0,0,0,0.957) 50.4%,rgba(0,0,0,0.844) 55.8%,rgba(0,0,0,0.684) 61.1%,rgba(0,0,0,0.500) 66.5%,rgba(0,0,0,0.316) 71.9%,rgba(0,0,0,0.156) 77.2%,rgba(0,0,0,0.043) 82.6%,rgba(0,0,0,0.000) 88.0%)}
+/* แถบเลื่อนต้อง overflow เพื่อปัดได้ ซึ่งตัดเงาการ์ดเป็นเหลี่ยม → เผื่อพื้นที่ให้เงา 40 บน/ซ้าย 48 ล่าง
+   แล้วขยับกล่องออกไปเท่ากัน การ์ดจึงยังอยู่ที่ (515,106) ตาม Figma · ปัดแล้วการ์ดหายเข้าหลังภาพที่ x475
+   ล่างเผื่อ 72 > เงาการ์ด (20+38) และปล่อยให้ล้นลงบนพื้นขาวของส่วนถัดไป เงาจึงไม่ถูกตัดเป็นเส้นที่รอยต่อ */
+.pp .rail{position:absolute;left:475px;right:0;top:34px;height:507px;display:flex;gap:40px;
+  overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:40px;
+  padding:40px var(--gutter) 72px 40px;scrollbar-width:none}
+.pp .rail::-webkit-scrollbar{display:none}
+.pp .rail .plan{width:348px;height:395px;flex:none;scroll-snap-align:start}
+
+/* แบบประกันอื่น */
+/* Figma: หัวข้อ y845 (ห่างส่วนแนะนำ 48) · กริดเริ่ม y976 · ท้ายรายการเว้น 80 */
+.pp .more{padding:48px var(--gutter) 248px}   /* ล่างเผื่อแถบปุ่มยกเลิก 208 + 40 ให้การ์ดใบท้ายเลื่อนพ้นแถบ */
+
+/* แถบปุ่มยกเลิก: fix ล่างจอ ไม่เลื่อนตามเนื้อหา · พื้นขาวไล่ขึ้น 40px ให้การ์ดที่เลื่อนผ่านจางหายใต้แถบ
+   ปุ่มสูง 88 กึ่งกลางจอ ขอบบนที่ y1752 แนวเดียวกับปุ่มภาษา/ตั้งค่าของหน้าแรก */
+.pp .foot{position:absolute;left:0;right:0;bottom:0;height:248px;z-index:3;pointer-events:none;
+  display:flex;align-items:flex-end;justify-content:center;padding:0 var(--gutter) 80px;
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0,#fff 40px)}
+.pp .cancel{pointer-events:auto;height:88px;border-radius:99px;display:flex;align-items:center;gap:16px;
+  padding:0 56px;border:0;cursor:pointer;font:inherit;font-size:28px;font-weight:600;color:var(--ink-muted);
+  background:#fff;box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line),0 8px 20px rgba(20,38,90,.08);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+.pp .cancel:active{transform:scale(.97);box-shadow:0 0 0 2px var(--ink-soft),0 4px 10px rgba(20,38,90,.1)}
+.pp .more .hd{position:static}
+.pp .grid{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:318px;gap:48px 40px}
+
+/* การ์ดแบบประกัน: ผิวไข่มุก + ขอบทองบาง ชุดเดียวกับปุ่มหน้าแรก */
+.pp .plan{border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);border-radius:24px;
+  padding:32px;display:flex;flex-direction:column;gap:8px;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 0 0 1px rgba(191,145,58,.32),0 0 0 2px rgba(255,255,255,.6),
+             0 1px 2px rgba(20,38,90,.04),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s cubic-bezier(.2,.8,.2,1)}
+.pp .plan:active{transform:scale(.982);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 0 0 2px rgba(191,145,58,.6),0 4px 10px rgba(20,38,90,.10)}
+.pp .plan .ic{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
+  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 7px rgba(191,145,58,.06),0 8px 18px rgba(120,92,30,.12)}
+.pp .plan .ic.lg{position:relative;overflow:hidden;background:#fff}
+.pp .plan .ic.lg img{position:absolute;inset:10px;width:44px;height:44px;object-fit:contain;background:#fff}
+.pp .plan .ic.lg img.cover{inset:0;width:64px;height:64px;object-fit:cover}
+.pp .plan .ic.lg b{font-size:20px;font-weight:700;line-height:1;color:#A87C2A}
+.pp .plan .tag{align-self:flex-start;font-size:20px;font-weight:600;color:#8A6420;
+  background:rgba(191,145,58,.12);border-radius:99px;padding:4px 16px}
+.pp .plan b{font-size:32px;font-weight:700;line-height:1.25}
+.pp .plan .cov{font-size:22px;color:var(--ink-muted);line-height:1.4}
+.pp .plan .pr{margin-top:auto;display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.pp .plan .pr span{font-size:20px;color:var(--ink-soft)}
+.pp .plan .pr strong{font-size:30px;font-weight:700}
+.pp .plan .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pp .plan .top .tag{align-self:center}
+
+/* ---------- หน้าส่งข้อมูล / ส่งสำเร็จ / ส่งนาน (ใต้แถบผู้ยืนยันตัวตน y504) ---------- */
+.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:600px;bottom:248px;z-index:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
+.pp .pane h2{font-size:48px;font-weight:700;line-height:64px}
+.pp .pane p{font-size:28px;line-height:44px;color:var(--ink-muted)}
+.pp .pane p b{color:var(--ink)}
+.pp .spin{width:160px;height:160px;border-radius:50%;margin-bottom:8px;
+  background:conic-gradient(from 0deg,rgba(214,168,80,0) 0deg,rgba(214,168,80,0) 200deg,#D9A546 330deg,#F2CC78 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 66px,#000 67px);mask:radial-gradient(circle,transparent 66px,#000 67px);
+  animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pp .bigic{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;margin-bottom:8px;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
+  box-shadow:0 0 0 2px rgba(191,145,58,.45),0 0 0 14px rgba(191,145,58,.07),0 18px 40px rgba(120,92,30,.14)}
+.pp .bigic svg{width:80px;height:80px}
+.pp .bigic.ok svg{stroke:var(--green)}
+.pp .bigic.wait svg{stroke:#A87C2A}
+.pp .apps{width:100%;display:flex;flex-direction:column;gap:16px}
+.pp .app{display:flex;align-items:center;gap:24px;padding:24px 32px;border-radius:24px;text-align:left;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+.pp .app .aic{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);box-shadow:0 0 0 1.5px rgba(191,145,58,.42)}
+.pp .app .aic svg{width:32px;height:32px;stroke:#A87C2A}
+.pp .app .tx b{display:block;font-size:30px;font-weight:700;line-height:40px}
+.pp .app .tx span{display:block;font-size:22px;color:var(--ink-muted);line-height:32px}
+.pp .app .st{margin-left:auto;flex:none;display:flex;align-items:center;gap:8px;font-size:22px;font-weight:600;
+  color:#8A6420;background:rgba(191,145,58,.12);border-radius:99px;padding:8px 16px}
+.pp .app .st.done{color:#0F6B51;background:var(--green-050)}
+.pp .app .st svg{width:20px;height:20px;stroke:var(--green)}
+.pp .note-s{display:flex;gap:16px;align-items:flex-start;text-align:left;font-size:22px;line-height:32px;color:var(--ink-muted)}
+.pp .note-s svg{width:32px;height:32px;flex:none;stroke:var(--ink-soft)}
+.pp .rid{font-size:24px;color:var(--ink-soft)}
+.pp .rid b{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.pp .finish{pointer-events:auto;height:88px;min-width:360px;padding:0 56px;border-radius:99px;border:0;cursor:pointer;font:inherit;
+  font-size:30px;font-weight:700;color:#fff;background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);
+  box-shadow:0 10px 24px rgba(20,38,90,.22);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.pp .finish:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.pp .spin{animation-duration:3s}}
+
+
+/* ---------- หน้าสรุปหลังส่งข้อมูล: หัวข้อ + เนื้อหาชิดซ้าย ---------- */
+.pp .pg{position:absolute;left:0;right:0;top:504px;bottom:248px;z-index:1;padding:0 var(--gutter);
+  display:flex;flex-direction:column;gap:32px}   /* หัวข้อ → เนื้อหา 32 เท่าหน้าเลือกแบบประกัน */
+.pp .pgb{display:flex;flex-direction:column;gap:24px}
+.pp .psum{display:flex;align-items:center;gap:24px;padding:32px;border-radius:24px;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+.pp .psum .lg{position:relative;width:80px;height:80px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;
+  background:#fff;box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
+.pp .psum .lg img{position:absolute;inset:12px;width:56px;height:56px;object-fit:contain;background:#fff}
+.pp .psum .lg img.cover{inset:0;width:80px;height:80px;object-fit:cover}
+.pp .psum .lg b{font-size:22px;color:#A87C2A}
+.pp .psum .tx b{display:block;font-size:34px;font-weight:700;line-height:44px}
+.pp .psum .tx span{display:block;font-size:22px;color:var(--ink-muted);line-height:32px}
+.pp .psum .st{margin-left:auto;flex:none;display:flex;align-items:center;gap:8px;font-size:22px;font-weight:600;
+  border-radius:99px;padding:10px 18px}
+.pp .psum .st svg{width:22px;height:22px}
+.pp .psum .st.done{color:#0F6B51;background:var(--green-050)} .pp .psum .st.done svg{stroke:var(--green)}
+.pp .psum .st.wait{color:#8A6420;background:rgba(191,145,58,.12)} .pp .psum .st.wait svg{stroke:#A87C2A}
+.pp .psum .st.busy{color:var(--ink-muted);background:rgba(20,38,90,.05)}
+.pp .mini-spin{width:22px;height:22px;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(214,168,80,0) 0deg,rgba(214,168,80,0) 180deg,#D9A546 330deg,#F2CC78 360deg);
+  -webkit-mask:radial-gradient(circle,transparent 7px,#000 8px);mask:radial-gradient(circle,transparent 7px,#000 8px);
+  animation:spin 1s linear infinite}
+.pp .lead2{font-size:26px;line-height:40px;color:var(--ink-muted)}
+
+.pp .phd h2{font-size:48px;font-weight:700;line-height:68px}
+.pp .phd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);line-height:48px}
+/* modal กำลังส่งข้อมูล */
+.pp .sendov{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:0 var(--gutter);
+  background:rgba(10,25,60,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:ovIn .25s ease-out}
+.pp .sendbox{width:100%;display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;
+  padding:64px 56px 56px;border-radius:40px;background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
+  box-shadow:0 0 0 1px rgba(191,145,58,.32),0 40px 100px rgba(6,20,50,.35);animation:boxIn .35s cubic-bezier(.2,.8,.2,1)}
+.pp .sendbox h2{font-size:44px;font-weight:700;line-height:60px}
+.pp .sendbox .psum{width:100%;text-align:left;margin-top:8px}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+@keyframes boxIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+
+<div class="stage" id="stage"><div class="screen" id="screen"></div></div>
+
+<script>
+/* ============================================================
+   FLOW ตรวจสอบประกันชีวิต/สุขภาพ ที่ KIOSK — เฉพาะส่วน UX/UI
+   ลำดับ: ยินยอม (modal ที่หน้าแรกของตู้) → เลือกแบบประกัน → ส่งข้อมูล FMR/PHR → รับผล
+   ============================================================ */
+
+let idx = 0;
+const SCREENS = [
+  {id:'select', nav:'2 · เลือกแบบประกัน'},
+  {id:'submit', nav:'3 · กำลังส่งข้อมูล'},
+  {id:'sent',   nav:'4 · ส่งสำเร็จ'},
+  {id:'slow',   nav:'4 · ส่งนาน รับผลทางแอป'},
+];
+
+const ICON = {
+  user:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+  check:'<path d="M4 12.5 9 17.5 20 6.5"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6h.01"/>',
+  warn:'<path d="M12 4 2.8 20h18.4L12 4Z"/><path d="M12 10v4.5M12 17.4h.01"/>',
+  shield:'<path d="M12 3 5 6v5.5c0 4.3 2.9 8.2 7 9.5 4.1-1.3 7-5.2 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/>',
+  bigcheck:'<path d="M4 12.5 9.5 18 20 6.5"/>',
+  arrow:'<path d="M5 12h13M12.5 6l6 6-6 6"/>',
+  back:'<path d="M19 12H6M11.5 18l-6-6 6-6"/>',
+  close:'<path d="M18 6 6 18M6 6l12 12"/>',
+  down:'<path d="M12 5v13M6 12.5l6 6 6-6"/>',
+  phone:'<rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10.5 18.5h3"/>',
+  doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h6M10 16h6"/>',
+};
+const svg = (k, w=1.9) => `<svg viewBox="0 0 24 24" fill="none" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
+
+/* ---------- ส่วนที่ใช้ซ้ำ ---------- */
+
+/* ---------- หน้าจอฐาน (ใช้เป็นพื้นหลังของ modal ได้) ---------- */
+
+/* เลือกแบบประกันก่อน แล้วจึงส่งข้อมูลสุขภาพไปให้บริษัทของแบบนั้นพิจารณา
+   เลย์เอาต์ตาม Figma node 50:101 · แตะการ์ดเพื่อเลือกแล้วไปขั้นส่งข้อมูล */
+/* ผู้ยืนยันตัวตน — ข้อมูลสมมติ ตอนต่อระบบจริงรับจากการอ่านบัตร/HIS */
+const PATIENT = {name:'ฐากูร ทดสอบ', cid:'1103700123123', dob:'2000-06-11', hn:'000890314', right:'บัตรทอง (UC)'};
+/* อายุเป็น ปี เดือน วัน: นับเดือนเต็มก่อน แล้วนับวันที่เหลือจาก "วันครบเดือน" ล่าสุด
+   วันเกิดวันที่ 29–31 ในเดือนที่สั้นกว่า ถือวันสุดท้ายของเดือนนั้นเป็นวันครบเดือน */
+function ageYMD(dob, now = new Date()){
+  const b = new Date(dob + 'T00:00:00');
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let months = (today.getFullYear() - b.getFullYear()) * 12 + today.getMonth() - b.getMonth();
+  const anchorOf = n => {
+    const y = b.getFullYear() + Math.floor((b.getMonth() + n) / 12), mo = (b.getMonth() + n) % 12;
+    return new Date(y, mo, Math.min(b.getDate(), new Date(y, mo + 1, 0).getDate()));
+  };
+  if (anchorOf(months) > today) months -= 1;
+  const days = Math.round((today - anchorOf(months)) / 864e5);
+  return `${Math.floor(months / 12)} ปี ${months % 12} เดือน ${days} วัน`;
+}
+/* เลขบัตร 13 หลักแสดงเฉพาะ 3 หลักท้าย: X-XXXX-XXXXX-12-3 */
+const maskCid = c => `X-XXXX-XXXXX-${c.slice(10,12)}-${c.slice(12)}`;
+
+/* บริษัทประกัน — โลโก้จาก Wikimedia Commons (ใช้ในต้นแบบเท่านั้น ก่อนขึ้นระบบจริงต้องได้ไฟล์และสิทธิ์ใช้จากบริษัท)
+   A: File:เมืองไทยประกันชีวิต-01.svg (CC BY-SA 4.0) · B: File:Thai Life Insurance Logo.svg (Public domain)
+   C: File:AIA wordmark logo.svg (Public domain)
+   fit: 'contain' = โลโก้วางกลางวงบนพื้นขาว · 'cover' = โลโก้พื้นเต็มสี่เหลี่ยมให้เต็มวง
+   ถ้าโหลดรูปไม่ได้ จะแสดงอักษรย่อแทน (onerror ลบรูปทิ้ง) */
+const INSURERS = {
+  A:{name:'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)', short:'MTL', logo:'ins_logo_a.png', fit:'contain'},
+  B:{name:'บริษัท ไทยประกันชีวิต จำกัด (มหาชน)',     short:'TL',  logo:'ins_logo_b.png', fit:'cover'},
+  C:{name:'บริษัท เอไอเอ จำกัด',                    short:'AIA', logo:'ins_logo_c.png', fit:'contain', slow:true},   // slow = สาธิตกรณีส่งข้อมูลนาน
+};
+const PLANS_REC = [
+  {co:'A', tag:'ประกันสุขภาพ', name:'Health Plus',      cov:'ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี', pr:'12,000'},
+  {co:'B', tag:'ประกันสุขภาพ', name:'Health Care Lite', cov:'ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี', pr:'6,500'},
+  {co:'C', tag:'ประกันชีวิต',  name:'Life Protect 20',  cov:'ทุนประกัน 1,000,000 บาท ระยะ 20 ปี',     pr:'18,000'},
+];
+const PLANS_MORE = [
+  {co:'B', tag:'ประกันสุขภาพ', name:'Cancer Care',        cov:'คุ้มครองโรคมะเร็งทุกระยะ สูงสุด 1,000,000 บาท', pr:'3,200'},
+  {co:'C', tag:'ประกันอุบัติเหตุ', name:'Accident Shield',   cov:'ค่ารักษาจากอุบัติเหตุ สูงสุด 100,000 บาท/ครั้ง', pr:'1,800'},
+  {co:'A', tag:'ประกันโรคร้ายแรง', name:'Critical Illness 30', cov:'จ่ายเงินก้อนเมื่อตรวจพบ 30 โรคร้ายแรง',        pr:'7,400'},
+  {co:'C', tag:'ประกันชีวิต',  name:'Saving Life 15',     cov:'ออมทรัพย์พร้อมคุ้มครองชีวิต ระยะ 15 ปี',       pr:'24,000'},
+  {co:'A', tag:'ประกันสุขภาพ', name:'OPD Care',           cov:'ค่ารักษาผู้ป่วยนอก ครั้งละ 1,500 บาท 30 ครั้ง/ปี', pr:'4,900'},
+  {co:'B', tag:'ประกันสุขภาพ', name:'Senior Health 60+',  cov:'ค่ารักษาผู้ป่วยใน สูงสุด 300,000 บาท/ปี',       pr:'21,500'},
+  {co:'C', tag:'ประกันชีวิต',  name:'Life Care 99',       cov:'คุ้มครองชีวิตถึงอายุ 99 ปี ทุน 500,000 บาท',    pr:'15,800'},
+  {co:'A', tag:'ประกันสุขภาพ', name:'Family Health',      cov:'คุ้มครองทั้งครอบครัว สูงสุด 4 คน',              pr:'28,000'},
+];
+/* แบบประกันที่ผู้ใช้เลือก (ตั้งค่าเมื่อแตะการ์ด) ใช้แสดงในหน้าส่งข้อมูล/ผลการส่ง */
+let CHOSEN = null;
+const planInfo = () => { const p = [...PLANS_REC, ...PLANS_MORE].find(x => x.name === CHOSEN) || PLANS_REC[0];
+  return {plan:p, co:INSURERS[p.co]}; };
+
+/* การ์ดแบบประกัน: โลโก้บริษัท + ป้ายประเภทอยู่แถวบน (ใช้โครงเดียวกันทั้งส่วนแนะนำและแบบประกันอื่น) */
+const planCard = p => `
+  <button class="plan" data-go="submit" data-plan="${p.name}">
+    <div class="top"><span class="ic lg" title="${INSURERS[p.co].name}"><b>${INSURERS[p.co].short}</b><img class="${INSURERS[p.co].fit}" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"></span><span class="tag">${p.tag}</span></div>
+    <b>${p.name}</b>
+    <span class="cov">${p.cov}</span>
+    <span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>
+  </button>`;
+
+/* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
+const ppHead = () => `
+    <div class="band">
+      <div class="id">
+        <div class="crest"><img src="logo_bms.svg" alt="BMS Group"></div>
+        <div><div class="ttl">Smart Hospital Kiosk</div><div class="sub">ระบบลงทะเบียนอัตโนมัติ</div></div>
+      </div>
+      <div class="clk"><div class="d" id="clkDate">—</div><div class="t" id="clkTime">--:--:--</div></div>
+    </div>
+
+    <div class="veil"></div>
+    <div class="who">
+      <div class="id">
+        <span class="av">${svg('user',1.8)}</span>
+        <div><div class="nm">${PATIENT.name}</div><div class="hn">HN ${PATIENT.hn}</div></div>
+      </div>
+      <div class="kv">
+        <div><span>เลขบัตรประชาชน</span><b>${maskCid(PATIENT.cid)}</b></div>
+        <div><span>อายุ</span><b>${ageYMD(PATIENT.dob)}</b></div>
+        <div><span>สิทธิการรักษา</span><b>${PATIENT.right}</b></div>
+      </div>
+    </div>
+`;
+
+const selectScreen = () => `
+  <div class="pp">
+${ppHead()}
+    <div class="scroll"><div class="stack">
+    <section class="rec">
+      <div class="hd"><h2>แบบประกันที่แนะนำ</h2><p>เลือกประกันที่ต้องการ</p></div>
+      <img class="art" src="ins_couple.png" alt="">
+      <div class="rail">${PLANS_REC.map(planCard).join('')}</div>
+    </section>
+
+    <section class="more">
+      <div class="hd"><h2>แบบประกันอื่น</h2><p>เลือกประกันที่ต้องการ</p></div>
+      <div class="grid">${PLANS_MORE.map(planCard).join('')}</div>
+    </section>
+    </div></div>
+
+    <!-- กดยินยอมมาโดยไม่ได้ตั้งใจ → ออกจากขั้นตอนประกันได้ทันที ข้อมูลยังไม่ถูกส่ง (ส่งหลังเลือกแบบประกันเท่านั้น) -->
+    <div class="foot"><button class="cancel" data-home>ยังไม่สนใจ, ไปที่ระบบลงทะเบียน</button></div>
+  </div>`;
+
+/* ---------- หลังเลือกแบบประกัน: ส่งข้อมูล → ส่งสำเร็จ หรือ ส่งนาน ----------
+   ส่งเสร็จเร็ว  → แจ้งว่าส่งให้บริษัทประกันแล้ว และส่งสำเนาเข้าแอปแล้ว
+   ส่งใช้เวลานาน → แจ้งให้รับข่าวสารผลทางแอปหมอพร้อม และ MyAtlas (ไม่ต้องรอที่ตู้)
+   ต้นแบบ: บริษัทที่ตั้ง slow:true (AIA) จำลองกรณีส่งนาน บริษัทอื่นจำลองกรณีส่งเร็ว */
+const REQ_ID = 'INS-2569-000123';
+const ppFoot = () => `<div class="foot"><button class="finish" data-home>เข้าใจแล้ว, ไปที่ระบบลงทะเบียน</button></div>`;
+
+/* การ์ดสรุปแบบประกันที่เลือก ใช้ร่วมทุกหน้าหลังเลือก */
+const planSum = (plan, co, status) => `<div class="psum">
+        <span class="lg"><b>${co.short}</b><img class="${co.fit}" src="${co.logo}" alt="${co.name}" onerror="this.remove()"></span>
+        <span class="tx"><b>${plan.name}</b><span>${co.name}</span></span>${status}</div>`;
+const appRow = (name, sub, st) => `<div class="app"><span class="aic">${svg('phone',1.8)}</span>
+        <span class="tx"><b>${name}</b><span>${sub}</span></span>${st}</div>`;
+
+/* ส่งข้อมูล: modal เด้งบนหน้าเลือกแบบประกัน แสดงแบบที่เลือก + สถานะกำลังส่ง แล้วไปหน้าสรุปเอง */
+const sendModal = () => { const {plan, co} = planInfo(); return `
+  <div class="sendov" data-screen="submit" role="dialog" aria-modal="true" aria-labelledby="sendTtl">
+    <div class="sendbox">
+      <div class="spin"></div>
+      <h2 id="sendTtl">กำลังส่งข้อมูลให้บริษัทประกัน</h2>
+      <p class="lead2">ระบบกำลังส่งข้อมูลสุขภาพตามที่ท่านยินยอม<br>ผ่านระบบกลางของ BMS แบบเข้ารหัส กรุณารอสักครู่</p>
+      ${planSum(plan, co, '<span class="st busy"><i class="mini-spin"></i> กำลังส่ง</span>')}
+      <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
+    </div>
+  </div>`; };
+
+const sentScreen = () => { const {plan, co} = planInfo(); return `
+  <div class="pp">
+${ppHead()}
+    <div class="pg" data-screen="sent">
+      <div class="phd"><h2>ส่งข้อมูลให้บริษัทประกันแล้ว</h2><p>ท่านจะได้รับผลผ่านแอปด้านล่าง</p></div>
+      <div class="pgb">
+        ${planSum(plan, co, `<span class="st done">${svg('check',3)} บริษัทได้รับแล้ว</span>`)}
+        <div class="apps">
+          ${appRow('แอป MyAtlas','ดูรายละเอียดได้ที่เมนู “ประกันของฉัน”',`<span class="st done">${svg('check',3)} ส่งแล้ว</span>`)}
+          ${appRow('แอปหมอพร้อม','ดูรายละเอียดได้ที่การแจ้งเตือน',`<span class="st done">${svg('check',3)} ส่งแล้ว</span>`)}
+        </div>
+        <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
+      </div>
+    </div>
+${ppFoot()}
+  </div>`; };
+
+const slowScreen = () => { const {plan, co} = planInfo(); return `
+  <div class="pp">
+${ppHead()}
+    <div class="pg" data-screen="slow">
+      <div class="phd"><h2>การส่งข้อมูลใช้เวลานานกว่าปกติ</h2><p>ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป</p></div>
+      <div class="pgb">
+        ${planSum(plan, co, `<span class="st wait">${svg('clock',2)} กำลังดำเนินการ</span>`)}
+        <div class="apps">
+          ${appRow('แอปหมอพร้อม','แจ้งเตือนเมื่อส่งข้อมูลเสร็จ','<span class="st">รอแจ้งผล</span>')}
+          ${appRow('แอป MyAtlas','แจ้งเตือนและดูรายละเอียดที่ “ประกันของฉัน”','<span class="st">รอแจ้งผล</span>')}
+        </div>
+        <div class="note-s">${svg('shield')}<span>การแจ้งเตือนจะไม่แสดงข้อมูลสุขภาพ ท่านต้องยืนยันตัวตนในแอปก่อนจึงจะเห็นรายละเอียด</span></div>
+        <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
+      </div>
+    </div>
+${ppFoot()}
+  </div>`; };
+
+/* ---------- ประกอบเป็นหน้าจอ ---------- */
+const VIEW = {
+  /* ความยินยอมเกิดที่หน้าแรกของตู้แล้ว (welcome_v2.html) ขั้นที่ 1 จึงแสดงเป็นเสร็จแล้ว */
+  select:   () => selectScreen(),
+
+  submit: () => selectScreen().replace(/<\/div>\s*$/, sendModal() + '\n  </div>'),
+  sent:   () => sentScreen(),
+  slow:   () => slowScreen(),
+};
+
+/* ---------- ตัวควบคุม ---------- */
+function render(id){
+  const at = SCREENS.findIndex(s => s.id === id);
+  if (at >= 0) idx = at;
+  document.getElementById('screen').innerHTML = VIEW[id]();
+  wire();
+  tickClock();
+  fit();
+}
+
+function wire(){
+  const scr = document.getElementById('screen');
+  const modal = scr.querySelector('.ov');
+
+  /* ขณะมี modal: พื้นหลังกดไม่ได้ */
+  if (modal) scr.querySelectorAll('.ftr .btn, .body .opt').forEach(el => {
+    if (!modal.contains(el)) { el.disabled = true; el.style.pointerEvents = 'none'; }
+  });
+
+  scr.querySelectorAll('[data-go]').forEach(el => {
+    el.onclick = () => { if (el.disabled) return; if (el.dataset.plan) CHOSEN = el.dataset.plan; render(el.dataset.go); };
+  });
+
+  /* ออกจากบริการ กลับหน้าแรกของตู้ */
+  scr.querySelectorAll('[data-home]').forEach(el => {
+    el.onclick = () => { if (!el.disabled) location.href = 'welcome_v2.html'; };
+  });
+
+  scr.querySelectorAll('[data-radio]').forEach(el => {
+    el.onclick = () => {
+      scr.querySelectorAll(`[data-radio="${el.dataset.radio}"]`).forEach(x => x.setAttribute('aria-checked','false'));
+      el.setAttribute('aria-checked','true');
+    };
+  });
+
+  /* modal ยินยอม: ปลดล็อกช่องติ๊กเมื่อเลื่อนอ่านจนสุด */
+  const body = document.getElementById('consentBody');
+  const agree = document.getElementById('agree');
+  const cue = document.getElementById('cue');
+  if (body && agree){
+    const check = () => {
+      if (body.scrollTop + body.clientHeight >= body.scrollHeight - 24){
+        agree.classList.remove('locked'); cue && cue.classList.add('hide');
+      }
+    };
+    body.addEventListener('scroll', check); check();
+    agree.onclick = () => {
+      const on = agree.getAttribute('aria-checked') !== 'true';
+      agree.setAttribute('aria-checked', String(on));
+      document.getElementById('btnConsent').disabled = !on;
+    };
+  }
+
+  const agree2 = document.getElementById('agree2');
+  if (agree2) agree2.onclick = () => {
+    const on = agree2.getAttribute('aria-checked') !== 'true';
+    agree2.setAttribute('aria-checked', String(on));
+    document.getElementById('btnInterest').disabled = !on;
+  };
+
+  /* หน้าส่งข้อมูล: ส่งเร็ว → หน้าส่งสำเร็จ · บริษัทที่ตอบช้า → รอเกินเกณฑ์แล้วแจ้งให้รับผลทางแอป */
+  /* พื้นที่เลื่อน: ใส่คลาส scrolled เมื่อเลื่อนลงจากบนสุด เพื่อขยายช่วงจางขอบบน */
+  const sc = scr.querySelector('.pp .scroll');
+  if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
+
+  clearTimeout(window._st);
+  if (scr.querySelector('[data-screen="submit"]')){
+    const slow = planInfo().co.slow;
+    window._st = setTimeout(() => render(slow ? 'slow' : 'sent'), slow ? 5200 : 2800);
+  }
+
+  clearInterval(window._it);   /* ไม่มีการนับเวลากลับหน้าแรกอัตโนมัติแล้ว */
+}
+
+
+function fit(){
+  const s = Math.min((innerWidth - 40) / 1080, (innerHeight - 40) / 1920);
+  const st = document.getElementById('stage');
+  st.style.transform = `scale(${s})`;
+  st.style.height = (1920 * s) + 'px';
+}
+
+/* ---------- นาฬิกาเรียลไทม์ มุมขวาบน ---------- */
+const TH_MON = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function tickClock(){
+  const dt = document.getElementById('clkDate');
+  if (!dt) return;
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  dt.textContent = `${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear() + 543}`;
+  document.getElementById('clkTime').textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+clearInterval(window._ct);
+window._ct = setInterval(tickClock, 1000);
+
+addEventListener('resize', fit);
+render('select');
+</script>
+
+<!-- ===== dev only: หน้าเว็บรีโหลดเองเมื่อไฟล์ถูกแก้ · ทำงานเฉพาะตอนเปิดผ่าน localhost ===== -->
+<script>
+if (['localhost','127.0.0.1'].includes(location.hostname)) {
+  let stamp = null;
+  setInterval(async () => {
+    try {
+      const r = await fetch(location.pathname, {method:'HEAD', cache:'no-store'});
+      const m = r.headers.get('last-modified');
+      if (stamp && m !== stamp) location.reload();
+      stamp = m;
+    } catch (e) {}
+  }, 1000);
+}
+</script>
+</body>
+</html>
