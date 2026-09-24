@@ -1,14 +1,21 @@
 package th.go.banlat.kiosk.ui.welcome
 
+import android.os.Build
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,546 +27,232 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlinx.coroutines.delay
 import th.go.banlat.kiosk.R
-import th.go.banlat.kiosk.ui.theme.Bright
-import th.go.banlat.kiosk.ui.theme.IdCardColors
+import th.go.banlat.kiosk.ui.common.BrandBlock
+import th.go.banlat.kiosk.ui.common.ClockBlock
+import th.go.banlat.kiosk.ui.common.KIcon
+import th.go.banlat.kiosk.ui.common.LineIcon
+import th.go.banlat.kiosk.ui.common.Shade
+import th.go.banlat.kiosk.ui.common.creamDisc
+import th.go.banlat.kiosk.ui.common.pearl
+import th.go.banlat.kiosk.ui.common.press
+import th.go.banlat.kiosk.ui.common.softShadow
+import th.go.banlat.kiosk.ui.theme.K
+import th.go.banlat.kiosk.ui.theme.KText
 import th.go.banlat.kiosk.ui.theme.s
-import th.go.banlat.kiosk.ui.theme.st
+import th.go.banlat.kiosk.ui.theme.unitPx
 
-enum class KioskLanguage { Thai, English }
+/** ชั้นที่ซ้อนบนหน้าแรก */
+sealed interface WelcomeOverlay {
+    data object None : WelcomeOverlay
+    data class Reading(val title: String, val sub: String) : WelcomeOverlay
+    data object Keypad : WelcomeOverlay
+    data object Consent : WelcomeOverlay
+}
 
 /**
- * หน้าต้อนรับ — หน้าแรกสุดที่คนไข้เห็นตอนเดินมาถึงตู้
- *
- * ทางเข้าระบบมี 3 ทาง เรียงตามลำดับความสำคัญชัดเจน
- *   1. เสียบบัตรประชาชน  — ทางหลัก ใช้อนิเมชัน 3D สอนวิธีใช้โดยไม่ต้องอ่าน
- *   2. กรอกเลข HN      — สำรอง สำหรับคนไม่ได้พกบัตร
- *   3. สแกนใบหน้า      — สำหรับคนที่ลงทะเบียนใบหน้าไว้แล้ว
+ * หน้าแรกของตู้ (Figma 26:38) — เสียบบัตร / กรอก HN หรือเลขบัตร / สแกนหน้า
+ * ยืนยันตัวตนสำเร็จ → เด้ง modal ความยินยอม → ยินยอม → onConsentAccepted
  */
 @Composable
-fun WelcomeScreen(
-    language: KioskLanguage,
-    onLanguageChange: (KioskLanguage) -> Unit,
-    onEnterHn: () -> Unit,
-    onFaceScan: () -> Unit,
-) {
-    val str = WelcomeStrings.of(language)
+fun WelcomeScreen(onConsentAccepted: () -> Unit) {
+    var overlay by remember { mutableStateOf<WelcomeOverlay>(WelcomeOverlay.None) }
+    var next by remember { mutableStateOf(0L) }   // ใช้ key ให้ LaunchedEffect ของชั้นอ่านบัตรเริ่มใหม่ทุกครั้ง
 
+    // TODO(integration): เปลี่ยนเป็น callback จากเครื่องอ่านบัตร / ระบบค้นหา HN / กล้องสแกนหน้า
+    fun verify(title: String, sub: String, ms: Long) { overlay = WelcomeOverlay.Reading(title, sub); next = ms }
+    LaunchedEffect(overlay, next) {
+        if (overlay is WelcomeOverlay.Reading) { delay(next); overlay = WelcomeOverlay.Consent }
+    }
+
+    // นาฬิกาแอนิเมชันรอบละ 14 วิ (บัตรไป 7 วิ กลับ 7 วิ · ประกายทองผูกกับจังหวะเดียวกัน)
+    val clock = rememberInfiniteTransition(label = "welcome").animateFloat(
+        0f, 14000f, infiniteRepeatable(tween(14000, easing = LinearEasing), RepeatMode.Restart), label = "t14")
+
+    val dim = overlay != WelcomeOverlay.None
     Box(Modifier.fillMaxSize()) {
-        Backdrop()
-        Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize().then(if (dim && Build.VERSION.SDK_INT >= 31) Modifier.blur(6.s) else Modifier)) {
+            Image(painterResource(R.drawable.bg_home), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
 
-            WelcomeHeader(str)
+            BrandBlock(Modifier.offset(80.s, 80.s))
+            ClockBlock(Modifier.align(Alignment.TopEnd).padding(top = 80.s, end = 80.s))
 
-            Headline(str)
+            // ---------- การ์ดเสียบบัตร 920 x 704 ที่ (80,416) ----------
+            InsertCard(clock, Modifier.offset(80.s, 416.s).size(920.s, 704.s)) {
+                verify("กำลังอ่านบัตรประชาชน", "กรุณาอย่าดึงบัตรออกจนกว่าจะอ่านเสร็จ", 1800)
+            }
+            EdgeGlint(clock, Modifier.offset(80.s, 416.s).size(920.s, 704.s))
 
-            // ---- ฉาก 3D: บัตร + ช่องอ่านบัตร ----
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                CardReaderScene(str)
+            // ---------- "หรือ" ----------
+            Row(Modifier.offset(y = 1216.s).fillMaxWidth().height(40.s),
+                horizontalArrangement = Arrangement.spacedBy(24.s, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(170.s, 1.s).background(Color(0x4D14265A)))
+                KText("หรือ", 24, weight = FontWeight.Medium, color = K.InkMuted, letterSpacing = .6f)
+                Box(Modifier.size(170.s, 1.s).background(Color(0x4D14265A)))
             }
 
-            Spacer(Modifier.weight(1f))
+            // ---------- ปุ่มทางเลือก ----------
+            Row(Modifier.offset(80.s, 1352.s).size(920.s, 152.s), horizontalArrangement = Arrangement.spacedBy(24.s)) {
+                OptionButton(KIcon.IdCard, "HN หรือบัตรประชาชน", "ลงทะเบียนผู้ป่วยใหม่") { overlay = WelcomeOverlay.Keypad }
+                OptionButton(KIcon.FaceScan, "สแกนหน้า", "ลงทะเบียนผู้ป่วยใหม่") {
+                    verify("กำลังสแกนใบหน้า", "กรุณามองตรงมาที่กล้องด้านบนของตู้", 2000)
+                }
+            }
+
+            LangToggle(Modifier.offset(80.s, 1755.s))
+
+            // ปุ่มตั้งค่าระบบ (ทำไว้แค่ปุ่ม) — TODO(integration): ใส่ PIN / กดค้างก่อนเข้าหน้าตั้งค่า
+            Box(Modifier.offset(912.s, 1752.s).size(88.s)
+                .softShadow(44f, Shade(Color(0x2414265A), 10f, 30f))
+                .clip(CircleShape).background(Color(0xB8FFFFFF)).border(1.5.s, Color(0xF2FFFFFF), CircleShape)
+                .press(scaleTo = .95f) {}, contentAlignment = Alignment.Center) {
+                LineIcon(KIcon.Gear, K.InkMuted, Modifier.size(42.s))
+            }
         }
 
-        // ป้าย + ปุ่มภาพ 2 ปุ่ม
-        AltLabel(str, Modifier.align(Alignment.TopCenter).offset(y = 1090.s))
-        ImageButtons(str, onEnterHn = onEnterHn, onFaceScan = onFaceScan)
-
-        // ปุ่มภาษา กึ่งกลางล่าง
-        LanguageSwitch(str, onLanguageChange, Modifier.align(Alignment.BottomCenter).padding(bottom = 34.s))
-    }
-}
-
-/* ============================ พื้นหลัง ============================ */
-
-/**
- * ภาพพื้นหลัง bg_home.png (1080 x 1920) เป็นแค่ฉากหลัง ปุ่มวางทับด้วย ImageButtons แยกต่างหาก
- */
-@Composable
-private fun Backdrop() {
-    Image(
-        painter = painterResource(R.drawable.bg_home),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize()
-    )
-}
-
-/* ============================ Header ============================ */
-
-@Composable
-private fun WelcomeHeader(str: WelcomeStrings) {
-    Row(
-        Modifier.fillMaxWidth().padding(start = 60.s, top = 28.s, end = 60.s),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(26.s)
-    ) {
-        // ตราโรงพยาบาล — ใส่ไฟล์โลโก้จริงแทน Box นี้ได้เลย
-        Box(
-            Modifier
-                .size(104.s)
-                .clip(CircleShape)
-                .background(Bright.Glass)
-                .border(1.5.dp, Bright.GlassBorder, CircleShape)
-        )
-        Column {
-            Text(
-                str.hospital,
-                fontSize = 46.st, fontWeight = FontWeight.Bold, color = Bright.Ink
+        when (val o = overlay) {
+            is WelcomeOverlay.Reading -> ReadingOverlay(o.title, o.sub)
+            WelcomeOverlay.Keypad -> KeypadModal(
+                onCancel = { overlay = WelcomeOverlay.None },
+                onConfirm = { verify("กำลังตรวจสอบข้อมูล", "ระบบกำลังค้นหาข้อมูลผู้ป่วยจากเลขที่ท่านกรอก", 1600) },
             )
-            Text(
-                str.hospitalSub,
-                fontSize = 24.st, color = Bright.Blue, fontWeight = FontWeight.SemiBold, letterSpacing = 5.st
+            WelcomeOverlay.Consent -> ConsentModal(
+                onDecline = { overlay = WelcomeOverlay.None },
+                onAccept = { overlay = WelcomeOverlay.None; onConsentAccepted() },
             )
+            WelcomeOverlay.None -> Unit
         }
     }
 }
 
-/**
- * ปุ่มเปลี่ยนภาษา = ภาพ 2 สถานะจากดีไซเนอร์ (lang_th.png / lang_en.png ขนาด 576 x 149)
- * ครึ่งซ้ายของภาพคือ EN ครึ่งขวาคือ TH เหมือนกันทั้งสองไฟล์ จึงวางพื้นที่กดทับได้เลย
- */
+/** การ์ดขาวไล่ฟ้า + ลายหลังบัตร + ตัวเครื่อง + ข้อความ · แตะที่การ์ด = จำลองการเสียบบัตร */
 @Composable
-private fun LanguageSwitch(str: WelcomeStrings, onChange: (KioskLanguage) -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier.width(360.s).height(93.s)) {
-        Image(
-            painter = painterResource(str.langRes),
-            contentDescription = "Language",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
-        )
-        Row(Modifier.fillMaxSize()) {
-            Box(
-                Modifier.weight(1f).fillMaxHeight()
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                        onChange(KioskLanguage.English)
-                    }
-            )
-            Box(
-                Modifier.weight(1f).fillMaxHeight()
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                        onChange(KioskLanguage.Thai)
-                    }
-            )
-        }
-    }
-}
-
-/* ============================ Headline ============================ */
-
-@Composable
-private fun Headline(str: WelcomeStrings) {
-    Column(
-        Modifier.fillMaxWidth().padding(start = 60.s, top = 28.s, end = 60.s),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            str.titleLead + str.titleAccent,
-            color = Bright.Ink,
-            fontSize = str.titleSize.st,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center, maxLines = 1, softWrap = false
-        )
-        Spacer(Modifier.height(14.s))
-        Text(
-            buildAnnotatedString {
-                append(str.subtitleLead)
-                withStyle(SpanStyle(color = Bright.Gold, fontWeight = FontWeight.Bold)) { append(str.subtitleAccent) }
-                append(str.subtitleTail)
-            },
-            fontSize = str.subtitleSize.st, color = Bright.InkMuted, textAlign = TextAlign.Center, maxLines = 1, softWrap = false
-        )
-    }
-}
-
-/* ============================ ฉาก 3D ============================ */
-
-/**
- * พิกัดทั้งหมดเป็น "หน่วยดีไซน์" บน rig 760 x 700 ตรงกับ preview/welcome.html
- * แก้ที่ไหนต้องแก้ทั้งสองที่
- *
- * โครงเครื่องอ่านบัตร (มองจากด้านหน้าเฉียงบน):
- *   ฝาบน (lid)        ระนาบนอนราบ ถอยลึกเข้าไป 260
- *   หน้าตัด (face)     y 120..320  ปากช่องอยู่ที่ y 260 = ใต้ "ฝาครอบ" 140 หน่วย
- *   ขอบรับบัตร (lip)   y 260..320  บัตรวางบนนี้ก่อนไถลเข้าใต้ฝาครอบ
- *
- * ลำดับการซ้อน (zIndex) คงที่ตลอด เพราะบัตรไม่เคยอยู่เหนือกล่อง:
- *   1  ขอบรับบัตร + ลูกศรบนพื้น        (อยู่หลังบัตรเสมอ)
- *   2  บัตร
- *   3  ฝาบน + ฝาครอบ + ป้าย            (บังส่วนของบัตรที่เข้าไปแล้ว)
- */
-private object Scene {
-    const val FACE_X = 70f; const val FACE_Y = 120f
-    const val FACE_W = 620f; const val FACE_H = 200f
-    const val SLOT_Y = 260f                       // ระดับปากช่อง = ระนาบที่บัตรไถล
-    const val SLOT_W = 344f                       // กว้างเท่าด้านสั้นของบัตร + เผื่อ
-    const val LID_DEPTH = 260f
-    const val CARD_W = 480f; const val CARD_H = 303f
-    const val CARD_CX = Rig.WIDTH / 2f; const val CARD_CY = SLOT_Y
-    val SPLIT = (SLOT_Y - FACE_Y) / FACE_H        // จุดผ่าหน้าตัดเป็นฝาครอบ/ขอบรับ
-}
-
-@Composable
-private fun CardReaderScene(str: WelcomeStrings) {
-    val pose = rememberInsertPose()
-    val sheen = rememberSheenProgress()
-    val slotGlow = rememberSlotGlow()
-    val shadow = rememberShadowPose()
-    val dropAlpha = rememberDropShadowAlpha()
-
-    Box(
-        Modifier
-            .width(Rig.WIDTH.toInt().s)
-            .height(Rig.HEIGHT.toInt().s)
-            .clipToBounds()
-            .bottomFade(.90f)   // กันขอบล่างตัดขาดถ้าบัตรยื่นเลยฉาก
-    ) {
-
-        // ---- ชั้นหลัง ----
-        ReaderFace(glow = slotGlow, part = FacePart.Lip, modifier = Modifier.zIndex(1f))
-        FloorArrows(x = 120f, modifier = Modifier.zIndex(1f))
-        FloorArrows(x = Rig.WIDTH - 120f - 60f, modifier = Modifier.zIndex(1f))
-
-        CardShadow(shadow, Modifier.zIndex(1f))
-
-        // ---- บัตร ----
-        IdCard(pose = pose, sheen = sheen, dropAlpha = dropAlpha, modifier = Modifier.zIndex(2f))
-
-        // ---- ชั้นหน้า ----
-        ReaderLid(Modifier.zIndex(3f))
-        ReaderFace(glow = slotGlow, part = FacePart.Hood, modifier = Modifier.zIndex(3f))
-    }
-}
-
-/** ทำให้ส่วนล่างของ composable ค่อยๆ โปร่งใส (เทียบเท่า mask-image ใน CSS) */
-private fun Modifier.bottomFade(from: Float): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-    .drawWithContent {
-        drawContent()
-        drawRect(
-            brush = Brush.verticalGradient(from to Color.Black, 1f to Color.Transparent),
-            blendMode = BlendMode.DstIn
-        )
-    }
-
-private enum class FacePart { Hood, Lip }
-
-/** หน้าตัดของเครื่อง วาดสองครั้ง (ฝาครอบ/ขอบรับ) เพื่อเสียบบัตรไว้ตรงกลาง */
-@Composable
-private fun ReaderFace(glow: Float, part: FacePart, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(bottomStart = 26.s, bottomEnd = 26.s)
-    Box(
-        modifier
-            .offset(x = Scene.FACE_X.toInt().s, y = Scene.FACE_Y.toInt().s)
-            .width(Scene.FACE_W.toInt().s)
-            .height(Scene.FACE_H.toInt().s)
-            .drawOnly(Scene.SPLIT, upperPart = part == FacePart.Hood)
-            .clip(shape)
-            .background(Bright.ReaderFace)
-            .border(1.dp, Bright.Line, shape)
-            .drawBehind {
-                // ปากช่อง คร่อมเส้นผ่าพอดี ครึ่งบนอยู่บนฝาครอบ ครึ่งล่างอยู่บนขอบรับ
-                val cy = size.height * Scene.SPLIT
-                val w = size.width * (Scene.SLOT_W / Scene.FACE_W)
-                val h = size.height * (16f / Scene.FACE_H)
-                drawRoundRect(
-                    brush = Bright.Slot,
-                    topLeft = Offset((size.width - w) / 2f, cy - h / 2f),
-                    size = androidx.compose.ui.geometry.Size(w, h),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(h / 2f)
-                )
-                // ไฟทองในช่อง
-                val gw = w * .84f * (.5f + .5f * glow)
-                drawRoundRect(
-                    brush = Brush.horizontalGradient(
-                        listOf(Color.Transparent, Bright.BlueLight, Color.Transparent)
-                    ),
-                    topLeft = Offset((size.width - gw) / 2f, cy - 1f),
-                    size = androidx.compose.ui.geometry.Size(gw, 2f * density),
-                    alpha = glow
-                )
-            }
-    )
-}
-
-/** ฝาบนของเครื่อง: ระนาบนอนราบถอยลึกจากขอบบนของหน้าตัด */
-@Composable
-private fun ReaderLid(modifier: Modifier = Modifier) {
-    val origin = Offset(Scene.FACE_X, Scene.FACE_Y - Scene.LID_DEPTH)
-    Box(
-        modifier
-            .offset(x = origin.x.toInt().s, y = origin.y.toInt().s)
-            .width(Scene.FACE_W.toInt().s)
-            .height(Scene.LID_DEPTH.toInt().s)
-            .projectQuad(origin) {
-                floorQuad(Scene.FACE_X, Scene.FACE_Y, Scene.FACE_W, zTop = -Scene.LID_DEPTH, zBottom = 0f)
-            }
-            .clip(RoundedCornerShape(topStart = 22.s, topEnd = 22.s))
-            .background(Bright.ReaderLid)
-            .border(1.dp, Bright.Line, RoundedCornerShape(topStart = 22.s, topEnd = 22.s))
-    )
-}
-
-/** ลูกศรบนพื้น ชี้เข้าหาช่อง วางบนระนาบเดียวกับบัตร */
-@Composable
-private fun FloorArrows(x: Float, modifier: Modifier = Modifier) {
-    val origin = Offset(x, Scene.SLOT_Y)
-    Column(
-        modifier
-            .offset(x = x.toInt().s, y = Scene.SLOT_Y.toInt().s)
-            .width(60.s).height(230.s)
-            .projectQuad(origin) { floorQuad(x, Scene.SLOT_Y, 60f, zTop = 0f, zBottom = 230f) }
-            .padding(bottom = 20.s),
-        verticalArrangement = Arrangement.spacedBy(14.s, Alignment.Bottom),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // ตัวที่อยู่บนสุด (ใกล้ช่องที่สุด) วิ่งก่อน
-        listOf(440, 220, 0).forEach { delay ->
-            val p = rememberArrowPulse(delay)
-            Box(
-                Modifier
-                    .size(30.s)
-                    .graphicsLayer {
-                        alpha = if (p < .45f) p / .45f * .95f else (1f - p) / .55f * .95f
-                        translationY = (7f - p * 14f) * density
-                    }
-                    .drawBehind {
-                        val w = 4.dp.toPx()
-                        // หัวลูกศรชี้ขึ้น = ชี้เข้าหาช่อง
-                        drawLine(Bright.Blue, Offset(0f, size.height / 2), Offset(size.width / 2, 0f), w)
-                        drawLine(Bright.Blue, Offset(size.width / 2, 0f), Offset(size.width, size.height / 2), w)
-                    }
-            )
+private fun InsertCard(clock: androidx.compose.runtime.State<Float>, modifier: Modifier, onInsert: () -> Unit) {
+    val shape = RoundedCornerShape(48.s)
+    Box(modifier
+        .softShadow(48f, Shade(Color(0x0A14265A), 2f, 4f), Shade(Color(0x1214265A), 14f, 30f), Shade(Color(0x2114265A), 44f, 84f))
+        .clip(shape)
+        .background(Brush.verticalGradient(0f to Color.White, .16f to Color.White, .48f to Color(0xFFF7FAFD),
+            .76f to Color(0xFFF2F6FB), 1f to Color(0xFFEEF3F9)))
+        .border(1.s, Color(0x0F14265A), shape)
+        .press(scaleTo = 1f, onClick = onInsert)) {
+        Watermark(Modifier.fillMaxSize())
+        MachineIllustration(clock, Modifier.fillMaxSize())
+        Column(Modifier.offset(64.s, 64.s).width(460.s)) {
+            KText("กรุณาเสียบ\nบัตรประชาชน", 72, weight = FontWeight.Bold, lineHeight = 88f, letterSpacing = -1f, softWrap = false)
+            Spacer(Modifier.height(32.s))
+            Box(Modifier.size(88.s, 6.s)
+                .softShadow(3f, Shade(Color(0x4DCC9017), 2f, 8f))
+                .clip(RoundedCornerShape(3.s))
+                .background(Brush.horizontalGradient(0f to Color(0xFFB4780C), .55f to Color(0xFFE0A93A), 1f to Color(0xFFCC9017))))
+            Spacer(Modifier.height(32.s))
+            KText("เสียบด้านที่มี", 46, weight = FontWeight.Medium, color = K.InkMuted, lineHeight = 64f, softWrap = false)
+            ChipIcon(Modifier.padding(vertical = 16.s).size(144.s, 104.s))
+            KText("เข้าช่องอ่านบัตร", 46, weight = FontWeight.Medium, color = K.InkMuted, lineHeight = 64f, softWrap = false)
         }
     }
 }
 
 /**
- * เงาตกกระทบบนพื้น: วงรีไล่สีเบลอ ฉายลงระนาบเดียวกับที่บัตรวาง
- * (blur ต้องการ API 31+; ต่ำกว่านั้นจะเป็นวงรีคมๆ ซึ่งยังพอดูได้)
+ * ลายหลังบัตรประชาชน (Figma 71:8) — วางให้เจดีย์องค์ใหญ่อยู่เกือบกลางการ์ด ต่อขวาด้วยภาพกลับด้าน
+ * ทึบ 32% ลดความอิ่มสีเหลือ 30% · ขอบบนจาง (y206→358) ให้หัวข้ออยู่บนพื้นขาว
  */
 @Composable
-private fun CardShadow(shadow: ShadowPose, modifier: Modifier = Modifier) {
-    val origin = Offset(Scene.CARD_CX - Scene.CARD_W / 2f, Scene.CARD_CY - Scene.CARD_H / 2f)
-    Box(
-        modifier
-            .offset(x = origin.x.toInt().s, y = origin.y.toInt().s)
-            .width(Scene.CARD_W.toInt().s)
-            .height(Scene.CARD_H.toInt().s)
-            .graphicsLayer { alpha = shadow.pose.alpha }
-            .projectQuad(origin) {
-                shadow.pose.projectedCorners(
-                    Scene.CARD_CX, Scene.CARD_CY,
-                    Scene.CARD_W * shadow.scaleX, Scene.CARD_H * shadow.scaleDepth
-                )
-            }
-            .blur(18.dp)
-            .background(
-                Brush.radialGradient(
-                    0f to Bright.Ink.copy(alpha = .40f), .42f to Bright.Ink.copy(alpha = .20f), .72f to Color.Transparent
-                ),
-                CircleShape
-            )
-    )
+private fun Watermark(modifier: Modifier) {
+    val img: ImageBitmap = ImageBitmap.imageResource(R.drawable.bg_backcard)
+    val u = unitPx()
+    val desat = remember { ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(.3f) }) }
+    Canvas(modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
+        val src = IntSize(img.width, img.height)
+        drawImage(img, IntOffset.Zero, src, IntOffset((-77 * u).toInt(), (100 * u).toInt()),
+            IntSize((760 * u).toInt(), (760 * u).toInt()), alpha = .32f, colorFilter = desat)
+        scale(-1f, 1f, pivot = Offset((683 + 380) * u, 0f)) {
+            drawImage(img, IntOffset.Zero, src, IntOffset((683 * u).toInt(), (100 * u).toInt()),
+                IntSize((760 * u).toInt(), (760 * u).toInt()), alpha = .32f, colorFilter = desat)
+        }
+        drawRect(Brush.verticalGradient(0f to Color.Transparent, 206f * u / size.height to Color.Transparent,
+            358f * u / size.height to Color.Black, 1f to Color.Black), blendMode = BlendMode.DstIn)
+    }
 }
 
+/** ภาพชิปทอง (สี่เหลี่ยมผืนผ้า 1.4:1) แทนคำว่า "ชิปสีทอง" */
 @Composable
-private fun IdCard(pose: CardPose, sheen: Float, dropAlpha: Float, modifier: Modifier = Modifier) {
-    val origin = Offset(Scene.CARD_CX - Scene.CARD_W / 2f, Scene.CARD_CY - Scene.CARD_H / 2f)
-    Box(
-        modifier
-            .offset(x = origin.x.toInt().s, y = origin.y.toInt().s)
-            .width(Scene.CARD_W.toInt().s)
-            .height(Scene.CARD_H.toInt().s)
-            .graphicsLayer { alpha = pose.alpha }
-            .projectQuad(origin) {
-                pose.projectedCorners(Scene.CARD_CX, Scene.CARD_CY, Scene.CARD_W, Scene.CARD_H)
-            }
-    ) {
-        // เงาติดตัวบัตร: นุ่มใหญ่ชั้นเดียว (ทิศทางถูกเฉพาะตอนบัตรตั้ง จึงหายไปเมื่อบัตรนอนราบ)
-        Box(
-            Modifier
-                .fillMaxSize()
-                .offset(y = 34.s)
-                .padding(horizontal = 12.s)
-                .graphicsLayer { alpha = dropAlpha }
-                .blur(35.dp)
-                .background(Bright.Ink.copy(alpha = .34f), RoundedCornerShape(24.s))
-        )
-        // ---- หน้าบัตร: จัดวางตามแม่แบบบัตรประชาชนไทย (ภาพอ้างอิง 340 x 220 → บัตร 480 x 303) ----
-        // พิกัดเป็นหน่วยบนบัตร 480 x 303 ตัวเลขเดียวกับ preview/welcome.html
-        Box(
-            Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(14.s))
-                .background(IdCardColors.Face)
-        ) {
-            Placeholder(Modifier.offset(x = 19.s, y = 6.s).size(56.s), CircleShape)          // ตราครุฑ
-
-            CardText("บัตรประจำตัวประชาชน", 89, 14, 18, IdCardColors.Ink, FontWeight.Bold)
-            CardText("Thai National ID Card", 274, 16, 15, IdCardColors.Blue, FontWeight.Bold)
-            CardText("เลขประจำตัวประชาชน", 89, 37, 9, IdCardColors.Ink, FontWeight.Medium)
-            CardText("Identification Number", 89, 48, 8, IdCardColors.Blue, FontWeight.Medium)
-            CardText("0 0000 00000 00 0", 209, 39, 16, IdCardColors.Ink, FontWeight.Bold, letterSpacing = 1.2f)
-            Box(Modifier.offset(x = 75.s, y = 58.s).size(395.s, 1.s).background(IdCardColors.Line))
-
-            CardText("ชื่อตัวและชื่อสกุล", 75, 69, 9, IdCardColors.Ink, FontWeight.Medium)
-            CardText("XXXXX XXXXXXXXX", 181, 67, 14, IdCardColors.Ink, FontWeight.Bold)
-
-            Placeholder(Modifier.offset(x = 21.s, y = 88.s).size(20.s, 176.s), RoundedCornerShape(8.s))   // บาร์โค้ด
-            GoldChip(Modifier.offset(x = 84.s, y = 90.s))
-
-            CardText("Name", 176, 97, 9, IdCardColors.Blue, FontWeight.Medium)
-            CardText("XXXXX", 219, 94, 13, IdCardColors.Ink, FontWeight.Bold)
-            CardText("Last name", 176, 118, 9, IdCardColors.Blue, FontWeight.Medium)
-            CardText("XXXXX", 219, 115, 13, IdCardColors.Ink, FontWeight.Bold)
-            CardText("เกิดวันที่ 28 มี.ค. 2537", 195, 143, 11, IdCardColors.Ink, FontWeight.Medium)
-            CardText("Date of Birth 28 Mar. 1994", 195, 162, 9, IdCardColors.Blue, FontWeight.Medium)
-            CardText("ศาสนา พุทธ", 195, 182, 11, IdCardColors.Ink, FontWeight.Medium)
-            CardText("ที่อยู่ xx/xx หมู่ที่ xx ถนน xxxxx", 75, 202, 11, IdCardColors.Ink, FontWeight.Bold)
-            CardText("แขวง xxxxx อ.xxxx จ.xxxxx", 75, 219, 11, IdCardColors.Ink, FontWeight.Medium)
-
-            // วันออกบัตร / วันหมดอายุ
-            listOf(75, 287).forEachIndexed { i, x ->
-                val (th, en) = if (i == 0) "28 มี.ค. 2567" to "28 Mar. 2024" else "28 มี.ค. 2576" to "28 Mar. 2033"
-                CardText(th, x, 241, 9, IdCardColors.Ink, FontWeight.Bold)
-                CardText(if (i == 0) "วันออกบัตร" else "วันหมดอายุ", x, 252, 8, IdCardColors.Ink, FontWeight.Medium)
-                CardText(en, x, 263, 8, IdCardColors.Blue, FontWeight.Medium)
-                CardText(if (i == 0) "Date of Issue" else "Date of Expiry", x, 274, 8, IdCardColors.Blue, FontWeight.Medium)
-            }
-            Placeholder(Modifier.offset(x = 178.s, y = 236.s).size(34.s), CircleShape)        // ตราประทับ
-            Placeholder(Modifier.offset(x = 216.s, y = 250.s).size(40.s, 8.s), CircleShape)   // ลายเซ็น
-            CardText("เจ้าพนักงานออกบัตร", 165, 279, 8, IdCardColors.Ink, FontWeight.Medium)
-
-            // รูปถ่าย → กล่อง + วงกลม(หัว) + วงรี(ไหล่)
-            Box(
-                Modifier.offset(x = 358.s, y = 151.s).size(99.s, 120.s)
-                    .clip(RoundedCornerShape(6.s)).background(Color.White)
-                    .border(1.5.dp, IdCardColors.PhBorder, RoundedCornerShape(6.s))
-            ) {
-                Placeholder(Modifier.align(Alignment.TopCenter).offset(y = 19.s).size(34.s), CircleShape)
-                Placeholder(Modifier.align(Alignment.TopCenter).offset(y = 62.s).size(75.s, 84.s), CircleShape)
-            }
-            CardText("0000-00-00000000", 358, 286, 8, IdCardColors.Ink, FontWeight.Medium)
-
-            // แสงกวาดผิวบัตร
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer { translationX = (sheen * 2f - 1f) * size.width * .7f }
-                    .background(
-                        Brush.linearGradient(
-                            0f to Color.Transparent, .48f to Color.White.copy(alpha = .8f), 1f to Color.Transparent
-                        )
-                    )
-            )
+private fun ChipIcon(modifier: Modifier) {
+    val lines = remember { PathParser().parsePathString("M38 1v76M70 1v76M1 27h37M1 51h37M70 27h37M70 51h37M38 39h32").toPath() }
+    Canvas(modifier.softShadow(17f, Shade(Color(0x478A6A20), 4f, 8f))) {
+        scale(size.width / 108f, size.height / 78f, pivot = Offset.Zero) {
+            val r = CornerRadius(13f)
+            drawRoundRect(Brush.linearGradient(0f to Color(0xFFF8D67A), .6f to Color(0xFFF2C14E), 1f to Color(0xFFD9A63A),
+                start = Offset(1f, 1f), end = Offset(107f, 77f)), Offset(1f, 1f), Size(106f, 76f), r)
+            drawRoundRect(Color(0xFF8A6A20), Offset(1f, 1f), Size(106f, 76f), r, style = Stroke(1.6f))
+            drawPath(lines, Color(0xFF8A6A20), style = Stroke(1.6f))
         }
     }
 }
 
 @Composable
-private fun GoldChip(modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(64.s, 60.s)
-            .clip(RoundedCornerShape(9.s))
-            .background(IdCardColors.Chip)
-            .border(1.2.dp, IdCardColors.ChipLine, RoundedCornerShape(9.s))
-            .drawBehind {
-                val c = IdCardColors.ChipLine; val w = 1.2.dp.toPx()
-                drawLine(c, Offset(0f, size.height * .34f), Offset(size.width, size.height * .34f), w)
-                drawLine(c, Offset(size.width * .30f, 0f), Offset(size.width * .30f, size.height), w)
-                drawLine(c, Offset(size.width * .70f, 0f), Offset(size.width * .70f, size.height), w)
-            }
-    )
-}
-
-@Composable
-private fun CardText(
-    text: String, x: Int, y: Int, size: Int, color: Color, weight: FontWeight, letterSpacing: Float = 0f,
-) {
-    Text(
-        text, fontSize = size.st, color = color, fontWeight = weight, maxLines = 1, softWrap = false,
-        lineHeight = size.st, letterSpacing = letterSpacing.toDouble().st,
-        modifier = Modifier.offset(x = x.s, y = y.s)
-    )
-}
-
-/** placeholder แบบ wireframe: รูปทรงพื้นฐานฟ้าอ่อนขอบฟ้าเข้ม แทนภาพวาดทุกชิ้นบนบัตร */
-@Composable
-private fun Placeholder(modifier: Modifier, shape: androidx.compose.ui.graphics.Shape) {
-    Box(modifier.clip(shape).background(IdCardColors.PhFill).border(1.5.dp, IdCardColors.PhBorder, shape))
-}
-
-/* ============================ ทางเลือกอื่น ============================ */
-
-@Composable
-private fun AltLabel(str: WelcomeStrings, modifier: Modifier = Modifier) {
-    Row(
-        modifier.padding(horizontal = 60.s).fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(26.s)
-    ) {
-        val rule = Brush.horizontalGradient(
-            listOf(Color.Transparent, Bright.Ink.copy(alpha = .25f), Color.Transparent)
-        )
-        Box(Modifier.weight(1f).height(2.dp).background(rule))
-        Text(str.altLabel, fontSize = 30.st, fontWeight = FontWeight.SemiBold, color = Bright.Ink, letterSpacing = 1.st)
-        Box(Modifier.weight(1f).height(2.dp).background(rule))
+private fun RowScope.OptionButton(icon: KIcon, title: String, sub: String, onClick: () -> Unit) {
+    Row(Modifier.weight(1f).fillMaxHeight().pearl(32f).press(onClick = onClick).padding(horizontal = 32.s),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.s)) {
+        Box(Modifier.size(88.s).creamDisc(halo = 9f), contentAlignment = Alignment.Center) {
+            LineIcon(icon, K.GoldIcon, Modifier.size(42.s))
+        }
+        Column(Modifier.weight(1f)) {
+            KText(title, 30, weight = FontWeight.Bold, lineHeight = 36f, softWrap = false, maxLines = 1, minSize = 26)
+            Spacer(Modifier.height(4.s))
+            KText(sub, 22, color = K.InkMuted, softWrap = false)
+        }
     }
 }
 
-/**
- * ปุ่มภาพ 2 ปุ่มจากดีไซเนอร์ (btn_hn.png / btn_scan.png ขนาด 466 x 668 พื้นโปร่ง มีเงาในไฟล์แล้ว)
- * ต้นฉบับ 466 x 668 แสดงที่ 85% = 396 x 568 วางที่ y 1150 ซ้าย x 124 / ขวา x 560 (หน่วยดีไซน์ 1080 x 1920)
- */
+/** สลับภาษา EN / ไทย — เขียนเป็นโค้ด (เดิมเป็นรูป) · TODO(integration): ผูกกับไฟล์คำแปล */
 @Composable
-private fun ImageButtons(str: WelcomeStrings, onEnterHn: () -> Unit, onFaceScan: () -> Unit) {
-    ImageButton(str.btnHnRes, str.btnHn, x = 124, onClick = onEnterHn)
-    ImageButton(str.btnScanRes, str.btnScan, x = 560, onClick = onFaceScan)
-}
-
-@Composable
-private fun ImageButton(resId: Int, label: String, x: Int, onClick: () -> Unit) {
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    Image(
-        painter = painterResource(resId),
-        contentDescription = label,
-        contentScale = ContentScale.Fit,
-        modifier = Modifier
-            .offset(x = x.s, y = 1150.s)
-            .size(396.s, 568.s)
-            .graphicsLayer { val k = if (pressed) .97f else 1f; scaleX = k; scaleY = k }
-            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
-    )
+private fun LangToggle(modifier: Modifier) {
+    var th by remember { mutableStateOf(true) }
+    Row(modifier.size(310.s, 81.s)
+        .softShadow(40f, Shade(Color(0x2914265A), 10f, 24f))
+        .clip(RoundedCornerShape(99.s)).background(Color(0xB8FFFFFF)).border(1.5.s, Color(0xF2FFFFFF), RoundedCornerShape(99.s))
+        .padding(8.s)) {
+        listOf(false to "EN", true to "ไทย").forEach { (isTh, label) ->
+            val on = th == isTh
+            Box(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(99.s))
+                .then(if (on) Modifier.background(Brush.linearGradient(listOf(K.BlueLight, K.Blue, K.BlueDeep))) else Modifier)
+                .press(scaleTo = .97f) { th = isTh }, contentAlignment = Alignment.Center) {
+                KText(label, 28, weight = FontWeight.Bold, color = if (on) Color.White else K.InkMuted)
+            }
+        }
+    }
 }
