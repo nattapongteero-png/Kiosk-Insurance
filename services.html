@@ -234,8 +234,9 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   display:flex;flex-direction:column;gap:24px;padding:48px var(--gutter)}
 /* พื้นคงที่ผืนเดียวหลังเนื้อหา (ไม่เลื่อน — เลื่อนเฉพาะ content): y208 → ล่างสุดจอ
    ขาวทึบที่มุมโค้งบน → จางจนใสที่ y1024 → กลับเป็นขาวสนิทที่ y1309 แล้วขาวจนสุดจอ */
+/* ทุกหน้าข้างใน: พื้นขาวไล่จางต่ำสุด 65% (ช่วงกลาง y640) ให้เห็นลายพื้นหลังรางๆ ไม่ชัดเกิน */
 .pp .veil{position:absolute;left:0;right:0;top:262px;bottom:0;z-index:0;pointer-events:none;
-  border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.980) 53px,rgba(255,255,255,0.926) 107px,rgba(255,255,255,0.844) 160px,rgba(255,255,255,0.741) 213px,rgba(255,255,255,0.624) 267px,rgba(255,255,255,0.500) 320px,rgba(255,255,255,0.376) 373px,rgba(255,255,255,0.259) 427px,rgba(255,255,255,0.156) 480px,rgba(255,255,255,0.074) 533px,rgba(255,255,255,0.020) 587px,rgba(255,255,255,0.000) 640px,rgba(255,255,255,0.043) 675px,rgba(255,255,255,0.156) 710px,rgba(255,255,255,0.316) 745px,rgba(255,255,255,0.500) 780px,rgba(255,255,255,0.684) 815px,rgba(255,255,255,0.844) 850px,rgba(255,255,255,0.957) 885px,rgba(255,255,255,1.000) 920px) 0 0/100% 920px no-repeat,
+  border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.993) 53px,rgba(255,255,255,0.974) 107px,rgba(255,255,255,0.945) 160px,rgba(255,255,255,0.909) 213px,rgba(255,255,255,0.868) 267px,rgba(255,255,255,0.825) 320px,rgba(255,255,255,0.782) 373px,rgba(255,255,255,0.741) 427px,rgba(255,255,255,0.705) 480px,rgba(255,255,255,0.676) 533px,rgba(255,255,255,0.657) 587px,rgba(255,255,255,0.650) 640px,rgba(255,255,255,0.665) 675px,rgba(255,255,255,0.705) 710px,rgba(255,255,255,0.761) 745px,rgba(255,255,255,0.825) 780px,rgba(255,255,255,0.889) 815px,rgba(255,255,255,0.945) 850px,rgba(255,255,255,0.985) 885px,rgba(255,255,255,1.000) 920px) 0 0/100% 920px no-repeat,
              linear-gradient(#fff,#fff) 0 920px/100% calc(100% - 920px) no-repeat}
 .pp .who .id{display:flex;align-items:center;gap:16px}
 .pp .who .av{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;
@@ -350,6 +351,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   font-size:30px;font-weight:700;color:#fff;background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);
   box-shadow:0 10px 24px rgba(20,38,90,.22);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
 .pp .finish:active{transform:scale(.97)}
+.pp .finish[disabled]{background:linear-gradient(180deg,#DCE4EE,#CBD6E4);color:#F2F6FA;box-shadow:none;cursor:not-allowed;transform:none}   /* ระหว่างพิมพ์บัตรคิว */
 @media (prefers-reduced-motion:reduce){.pp .spin{animation-duration:3s}}
 
 
@@ -471,7 +473,6 @@ body.bleed .screen{border-radius:0;box-shadow:none}
   filter:drop-shadow(0 0 2px rgba(var(--ring,217,165,70),.45))}
 
 /* หน้าอื่นนอกจากหน้าเลือกแบบประกัน (รายละเอียด / ส่งสำเร็จ / ส่งนาน): พื้นขาวทั้งหน้าใต้หัวจอ ไม่เห็นภาพพื้นหลัง */
-.pp .veil.full{background:#fff}
 
 /* หน้ารายละเอียด: ขอบเงาสีบริษัทเฉพาะการ์ดบนสุด · การ์ดความคุ้มครอง/เงื่อนไข/ข้อยกเว้น ใช้ขอบทองบางเรียบแบบเดิม */
 .pp .card:not(.dhero){box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
@@ -740,8 +741,10 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 
 /* หัวจอหน้าใน: แบนเนอร์อยู่เหนือพื้นขาว (veil เริ่ม y262) */
 .bannerFade{position:absolute;left:0;top:196px;width:1080px;height:804px;z-index:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(178,238,244,1.000) 0px,rgba(181,238,245,0.991) 20px,rgba(186,239,246,0.974) 40px,rgba(190,240,247,0.961) 60px,rgba(191,240,247,0.956) 80px,rgba(197,240,248,0.943) 100px,rgba(204,241,248,0.925) 121px,rgba(211,241,249,0.909) 141px,rgba(214,241,249,0.900) 161px,rgba(215,241,249,0.891) 181px,rgba(217,241,249,0.864) 201px,rgba(220,241,249,0.826) 221px,rgba(224,242,249,0.787) 241px,rgba(227,242,249,0.755) 261px,rgba(228,242,249,0.740) 281px,rgba(228,242,249,0.731) 302px,rgba(229,242,249,0.701) 322px,rgba(230,242,249,0.657) 342px,rgba(231,242,249,0.606) 362px,rgba(232,243,248,0.554) 382px,rgba(233,243,248,0.508) 402px,rgba(234,243,248,0.474) 422px,rgba(234,243,248,0.460) 442px,rgba(234,243,248,0.452) 462px,rgba(234,243,248,0.427) 482px,rgba(235,243,248,0.390) 502px,rgba(235,243,248,0.346) 523px,rgba(236,244,248,0.300) 543px,rgba(236,244,248,0.255) 563px,rgba(237,244,248,0.217) 583px,rgba(237,244,248,0.191) 603px,rgba(237,244,248,0.180) 623px,rgba(237,244,248,0.174) 643px,rgba(237,244,248,0.158) 663px,rgba(237,244,248,0.134) 683px,rgba(237,244,248,0.106) 704px,rgba(238,244,248,0.076) 724px,rgba(238,244,248,0.047) 744px,rgba(238,244,248,0.023) 764px,rgba(238,244,248,0.006) 784px,rgba(238,244,248,0.000) 804px)}
-.pp .banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:3;display:block;pointer-events:none}   /* ท้ายภาพโปร่งนุ่มอบไว้ในไฟล์ · จางลงบนพื้นขาว */
+  /* ฟ้าใต้แบนเนอร์ไล่ตามสีท้องฟ้าของแบนเนอร์ทีละช่วงแนวนอน รอยต่อกลืนเป็นแผ่นเดียว → อ่อนลงเข้าโทนพื้นหลัง → จางหาย y196→1000 */
+  background:linear-gradient(180deg,rgba(178,238,244,0.000) 0px,rgba(181,238,245,0.000) 20px,rgba(186,239,246,0.000) 40px,rgba(190,240,247,0.010) 60px,rgba(191,240,247,0.046) 80px,rgba(197,240,248,0.119) 100px,rgba(204,241,248,0.226) 120px,rgba(210,241,249,0.360) 140px,rgba(214,241,249,0.507) 160px,rgba(215,241,249,0.655) 180px,rgba(217,241,249,0.786) 200px,rgba(220,241,249,0.890) 220px,rgba(224,242,249,0.959) 240px,rgba(227,242,249,0.992) 260px,rgba(228,242,249,1.000) 280px,rgba(228,242,249,1.000) 300px,rgba(229,242,249,1.000) 320px,rgba(230,242,249,1.000) 340px,rgba(231,242,249,1.000) 360px,rgba(232,243,248,1.000) 380px,rgba(233,243,248,1.000) 400px,rgba(234,243,248,1.000) 420px,rgba(234,243,248,1.000) 440px,rgba(234,243,248,1.000) 460px,rgba(234,243,248,1.000) 480px,rgba(235,243,248,1.000) 500px,rgba(235,243,248,1.000) 520px,rgba(236,244,248,1.000) 540px,rgba(236,244,248,1.000) 560px,rgba(237,244,248,1.000) 580px,rgba(237,244,248,1.000) 600px,rgba(237,244,248,1.000) 620px,rgba(237,244,248,1.000) 640px,rgba(237,244,248,1.000) 660px,rgba(237,244,248,1.000) 680px,rgba(237,244,248,1.000) 700px,rgba(238,244,248,1.000) 720px,rgba(238,244,248,1.000) 740px,rgba(238,244,248,1.000) 760px,rgba(238,244,248,1.000) 780px,rgba(238,244,248,1.000) 800px),linear-gradient(90deg,rgb(186, 246, 247) 0px,rgb(185, 245, 246) 180px,rgb(186, 244, 247) 270px,rgb(182, 240, 247) 360px,rgb(177, 237, 247) 450px,rgb(170, 234, 247) 540px,rgb(157, 229, 248) 630px,rgb(145, 224, 247) 720px,rgb(141, 221, 245) 810px,rgb(143, 221, 247) 900px,rgb(141, 219, 248) 990px,rgb(158, 227, 249) 1080px);
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px);mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px)}
+.pp .banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:3;display:block;pointer-events:none}   /* ทึบถึงใต้ตัวหนังสือ แล้วจางจนโปร่งที่ขอบล่าง (อบในไฟล์) */
 
 /* ================= ผลตรวจสอบสิทธิ (ก่อนเลือกบริการ) — เลย์เอาต์เดียวกับหน้าสรุปผลประกัน =================
    ไอคอนสถานะ 160 → หัวข้อกลาง → การ์ดไข่มุก (สิทธิหลัก/รอง · สถานพยาบาลหลัก/รอง · Authen Code) → หมายเหตุ · แถบปุ่มล่าง 2 ปุ่ม */
@@ -842,8 +845,8 @@ Object.assign(ICON, {
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
 const ppHead = (full = false) => `
     <img class="banner" src="hdr_banlat.png" alt="โรงพยาบาลบ้านลาด · ระบบลงทะเบียนอัตโนมัติ">
-    <div class="bannerFade" aria-hidden="true"></div>
 
+    <div class="bannerFade" aria-hidden="true"></div>
     <div class="veil${full ? ' full' : ''}"></div>
     <div class="who">
       <div class="id">
@@ -1064,6 +1067,9 @@ function driveSlip(idle = false){   /* idle = รอยืนยัน: เค�
       q.classList.toggle('load', printing); q.classList.remove('pop'); void q.offsetWidth; if (!printing) q.classList.add('pop');
       const rm = document.getElementById('pRoom');   /* ห้องที่ต้องไป: skeleton เหมือนกัน */
       rm.classList.toggle('load', printing); rm.classList.remove('pop'); void rm.offsetWidth; if (!printing) rm.classList.add('pop');
+      /* ปุ่มเสร็จสิ้นกดได้เมื่อพิมพ์ใบแรกเสร็จ แล้วเปิดค้างไว้ · TODO(integration): ตามสัญญาณเครื่องพิมพ์จริง */
+      const done = document.getElementById('pDone');
+      if (done && !printing && done.disabled){ done.disabled = false; done.textContent = 'เสร็จสิ้น, กลับหน้าแรก'; }
     }
     window._slipRAF = requestAnimationFrame(frame);
   };
@@ -1247,7 +1253,7 @@ ${slipSvg(sv, ar)}
     </div>
     ${wait
       ? `<div class="foot two"><button class="cancel" data-home>ยกเลิกการทำรายการ</button><button class="finish" data-confirm>ยืนยันการรับบริการ</button></div>`
-      : `<div class="foot"><button class="finish" data-home>เสร็จสิ้น, กลับหน้าแรก</button></div>`}
+      : `<div class="foot"><button class="finish" id="pDone" data-home disabled>กำลังพิมพ์บัตรคิว…</button></div>`}   <!-- เปิดเมื่อพิมพ์ใบแรกเสร็จ (driveSlip) -->
   </div>`; };
 
 /* ---------- ผลตรวจสอบสิทธิ ----------
