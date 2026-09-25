@@ -257,14 +257,15 @@ private fun TicketScreen(sv: Service, arrive: String, wait: Boolean, onCancel: (
     val now = remember { LocalDateTime.now() }
     PageShell {
         // การ์ดรับบัตรคิว + สรุปข้อมูลที่ใช้รับบริการ · จัดกลางระหว่างข้อมูลผู้ป่วยกับแถบปุ่ม
-        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
-            verticalArrangement = Arrangement.spacedBy(32.s, Alignment.CenterVertically)) {
+        // หน้านี้ของแน่น (การ์ด 704 + สรุป 3 แถว + หมายเหตุชำระเงินเอง) → ล่างเว้นแค่แถบปุ่ม 288 + 12 · ช่องว่าง 24 · แถว 16 ไม่ให้การ์ดสรุปถูกบีบจนตัวหนังสือโดนตัด
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 300.s),
+            verticalArrangement = Arrangement.spacedBy(24.s, Alignment.CenterVertically)) {
             PrintCard(sv, arrive, now, wait)
             val right = if (DemoSession.rightsOk) DemoSession.rights.main else "ชำระเงินเอง"
             Column(Modifier.fillMaxWidth().pearl(24f, gradientRing = false).padding(horizontal = 40.s, vertical = 8.s)) {
                 listOf("บริการ" to sv.name, "ลักษณะการมา" to arrive, "สิทธิการรักษาที่จะใช้" to right).forEachIndexed { i, (k, v) ->
                     if (i > 0) Box(Modifier.fillMaxWidth().height(1.s).background(Color(0x1414265A)))
-                    Row(Modifier.fillMaxWidth().padding(vertical = 20.s), horizontalArrangement = Arrangement.spacedBy(32.s),
+                    Row(Modifier.fillMaxWidth().padding(vertical = 16.s), horizontalArrangement = Arrangement.spacedBy(32.s),
                         verticalAlignment = Alignment.CenterVertically) {
                         KText(k, 26, color = K.InkSoft, lineHeight = 36f, softWrap = false)
                         Spacer(Modifier.weight(1f))
