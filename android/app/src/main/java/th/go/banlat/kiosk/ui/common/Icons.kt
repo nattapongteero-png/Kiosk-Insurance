@@ -38,6 +38,8 @@ enum class KIcon(vararg val paths: String) {
     BigCheck("M4 12.5 9.5 18 20 6.5"),
     Cross("M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"),
     Close("M18 6 6 18M6 6l12 12"),
+    Back("M15 5l-7 7 7 7"),
+    Search("M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z", "m15.5 15.5 4.5 4.5"),
     Info("M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "M12 11v5M12 7.6h.01"),
     Warn("M12 4 2.8 20h18.4L12 4Z", "M12 10v4.5M12 17.4h.01"),
     Down("M12 5v13M6 12.5l6 6 6-6"),
@@ -64,8 +66,13 @@ enum class KIcon(vararg val paths: String) {
 }
 
 @Composable
-fun LineIcon(icon: KIcon, color: Color, modifier: Modifier, stroke: Float = 1.8f) {
-    val paths: List<Path> = remember(icon) { icon.paths.map { PathParser().parsePathString(it).toPath() } }
+fun LineIcon(icon: KIcon, color: Color, modifier: Modifier, stroke: Float = 1.8f) = PathIcon(icon.paths.toList(), color, modifier, stroke)
+
+/** ไอคอนเส้นจาก path SVG (viewBox 24) — ใช้กับไอคอนที่มาจากข้อมูล เช่น หมวดในหน้าตั้งค่า */
+@Composable
+fun PathIcon(src: List<String>, color: Color, modifier: Modifier, stroke: Float = 1.8f) {
+    val icon = src
+    val paths: List<Path> = remember(icon) { icon.map { PathParser().parsePathString(it).toPath() } }
     // ขยาย "ตัว path" เป็นขนาดพิกเซลจริงก่อนวาด (ไม่ scale canvas)
     // Android 7–8 วาด path ใต้ canvas ที่ถูก scale เป็นภาพเล็กแล้วขยาย → เส้นไอคอนเบลอ · แบบนี้คมทุกเวอร์ชัน
     var cache by remember(icon) { mutableStateOf<Pair<Float, List<Path>>?>(null) }

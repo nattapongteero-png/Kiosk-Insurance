@@ -98,4 +98,6 @@ object DemoSession {
     val rights get() = if (rightsOk) RightsOk else RightsFail
     /** สิทธิที่แสดงในแถบผู้ป่วย/บัตรคิว */
     val rightLabel get() = when { selfPay -> "ชำระเงินเอง"; rightsOk -> DemoPatient.right; else -> "ประกันสังคม" }
+    /** ชื่อสิทธิเต็มในแถบผู้ป่วย (แถวเต็มความกว้าง) */
+    val rightFull get() = if (selfPay) "ชำระเงินเอง" else rights.main
 }

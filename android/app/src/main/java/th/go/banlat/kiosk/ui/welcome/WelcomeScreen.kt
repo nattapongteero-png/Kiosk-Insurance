@@ -101,7 +101,7 @@ sealed interface WelcomeOverlay {
 fun WelcomeScreen(
     onConsentAccepted: () -> Unit, onConsentDeclined: () -> Unit = {},
     bye: String? = null, onByeShown: () -> Unit = {},      // แจ้งผลตอนกลับหน้าแรก: "cancel" ยกเลิก / "idle" หมดเวลา
-    onBusy: (Boolean) -> Unit = {}, onCancel: () -> Unit = {},
+    onBusy: (Boolean) -> Unit = {}, onCancel: () -> Unit = {}, onSettings: () -> Unit = {},
 ) {
     var overlay by remember { mutableStateOf<WelcomeOverlay>(WelcomeOverlay.None) }
     LaunchedEffect(overlay != WelcomeOverlay.None) { onBusy(overlay != WelcomeOverlay.None) }   // ตัวจับเวลาไม่มีการแตะนับเฉพาะตอนมีชั้นซ้อน
@@ -174,11 +174,11 @@ fun WelcomeScreen(
 
             LangToggle(Modifier.offset(80.s, (h - 165f).s))
 
-            // ปุ่มตั้งค่าระบบ (ทำไว้แค่ปุ่ม) — TODO(integration): ใส่ PIN / กดค้างก่อนเข้าหน้าตั้งค่า
+            // ปุ่มตั้งค่าระบบ → หน้าตั้งค่าตู้ — TODO(integration): ใส่รหัสผ่านตั้งค่า / กดค้างก่อนเข้า
             Box(Modifier.offset(912.s, (h - 168f).s).size(88.s)
                 .softShadow(44f, Shade(Color(0x2414265A), 10f, 30f))
                 .clip(CircleShape).background(Color(0xB8FFFFFF)).border(1.5.s, Color(0xF2FFFFFF), CircleShape)
-                .press(scaleTo = .95f) {}, contentAlignment = Alignment.Center) {
+                .press(scaleTo = .95f, onClick = onSettings), contentAlignment = Alignment.Center) {
                 LineIcon(KIcon.Gear, K.InkMuted, Modifier.size(42.s))
             }
         }

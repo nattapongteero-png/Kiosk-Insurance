@@ -164,14 +164,16 @@ fun ServicesScreen(onExit: () -> Unit, onQueued: (service: String, arrive: Strin
     val scroll = rememberScrollState()
     Box(Modifier.fillMaxSize()) {
         PageShell {
-            Column(Modifier.padding(top = 550.s).fillMaxSize()
+            Column(Modifier.padding(top = 586.s).fillMaxSize()
                 .topFade(16f * u, 96f * u) { scroll.value > 4 }
                 .verticalScroll(scroll)
-                .padding(start = 80.s, end = 80.s, top = 8.s, bottom = 336.s),
-                verticalArrangement = Arrangement.spacedBy(48.s)) {
+                .padding(start = 80.s, end = 80.s, top = 40.s, bottom = 336.s),
+                verticalArrangement = Arrangement.spacedBy(24.s)) {
+                // หัวข้อชิดรายการใต้ตัวเอง (24) มากกว่าชิดข้อมูลผู้ป่วยด้านบน (40) — จัดกลุ่มตามความใกล้ · กลุ่ม "มาตามนัด" เว้นเพิ่ม 24 (รวม 48)
                 Heading("เลือกบริการที่ต้องการ", "แตะบริการเพื่อรับบัตรคิว")
                 // ตรวจโรคทั่วไป (ใช้บ่อยที่สุด) อยู่ใบแรกของรายการ ขนาดเท่าการ์ดอื่น
                 listOf(null to listOf(Main) + Clinics, "มาตามนัด" to Appointments).forEach { (title, list) ->
+                    if (title != null) Spacer(Modifier.height(0.s))
                     Section(title) {   // กลุ่มแรกไม่มีหัวข้อ (ต่อจาก "เลือกบริการที่ต้องการ")
                         Column(verticalArrangement = Arrangement.spacedBy(32.s)) {
                             list.chunked(2).forEach { row ->
@@ -258,7 +260,7 @@ private fun TicketScreen(sv: Service, arrive: String, wait: Boolean, onCancel: (
     PageShell {
         // การ์ดรับบัตรคิว + สรุปข้อมูลที่ใช้รับบริการ · จัดกลางระหว่างข้อมูลผู้ป่วยกับแถบปุ่ม
         // หน้านี้ของแน่น (การ์ด 704 + สรุป 3 แถว + หมายเหตุชำระเงินเอง) → ล่างเว้นแค่แถบปุ่ม 288 + 12 · ช่องว่าง 24 · แถว 16 ไม่ให้การ์ดสรุปถูกบีบจนตัวหนังสือโดนตัด
-        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 300.s),
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 300.s),
             verticalArrangement = Arrangement.spacedBy(24.s, Alignment.CenterVertically)) {
             PrintCard(sv, arrive, now, wait)
             val right = if (DemoSession.rightsOk) DemoSession.rights.main else "ชำระเงินเอง"
@@ -329,18 +331,22 @@ private fun FakeQr(modifier: Modifier) {
     }
 }
 
+/** เวลาที่หยุดค้างหลังพิมพ์เสร็จ (วินาที): บัตรคิวออกครบใบ ไฟดับ ยังไม่หลุดออกจากการ์ด */
+private const val PrintHold = 4.6f
+
 /* ---------- การ์ดรับบัตรคิว — ตัวเครื่องเดียวกับการ์ดเสียบบัตรหน้าแรก (ตรงกับ services.html .pcard) ----------
  * 920 x 704 มุม 48 · พื้น ลาย ตัวเครื่อง มุม/องศาเหมือนหน้าแรกทุกพิกัด → เล่าเรื่องต่อกัน: เสียบบัตร → บัตรคิวพิมพ์ออกมา
  * ซ้าย: สถานะ → "กรุณารับ / บัตรคิว" → เส้นทอง → เลขคิว + QN ตัวใหญ่ (อ่านง่ายกว่าบนบัตรเอียง) → ไปห้องไหน
- * แอนิเมชันวนรอบละ 7.5 วิ: พิมพ์ออกจนสุดใบ (กระดาษโค้งตามน้ำหนัก) → ค้างให้อ่าน → หลุดเลื่อนออกนอกการ์ด → พิมพ์ใหม่
+ * แอนิเมชันเล่นครั้งเดียว: พิมพ์ออกจนสุดใบ (กระดาษโค้งตามน้ำหนัก) → หยุดค้างที่สถานะพิมพ์เสร็จ ไม่วนซ้ำ
  */
 @Composable
 private fun PrintCard(sv: Service, arrive: String, now: LocalDateTime, wait: Boolean) {
     val u = unitPx()
-    // วนรอบละ 7.5 วิ: พิมพ์ออกจนสุดใบ → ค้าง → หลุดเลื่อนออกนอกการ์ด → พิมพ์ใหม่ · รอยืนยัน = เวลา 0 (ยังไม่มีกระดาษ ไฟดับ)
-    val idle = remember { mutableFloatStateOf(0f) }
-    val sec = if (wait) idle else rememberInfiniteTransition(label = "print").animateFloat(0f, 7.5f,
-        infiniteRepeatable(tween(7500, easing = LinearEasing), RepeatMode.Restart), label = "sec")
+    // เล่นครั้งเดียว: พิมพ์ออกจนสุดใบ (ไฟเขียว) → หยุดค้างที่สถานะพิมพ์เสร็จ ไม่วนซ้ำ
+    // (ถ้าวน ผู้ใช้จะเห็นกำลังพิมพ์/skeleton ซ้ำ แล้วเข้าใจว่ายังพิมพ์ไม่เสร็จ) · รอยืนยัน = เวลา 0 (ยังไม่มีกระดาษ ไฟดับ)
+    val clock = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(wait) { if (!wait) clock.animateTo(PrintHold, tween((PrintHold * 1000).toInt(), easing = LinearEasing)) }
+    val sec = clock.asState()
     val tm = listOf("ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.")
     val slip = remember(sv, arrive) {
         val p = DemoPatient; val dob = p.dob
@@ -529,7 +535,7 @@ private fun ServiceCard(s: Service, main: Boolean, modifier: Modifier, onClick: 
 private fun RightsScreen(onCancel: () -> Unit, onNext: () -> Unit) {
     val ok = DemoSession.rightsOk; val r = DemoSession.rights
     PageShell {
-        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
             verticalArrangement = Arrangement.spacedBy(48.s, Alignment.CenterVertically)) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(Modifier.padding(bottom = 32.s).size(160.s)

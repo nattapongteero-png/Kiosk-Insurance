@@ -166,7 +166,13 @@ private fun Veil(modifier: Modifier, floor: Float = 0f) {
 @Composable
 private fun PatientBar(modifier: Modifier) {
     val p = DemoPatient
-    Column(modifier.padding(horizontal = 80.s, vertical = 48.s), verticalArrangement = Arrangement.spacedBy(24.s)) {
+    // 3 แถว: ชื่อ · เลขบัตร/อายุ · สิทธิการรักษาเต็มความกว้าง (ชื่อสิทธิบางรายการยาวมาก) · ป้ายกำกับอยู่บนค่าทุกช่อง · จบที่ y550
+    @Composable
+    fun Kv(k: String, v: String, modifier: Modifier) = Column(modifier, verticalArrangement = Arrangement.spacedBy(4.s)) {
+        KText(k, 24, color = K.InkSoft, lineHeight = 32f, softWrap = false)
+        KText(v, 28, weight = FontWeight.Bold, lineHeight = 40f, tabular = true, softWrap = false, maxLines = 1, minSize = 22)
+    }
+    Column(modifier.padding(start = 80.s, end = 80.s, top = 24.s, bottom = 24.s), verticalArrangement = Arrangement.spacedBy(12.s)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.s)) {
             Box(Modifier.size(88.s).creamDisc(halo = 8f), contentAlignment = Alignment.Center) {
                 LineIcon(KIcon.User, K.GoldIcon, Modifier.size(44.s))
@@ -177,13 +183,10 @@ private fun PatientBar(modifier: Modifier) {
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.s)) {
-            listOf("เลขบัตรประชาชน" to maskCid(p.cid), "อายุ" to ageYMD(p.dob), "สิทธิการรักษา" to th.go.banlat.kiosk.data.DemoSession.rightLabel).forEach { (k, v) ->
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.s)) {
-                    KText(k, 24, color = K.InkSoft, lineHeight = 40f, softWrap = false)
-                    KText(v, 28, weight = FontWeight.Bold, lineHeight = 40f, tabular = true, softWrap = false)
-                }
-            }
+            Kv("เลขบัตรประชาชน", maskCid(p.cid), Modifier.weight(1f))
+            Kv("อายุ", ageYMD(p.dob), Modifier.weight(1f))
         }
+        Kv("สิทธิการรักษา", th.go.banlat.kiosk.data.DemoSession.rightFull, Modifier.fillMaxWidth())
     }
 }
 
@@ -225,7 +228,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
     val u = unitPx()
     val scroll = rememberScrollState()
     PageShell {
-        Column(Modifier.padding(top = 550.s).fillMaxSize()
+        Column(Modifier.padding(top = 586.s).fillMaxSize()
             .topFade(16f * u, 96f * u) { scroll.value > 4 }
             .verticalScroll(scroll)) {
             // แบบประกันที่แนะนำ (สูง 517: การ์ดจบที่ 469 + ห่างส่วนถัดไป 48)
@@ -311,7 +314,7 @@ internal fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
     PageShell {
         // จัดกึ่งกลาง ไม่กระจุกบนซ้าย: ผู้ใช้ยืนมองระดับสายตา (กลาง–ล่างจอ) ได้โดยไม่ต้องเงยหน้า
         // ไอคอนสถานะ 160 → หัวข้อกลาง → การ์ด → รหัสรายการ · ทั้งก้อนอยู่กลางระหว่างข้อมูลผู้ป่วย (y504) กับแถบปุ่ม (ล่าง 248)
-        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
             verticalArrangement = Arrangement.spacedBy(48.s, Alignment.CenterVertically)) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(Modifier.padding(bottom = 32.s).size(160.s).creamDisc(ring = 2f, halo = 14f), contentAlignment = Alignment.Center) {

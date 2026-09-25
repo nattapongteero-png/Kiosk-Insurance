@@ -35,7 +35,7 @@ import th.go.banlat.kiosk.ui.welcome.WelcomeScreen
  * หน้าแรกนับเฉพาะตอนมีชั้นซ้อนเปิด (ตรงกับ preview/idle.js)
  * ทีมพัฒนาเปลี่ยนจุดที่ใส่ความเห็น "TODO(integration)" ให้เรียกระบบจริงได้เลย
  */
-private enum class Route { Welcome, Insurance, Services }
+private enum class Route { Welcome, Insurance, Services, Settings }
 
 @Composable
 fun KioskApp() {
@@ -69,11 +69,14 @@ fun KioskApp() {
             when (route) {
                 Route.Welcome -> key(homeKey) {
                     WelcomeScreen(onConsentAccepted = { route = Route.Insurance }, onConsentDeclined = { route = Route.Services },
-                        bye = bye, onByeShown = { bye = null }, onBusy = { homeBusy = it }, onCancel = { goHome("cancel") })
+                        bye = bye, onByeShown = { bye = null }, onBusy = { homeBusy = it }, onCancel = { goHome("cancel") },
+                        onSettings = { route = Route.Settings })
                 }
                 Route.Insurance -> InsuranceFlow(onExit = { route = Route.Services })
                 // หลังเลือกลักษณะการมา หน้าเลือกบริการแสดงบัตรคิวเอง · TODO(integration): onQueued → ส่ง HIS แล้วสั่งพิมพ์บัตรคิว
                 Route.Services -> ServicesScreen(onExit = { route = Route.Welcome })
+                // TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า
+                Route.Settings -> th.go.banlat.kiosk.ui.settings.SettingsScreen(onExit = { route = Route.Welcome })
             }
             if (warn) IdleWarning(onContinue = { warn = false; lastTouch = SystemClock.uptimeMillis() }, onHome = { goHome("idle") })
         }

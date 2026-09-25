@@ -53,7 +53,7 @@ internal fun DetailScreen(plan: Plan, onBack: () -> Unit, onSend: () -> Unit) {
     val t = TermsByTag.getValue(plan.tag)
     val br = Color(plan.co.brand); val brd = Color(plan.co.brandDeep)
     PageShell {
-        Column(Modifier.padding(top = 550.s).fillMaxSize()
+        Column(Modifier.padding(top = 586.s).fillMaxSize()
             .topFade(16f * u, 96f * u) { scroll.value > 4 }
             .verticalScroll(scroll)
             .padding(start = 80.s, end = 80.s, top = 8.s, bottom = 336.s),
