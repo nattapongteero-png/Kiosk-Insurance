@@ -549,7 +549,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 /* ================= บัตรคิว (หลังเลือกลักษณะการมา) — ข้อมูลชุดเดียวกับสลิปใบนำทางผู้ป่วยนอก =================
    จัดกึ่งกลางแบบหน้าสรุปผล: ไอคอนสถานะ → หัวข้อ → บัตรคิว → หมายเหตุ · ผู้ใช้ยืนมองระดับสายตาได้ไม่ต้องเงย
    บัตร: ส่วนบน = คิวเรียกคนไข้ (ตัวใหญ่สุด) + QN · รอยปรุ · ส่วนล่าง = รายละเอียด + QR */
-.tk{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter) 40px;
+.tk{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter) 12px;
   display:flex;flex-direction:column;justify-content:center;gap:40px}
 .tk .phd{display:flex;flex-direction:column;align-items:center;text-align:center}
 .tk .phd .bigic{margin-bottom:24px;width:128px;height:128px}
@@ -668,7 +668,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 .prline{opacity:0}
 
 /* หน้าบัตรคิว: การ์ดใหญ่ + แถบเตือน · ไม่มีการ์ดบัตรคิวแยกแล้ว (ข้อมูลอยู่บนบัตรคิวในการ์ด) */
-.tk{gap:32px}
+.tk{gap:24px}
 .pcard .ok .mspin{display:none;width:20px;height:20px;border-radius:50%;
   background:conic-gradient(from 0deg,rgba(30,123,224,0) 0deg,rgba(30,123,224,0) 150deg,#1E7BE0 360deg);
   -webkit-mask:radial-gradient(circle,transparent 6px,#000 7px);mask:radial-gradient(circle,transparent 6px,#000 7px);
@@ -770,7 +770,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 .pcard .ok.wait svg{stroke:#A87C2A}
 .pcard p.hint{color:var(--ink-muted);font-size:28px;line-height:44px}
 .pcard p.hint b{color:var(--ink)}
-.tk .rcard .r{padding:20px 0}
+.tk .rcard .r{padding:16px 0}   /* หน้าบัตรคิวของแน่น: แถวชิดขึ้นไม่ให้ล้นใต้แถบปุ่ม */
 .rcard .r.use b{font-size:32px;color:var(--blue-deep)}
 .rcard .r.use b small{display:block;font-size:22px;line-height:32px;font-weight:500;color:#7A4A0A}
 </style>
