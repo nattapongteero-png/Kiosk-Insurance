@@ -144,12 +144,12 @@ fun SecondaryPill(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
 /** ปุ่มหลัก (น้ำเงินกรมท่า) */
 @Composable
 fun PrimaryPill(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
-                colors: List<Color> = listOf(Color(0xFF223A7A), K.Ink), glow: Color = Color(0x3814265A)) {
+                colors: List<Color> = listOf(Color(0xFF223A7A), K.Ink), glow: Color = Color(0x3814265A), enabled: Boolean = true) {
     Box(modifier.height(88.s)
-        .softShadow(44f, Shade(glow, 10f, 24f))
-        .clip(RoundedCornerShape(99.s)).background(Brush.verticalGradient(colors))
-        .press(scaleTo = .97f, onClick = onClick).padding(horizontal = 56.s), contentAlignment = Alignment.Center) {
-        KText(text, 30, weight = FontWeight.Bold, color = Color.White, softWrap = false)
+        .then(if (enabled) Modifier.softShadow(44f, Shade(glow, 10f, 24f)) else Modifier)
+        .clip(RoundedCornerShape(99.s)).background(if (enabled) Brush.verticalGradient(colors) else Brush.verticalGradient(listOf(Color(0xFFDCE4EE), Color(0xFFCBD6E4))))
+        .press(enabled = enabled, scaleTo = .97f, onClick = onClick).padding(horizontal = 56.s), contentAlignment = Alignment.Center) {
+        KText(text, 30, weight = FontWeight.Bold, color = if (enabled) Color.White else Color(0xFFF2F6FA), softWrap = false)
     }
 }
 

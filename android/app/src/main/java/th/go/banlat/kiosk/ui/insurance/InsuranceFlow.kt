@@ -65,6 +65,7 @@ import th.go.banlat.kiosk.data.RequestId
 import th.go.banlat.kiosk.data.ageYMD
 import th.go.banlat.kiosk.data.maskCid
 import th.go.banlat.kiosk.ui.common.HospitalBanner
+import th.go.banlat.kiosk.ui.common.drawBannerFade
 import th.go.banlat.kiosk.ui.common.KIcon
 import th.go.banlat.kiosk.ui.common.LineIcon
 import th.go.banlat.kiosk.ui.common.Shade
@@ -117,13 +118,14 @@ fun InsuranceFlow(onExit: () -> Unit) {
 
 /** พื้นหลัง + หัวจอ + ผู้ยืนยันตัวตน (คงที่ ไม่เลื่อน) + พื้นขาวไล่สีผืนเดียวหลังเนื้อหา */
 @Composable
-internal fun PageShell(fullVeil: Boolean = false, content: @Composable BoxScope.() -> Unit) {
+internal fun PageShell(content: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize()) {
         Image(imgPainter(R.drawable.bg_home), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         // ชั้นฟ้าไล่เฉดใต้แบนเนอร์ (ตรงกับ .bannerFade ใน insurance.html / services.html): ฟ้าท้ายแบนเนอร์ → อ่อนลง → จางหาย y196→1000
         // อยู่ใต้พื้นขาว (veil เริ่ม y262) จึงเห็นเฉพาะช่วงท้ายแบนเนอร์และขอบข้างมุมโค้ง
         Canvas(Modifier.offset(y = 196.s).fillMaxWidth().height(804.s)) {
             fun sm(t: Float) = t * t * (3 - 2 * t)
+            fun ss(t: Float) = t.coerceIn(0f, 1f).let { it * it * it * (it * (it * 6 - 15) + 10) }
             fun c(r: Int, g: Int, b: Int, a: Float) = Color(r, g, b, (255 * a).toInt())
             val keys = listOf(196f to c(178, 238, 244, 1f), 262f to c(190, 240, 247, .96f), 360f to c(214, 241, 249, .9f),
                 480f to c(228, 242, 249, .74f), 640f to c(234, 243, 248, .46f), 820f to c(237, 244, 248, .18f), 1000f to c(238, 244, 248, 0f))
@@ -134,11 +136,11 @@ internal fun PageShell(fullVeil: Boolean = false, content: @Composable BoxScope.
                 }
                 return keys.last().second
             }
-            drawRect(Brush.verticalGradient(*(0..40).map { i -> (i / 40f) to at(196f + i * 804f / 40) }.toTypedArray()))
+            // สีท้องฟ้าตามแนวนอนของแบนเนอร์ค่อยๆ หมดน้ำหนักใน y230→480 (ตรงกับ .bannerFade)
+            drawBannerFade(196f, 804f, size.height / 804f, color = { at(it).copy(alpha = 1f) }, alpha = { at(it).alpha }, tint = { ss((it - 230f) / 250f) })
         }
-        // หน้าเลือกแบบประกัน: พื้นขาวไล่สีเห็นภาพพื้นหลังช่วงกลาง · หน้าอื่น (รายละเอียด/สรุป): ขาวทั้งหน้าใต้หัวจอ
-        if (fullVeil) Box(Modifier.offset(y = 262.s).fillMaxSize().clip(RoundedCornerShape(topStart = 40.s, topEnd = 40.s)).background(Color.White))
-        else Veil(Modifier.offset(y = 262.s).fillMaxSize())
+        // ทุกหน้าข้างใน: พื้นขาวไล่จางผืนเดียว ต่ำสุด 65% ช่วงกลาง ให้เห็นลายพื้นหลังรางๆ (ตรงกับ .veil)
+        Veil(Modifier.offset(y = 262.s).fillMaxSize(), floor = .65f)
         // หัวจอตำแหน่งเดียวกับหน้าแรก
         HospitalBanner(fade = false)   // หัวจอ = แบนเนอร์โรงพยาบาล ชุดเดียวกับหน้าแรก (สูง 262)
         content()
@@ -148,13 +150,13 @@ internal fun PageShell(fullVeil: Boolean = false, content: @Composable BoxScope.
 
 /** พื้นขาว: ทึบที่มุมโค้งบน → ใสที่ +640 → ขาวสนิทที่ +920 แล้วขาวจนสุดจอ (smoothstep เหมือนต้นแบบ) */
 @Composable
-private fun Veil(modifier: Modifier) {
+private fun Veil(modifier: Modifier, floor: Float = 0f) {
     val u = unitPx()
     Canvas(modifier.clip(RoundedCornerShape(topStart = 40.s, topEnd = 40.s))) {
         fun sm(t: Float) = t * t * (3 - 2 * t)
         val stops = buildList {
-            for (i in 0..12) add(640f * i / 12 to Color.White.copy(alpha = 1f - sm(i / 12f)))
-            for (i in 1..8) add(640f + 280f * i / 8 to Color.White.copy(alpha = sm(i / 8f)))
+            for (i in 0..12) add(640f * i / 12 to Color.White.copy(alpha = 1f - (1f - floor) * sm(i / 12f)))
+            for (i in 1..8) add(640f + 280f * i / 8 to Color.White.copy(alpha = floor + (1f - floor) * sm(i / 8f)))
         }.map { (y, c) -> (y * u / size.height) to c }.toTypedArray()
         drawRect(Brush.verticalGradient(*stops, 1f to Color.White))
     }
@@ -306,7 +308,7 @@ internal fun GoldSpinner(modifier: Modifier, thickness: Float) {
 // ---------------- หน้าสรุป (ส่งสำเร็จ / ส่งนาน) ----------------
 @Composable
 internal fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
-    PageShell(fullVeil = true) {
+    PageShell {
         // จัดกึ่งกลาง ไม่กระจุกบนซ้าย: ผู้ใช้ยืนมองระดับสายตา (กลาง–ล่างจอ) ได้โดยไม่ต้องเงยหน้า
         // ไอคอนสถานะ 160 → หัวข้อกลาง → การ์ด → รหัสรายการ · ทั้งก้อนอยู่กลางระหว่างข้อมูลผู้ป่วย (y504) กับแถบปุ่ม (ล่าง 248)
         Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),

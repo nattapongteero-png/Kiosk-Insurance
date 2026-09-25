@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -75,9 +76,9 @@ fun ClockBlock(modifier: Modifier = Modifier) {
 
 
 /**
- * แบนเนอร์โรงพยาบาล (เฉพาะหน้าแรก) เต็มกว้าง 1080 x 262 — สูตรเดียวกับ welcome_v2.html
- * ไฟล์ภาพต่อท้องฟ้าแทนเส้นเทา/หญ้าท้ายภาพ · ส่วนท้ายจาง y196→262 แบบ 1−t^2.2 (ข้อความยังชัด แล้วจางเร็วช่วงท้าย) ลงบนหมอกขาว
- * ใต้แบนเนอร์ต่อด้วยฟ้าไล่เฉดจากสีท้ายแบนเนอร์ → ฟ้าอ่อน → โทนพื้นหลัง แล้วจางหาย (→y780) · วางก่อนการ์ด จึงอยู่ใต้การ์ด
+ * แบนเนอร์โรงพยาบาล เต็มกว้าง 1080 x 262 ทุกหน้า — ตรงกับ .banner ใน welcome_v2.html / insurance.html / services.html
+ * ไฟล์ภาพ = ต้นฉบับตัดเส้นเขียวท้ายภาพออก (ยืดแนวตั้ง 4%) · ทึบถึง y240 (ใต้ "ระบบลงทะเบียนอัตโนมัติ") แล้วจางจนโปร่ง 0% ที่ขอบล่าง (อบในไฟล์)
+ * หน้าแรก: ใต้แบนเนอร์มีชั้นฟ้าไล่เฉดฟุ้งลงไปกลืนพื้นหลัง (fade) · หน้าใน: PageShell วาดชั้นฟุ้งเองใต้พื้นขาว
  */
 @Composable
 fun HospitalBanner(modifier: Modifier = Modifier, fade: Boolean = true) {   // fade = ฟ้าไล่เฉดใต้แบนเนอร์ (หน้าแรก) · หน้าในมีพื้นขาวรับต่อแล้ว
@@ -86,18 +87,33 @@ fun HospitalBanner(modifier: Modifier = Modifier, fade: Boolean = true) {   // f
         // ชั้นหลัง (y150→600, ฟ้าเป็นโทนพื้นหลังภายใน y360): เฉพาะสีท้องฟ้าของแบนเนอร์ เบลอแนวนอนจนเป็นฟ้าเนื้อเดียว → โทนพื้นหลัง → จางหาย (banner_fade)
         // ชั้นไล่สีหลังแบนเนอร์ (container แยก): สีฟ้าท้ายแบนเนอร์ ทึบถึง y200 → จางนุ่มพร้อมอ่อนลงเข้าโทนพื้นหลัง จน 0 ที่ y600
         if (fade) Canvas(Modifier.fillMaxWidth().height(600.s)) {
-            fun ss(t: Float) = t * t * t * (t * (t * 6 - 15) + 10)
-            val c0 = Color(176, 236, 244); val c1 = Color(226, 240, 247)
-            val stops = (0..40).map { i ->
-                val y = i * 600f / 40; val t = ss(((y - 200f) / 400f).coerceIn(0f, 1f))
-                (i / 40f) to androidx.compose.ui.graphics.lerp(c0, c1, t).copy(alpha = 1f - t)
-            }
-            drawRect(Brush.verticalGradient(*stops.toTypedArray()))
+            fun ss(t: Float) = t.coerceIn(0f, 1f).let { it * it * it * (it * (it * 6 - 15) + 10) }
+            val c1 = Color(226, 240, 247)
+            drawBannerFade(0f, 600f, size.height / 600f, color = { c1 }, alpha = { 1f - ss((it - 200f) / 400f) }, tint = { ss((it - 200f) / 400f) })
         }
-        // แบนเนอร์: ทึบถึง y222 (ตัวหนังสือ/โลโก้ชัดเต็ม) → 0 ที่ขอบล่าง (อบในไฟล์) ละลายลงบนชั้นไล่สีด้านหลัง
-        // แบนเนอร์สีเต็ม · ส่วนล่างโปร่งนุ่ม y206→262 อบไว้ในไฟล์ (ตัวการ์ตูน/ตึกละลายเข้าท้องฟ้า)
+        // แบนเนอร์สีเต็ม · ใต้ตัวหนังสือจางลงจนโปร่งที่ขอบล่าง (อบในไฟล์) ละลายลงบนชั้นไล่สีด้านหลัง
         Image(imgPainter(R.drawable.hdr_banlat), "โรงพยาบาลบ้านลาด · ระบบลงทะเบียนอัตโนมัติ",
             Modifier.fillMaxWidth().height(262.s), contentScale = ContentScale.FillBounds)
     }
 }
 
+/** สีท้องฟ้าท้ายแบนเนอร์ตามแนวนอน (วัดจากไฟล์ hdr_banlat · ซ้ายฟ้าอ่อน → ขวาฟ้าเข้ม) — ชั้นฟุ้งใต้แบนเนอร์ใช้สีนี้ รอยต่อจึงกลืนเป็นแผ่นเดียว */
+internal val BannerSky = listOf(0f to Color(186, 246, 247), 180f to Color(185, 245, 246), 270f to Color(186, 244, 247), 360f to Color(182, 240, 247), 450f to Color(177, 237, 247), 540f to Color(170, 234, 247), 630f to Color(157, 229, 248), 720f to Color(145, 224, 247), 810f to Color(141, 221, 245), 900f to Color(143, 221, 247), 990f to Color(141, 219, 248), 1080f to Color(158, 227, 249))
+
+/** วาดชั้นฟุ้งใต้แบนเนอร์แบบไล่ต่อเนื่อง (ไม่เป็นแถบ):
+ *  ① สีท้องฟ้าตามแนวนอนเต็มพื้นที่ ② ทับด้วยสีตามแนวตั้ง color(y) ความทึบ tint(y) → สีค่อยๆ เข้าโทนพื้นหลัง
+ *  ③ ตัดความทึบรวมตาม alpha(y) ด้วย DstIn ในเลเยอร์แยก (ใช้ได้ถึง Android 7) */
+internal fun androidx.compose.ui.graphics.drawscope.DrawScope.drawBannerFade(
+    top: Float, height: Float, u: Float, color: (Float) -> Color, alpha: (Float) -> Float, tint: (Float) -> Float) {
+    val n = 60
+    val ys = (0..n).map { top + height * it / n }
+    val rect = androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height)
+    drawIntoCanvas { cv ->
+        cv.saveLayer(rect, androidx.compose.ui.graphics.Paint())
+        drawRect(Brush.horizontalGradient(*BannerSky.map { (x, c) -> (x / 1080f) to c }.toTypedArray(), startX = 0f, endX = size.width))
+        drawRect(Brush.verticalGradient(*ys.mapIndexed { i, y -> (i.toFloat() / n) to color(y).copy(alpha = tint(y)) }.toTypedArray(), startY = 0f, endY = size.height))
+        drawRect(Brush.verticalGradient(*ys.mapIndexed { i, y -> (i.toFloat() / n) to Color.Black.copy(alpha = alpha(y)) }.toTypedArray(), startY = 0f, endY = size.height),
+            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn)
+        cv.restore()
+    }
+}

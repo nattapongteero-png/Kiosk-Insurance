@@ -255,7 +255,7 @@ private val Prefix = mapOf("opd" to "A", "wound" to "B", "med" to "C", "dent" to
 @Composable
 private fun TicketScreen(sv: Service, arrive: String, wait: Boolean, onCancel: () -> Unit, onConfirm: () -> Unit, onDone: () -> Unit) {
     val now = remember { LocalDateTime.now() }
-    PageShell(fullVeil = true) {
+    PageShell {
         // การ์ดรับบัตรคิว + สรุปข้อมูลที่ใช้รับบริการ · จัดกลางระหว่างข้อมูลผู้ป่วยกับแถบปุ่ม
         Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
             verticalArrangement = Arrangement.spacedBy(32.s, Alignment.CenterVertically)) {
@@ -283,7 +283,13 @@ private fun TicketScreen(sv: Service, arrive: String, wait: Boolean, onCancel: (
             if (wait) Row(Modifier.fillMaxWidth().padding(horizontal = 80.s), horizontalArrangement = Arrangement.spacedBy(24.s)) {
                 SecondaryPill("ยกเลิกการทำรายการ", onCancel, Modifier.widthIn(min = 280.s))
                 PrimaryPill("ยืนยันการรับบริการ", onConfirm, Modifier.weight(1f))
-            } else PrimaryPill("เสร็จสิ้น, กลับหน้าแรก", onDone, Modifier.padding(horizontal = 80.s).fillMaxWidth())   // ปุ่มหลักเดี่ยว = เต็มความกว้าง
+            } else {
+                // กดเสร็จสิ้นได้เมื่อพิมพ์บัตรคิวใบแรกออกครบแล้ว (จังหวะเดียวกับ tag "ลงทะเบียนสำเร็จ" · 0.3 + 3.6 วิ)
+                // TODO(integration): เปิดตามสัญญาณเครื่องพิมพ์จริง (พิมพ์เสร็จ)
+                var printed by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) { kotlinx.coroutines.delay(3900); printed = true }
+                PrimaryPill(if (printed) "เสร็จสิ้น, กลับหน้าแรก" else "กำลังพิมพ์บัตรคิว…", onDone, Modifier.padding(horizontal = 80.s).fillMaxWidth(), enabled = printed)   // ปุ่มหลักเดี่ยว = เต็มความกว้าง
+            }
         }
     }
 }
@@ -521,7 +527,7 @@ private fun ServiceCard(s: Service, main: Boolean, modifier: Modifier, onClick: 
 @Composable
 private fun RightsScreen(onCancel: () -> Unit, onNext: () -> Unit) {
     val ok = DemoSession.rightsOk; val r = DemoSession.rights
-    PageShell(fullVeil = true) {
+    PageShell {
         Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
             verticalArrangement = Arrangement.spacedBy(48.s, Alignment.CenterVertically)) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
