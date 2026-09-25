@@ -10,7 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "th.go.banlat.kiosk"
-        minSdk = 28          // เงาหลายชั้น (setShadowLayer บน hardware canvas) ต้อง API 28+
+        // ตู้จริง Android 7.1.2 (rk3288) · เงาเบลอบน Android < 9 ใช้ SoftBlur (เรนเดอร์ลงบิตแมปแล้วแคช) ภาพจึงเหมือนกัน
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0-prototype"
@@ -21,7 +22,11 @@ android {
             isMinifyEnabled = false
         }
     }
+    signingConfigs {
+        getByName("debug") { enableV1Signing = true; enableV2Signing = true }   // v1 ให้ติดตั้งบนเครื่องเก่าได้แน่นอน
+    }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true   // java.time (นาฬิกา / อายุ / วันที่บนบัตรคิว) บน Android 7
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -44,4 +49,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.core:core-ktx:1.16.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }

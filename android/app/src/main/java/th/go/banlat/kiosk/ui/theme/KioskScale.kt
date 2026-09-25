@@ -27,6 +27,11 @@ import androidx.compose.ui.unit.sp
  */
 const val DESIGN_W = 1080f
 const val DESIGN_H = 1920f
+/** ความสูงต่ำสุดที่ layout ยังวางได้ครบ · จอแนวตั้งที่เตี้ยกว่านี้ (เช่น 3:4) จะย่อกรอบ 1080x1920 ทั้งกรอบแทน */
+const val DESIGN_MIN_H = 1600f
+
+/** ความสูงกรอบจริงของจอนี้ (หน่วยออกแบบ) — 1920 บนจอ 9:16 · มากกว่าบนจอที่ยาวกว่า · น้อยกว่าบนจอ 16:10 */
+val LocalDesignHeight = staticCompositionLocalOf { DESIGN_H }
 
 val LocalKioskScale = staticCompositionLocalOf { 1f }
 
@@ -37,20 +42,29 @@ val Int.st: TextUnit @Composable get() = (this * LocalKioskScale.current).sp
 val Float.st: TextUnit @Composable get() = (this * LocalKioskScale.current).sp
 val Double.st: TextUnit @Composable get() = (this * LocalKioskScale.current).sp
 
-/** ครอบทั้งแอปครั้งเดียว: จัดกรอบ 1080x1920 กลางจอ และล็อก fontScale = 1 ไม่ให้ตัวอักษรล้นกรอบ */
+/**
+ * ครอบทั้งแอปครั้งเดียว และล็อก fontScale = 1 ไม่ให้ตัวอักษรล้นกรอบ
+ * Responsive: กว้างเต็มจอเสมอ (1080 หน่วย) แล้วความสูงยืด/หดตามสัดส่วนจอ
+ *  - จอแนวตั้งที่สูง ≥ 1600 หน่วยเมื่อกว้าง 1080 (9:16, 9:19.5, 10:16 …) → เต็มจอ ไม่มีขอบดำ
+ *  - จอที่เตี้ยกว่านั้น (3:4, แนวนอน) → ย่อกรอบ 1080x1920 ทั้งกรอบ วางกลางจอ
+ * แต่ละหน้าอ่านความสูงจริงจาก LocalDesignHeight: หัวจอยึดบน แถบปุ่มยึดล่าง ส่วนกลางกระจายระยะ
+ */
 @Composable
 fun KioskFrame(content: @Composable () -> Unit) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Color(0xFF0E1420)), contentAlignment = Alignment.Center) {
         val d = LocalDensity.current
         val wPx = constraints.maxWidth.toFloat()
         val hPx = constraints.maxHeight.toFloat()
-        val pxPerUnit = minOf(wPx / DESIGN_W, hPx / DESIGN_H)
+        val fill = hPx / wPx >= DESIGN_MIN_H / DESIGN_W
+        val pxPerUnit = if (fill) wPx / DESIGN_W else minOf(wPx / DESIGN_W, hPx / DESIGN_H)
+        val designH = if (fill) hPx / pxPerUnit else DESIGN_H
         val dpPerUnit = pxPerUnit / d.density
         CompositionLocalProvider(
             LocalDensity provides Density(d.density, 1f),
             LocalKioskScale provides dpPerUnit,
+            LocalDesignHeight provides designH,
         ) {
-            Box(Modifier.requiredSize((DESIGN_W * dpPerUnit).dp, (DESIGN_H * dpPerUnit).dp).clipToBounds()) {
+            Box(Modifier.requiredSize((DESIGN_W * dpPerUnit).dp, (designH * dpPerUnit).dp).clipToBounds()) {
                 content()
             }
         }

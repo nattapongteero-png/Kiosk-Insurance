@@ -23,8 +23,8 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   display:flex;flex-direction:column;align-items:center;padding:20px 12px;gap:0}
 
 
-.stage{width:1080px;height:1920px;transform-origin:top center;flex:none}
-.screen{position:relative;width:1080px;height:1920px;overflow:hidden;border-radius:10px;
+.stage{width:1080px;height:var(--H,1920px);transform-origin:top center;flex:none}
+.screen{position:relative;width:1080px;height:var(--H,1920px);overflow:hidden;border-radius:10px;
   background:#EAF2FB url("bg_home.png") center/cover no-repeat;
   box-shadow:0 30px 90px rgba(0,0,0,.5);display:flex;flex-direction:column;color:var(--ink)}
 .screen::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,.86);z-index:0}
@@ -211,7 +211,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .id{display:flex;align-items:center;gap:16px}
 .pp .crest{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;
   background:#fff;border:1.5px solid var(--line);box-shadow:0 10px 30px rgba(20,38,90,.12)}
-.pp .crest img{width:72px;height:72px;object-fit:contain}
+.pp .crest img{width:62px;height:62px;object-fit:contain}   /* โลโก้โรงพยาบาลบ้านลาด (ตัดจากแบนเนอร์ พื้นโปร่งใส) */
 .pp .ttl{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
 .pp .sub{font-size:28px;font-weight:600;letter-spacing:1px;color:var(--blue);height:44px;line-height:44px;white-space:nowrap}
 .pp .clk{text-align:right}
@@ -220,7 +220,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 /* แบบประกันที่แนะนำ */
 /* หัวจอ fix ไว้ 0–208 (ใต้โลโก้ 40 + ส่วนแนะนำเว้นบน 40 = ห่างเนื้อหา 80 เท่าขอบข้าง) · เนื้อหาใต้หัวจอเลื่อนขึ้น-ลงได้ ขอบบนจาง 32px เนื้อหาจึงไม่ถูกตัดเป็นเส้นแข็งใต้หัวจอ */
-.pp .scroll{position:absolute;left:0;right:0;top:496px;bottom:0;overflow-y:auto;overflow-x:hidden;
+.pp .scroll{position:absolute;left:0;right:0;top:550px;bottom:0;overflow-y:auto;overflow-x:hidden;
   scrollbar-width:none;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16px);mask-image:linear-gradient(180deg,transparent 0,#000 16px)}
 .pp .scroll::-webkit-scrollbar{display:none}
@@ -230,13 +230,13 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 /* ผู้ยืนยันตัวตน — Figma node 67:947: แถบขาวเต็มกว้าง padding 48/80 · 2 แถวห่าง 24
    แถว 1: ตรา 88 + ชื่อ/HN (44+44) · แถว 2: 3 คอลัมน์เท่ากันห่าง 24 ป้าย 40 + ค่า 40 (ห่าง 8)
    คงที่ใต้หัวจอ (y208–504) · เลขบัตรปิดไว้เหลือ 3 หลักท้าย เพราะจอตู้อยู่ในที่สาธารณะ */
-.pp .who{position:absolute;left:0;right:0;top:208px;z-index:3;
+.pp .who{position:absolute;left:0;right:0;top:262px;z-index:3;
   display:flex;flex-direction:column;gap:24px;padding:48px var(--gutter)}
 /* พื้นคงที่ผืนเดียวหลังเนื้อหา (ไม่เลื่อน — เลื่อนเฉพาะ content): y208 → ล่างสุดจอ
    ขาวทึบที่มุมโค้งบน → จางจนใสที่ y1024 → กลับเป็นขาวสนิทที่ y1309 แล้วขาวจนสุดจอ */
-.pp .veil{position:absolute;left:0;right:0;top:208px;bottom:0;z-index:0;pointer-events:none;
-  border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.980) 68px,rgba(255,255,255,0.926) 136px,rgba(255,255,255,0.844) 204px,rgba(255,255,255,0.741) 272px,rgba(255,255,255,0.624) 340px,rgba(255,255,255,0.500) 408px,rgba(255,255,255,0.376) 476px,rgba(255,255,255,0.259) 544px,rgba(255,255,255,0.156) 612px,rgba(255,255,255,0.074) 680px,rgba(255,255,255,0.020) 748px,rgba(255,255,255,0.000) 816px,rgba(255,255,255,0.043) 852px,rgba(255,255,255,0.156) 887px,rgba(255,255,255,0.316) 923px,rgba(255,255,255,0.500) 958px,rgba(255,255,255,0.684) 994px,rgba(255,255,255,0.844) 1030px,rgba(255,255,255,0.957) 1065px,rgba(255,255,255,1.000) 1101px) 0 0/100% 1101px no-repeat,
-             linear-gradient(#fff,#fff) 0 1101px/100% calc(100% - 1101px) no-repeat}
+.pp .veil{position:absolute;left:0;right:0;top:262px;bottom:0;z-index:0;pointer-events:none;
+  border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.980) 53px,rgba(255,255,255,0.926) 107px,rgba(255,255,255,0.844) 160px,rgba(255,255,255,0.741) 213px,rgba(255,255,255,0.624) 267px,rgba(255,255,255,0.500) 320px,rgba(255,255,255,0.376) 373px,rgba(255,255,255,0.259) 427px,rgba(255,255,255,0.156) 480px,rgba(255,255,255,0.074) 533px,rgba(255,255,255,0.020) 587px,rgba(255,255,255,0.000) 640px,rgba(255,255,255,0.043) 675px,rgba(255,255,255,0.156) 710px,rgba(255,255,255,0.316) 745px,rgba(255,255,255,0.500) 780px,rgba(255,255,255,0.684) 815px,rgba(255,255,255,0.844) 850px,rgba(255,255,255,0.957) 885px,rgba(255,255,255,1.000) 920px) 0 0/100% 920px no-repeat,
+             linear-gradient(#fff,#fff) 0 920px/100% calc(100% - 920px) no-repeat}
 .pp .who .id{display:flex;align-items:center;gap:16px}
 .pp .who .av{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;
   background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
@@ -259,7 +259,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 /* แถบเลื่อนต้อง overflow เพื่อปัดได้ ซึ่งตัดเงาการ์ดเป็นเหลี่ยม → เผื่อพื้นที่ให้เงา 40 บน/ซ้าย 48 ล่าง
    แล้วขยับกล่องออกไปเท่ากัน การ์ดจึงยังอยู่ที่ (515,106) ตาม Figma · ปัดแล้วการ์ดหายเข้าหลังภาพที่ x475
    ล่างเผื่อ 72 > เงาการ์ด (20+38) และปล่อยให้ล้นลงบนพื้นขาวของส่วนถัดไป เงาจึงไม่ถูกตัดเป็นเส้นที่รอยต่อ */
-.pp .rail{position:absolute;left:475px;right:0;top:34px;height:507px;display:flex;gap:40px;
+.pp .rail{position:absolute;left:475px;right:0;top:34px;height:507px;display:flex;gap:40px;cursor:grab;user-select:none;-webkit-user-drag:none;touch-action:pan-x pan-y;
   overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:40px;
   padding:40px var(--gutter) 72px 40px;scrollbar-width:none}
 .pp .rail::-webkit-scrollbar{display:none}
@@ -267,13 +267,19 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 /* แบบประกันอื่น */
 /* Figma: หัวข้อ y845 (ห่างส่วนแนะนำ 48) · กริดเริ่ม y976 · ท้ายรายการเว้น 80 */
-.pp .more{padding:48px var(--gutter) 248px}   /* ล่างเผื่อแถบปุ่มยกเลิก 208 + 40 ให้การ์ดใบท้ายเลื่อนพ้นแถบ */
+.pp .more{padding:48px var(--gutter) 336px}   /* ล่างเผื่อแถบปุ่ม 288 + 48 · เลื่อนสุดแล้วการ์ดใบท้ายไม่ชิดปุ่ม */
 
 /* แถบปุ่มยกเลิก: fix ล่างจอ ไม่เลื่อนตามเนื้อหา · พื้นขาวไล่ขึ้น 40px ให้การ์ดที่เลื่อนผ่านจางหายใต้แถบ
    ปุ่มสูง 88 กึ่งกลางจอ ขอบบนที่ y1752 แนวเดียวกับปุ่มภาษา/ตั้งค่าของหน้าแรก */
-.pp .foot{position:absolute;left:0;right:0;bottom:0;height:248px;z-index:3;pointer-events:none;
-  display:flex;align-items:flex-end;justify-content:center;padding:0 var(--gutter) 80px;
-  background:linear-gradient(180deg,rgba(255,255,255,0) 0,#fff 40px)}
+.pp .foot{position:absolute;left:0;right:0;bottom:0;height:288px;z-index:3;pointer-events:none;
+  display:flex;align-items:flex-end;justify-content:center;padding:0 var(--gutter) 80px}
+/* พื้นแถบปุ่มแบบกระจกฝ้า สูง 288: ไล่จางนุ่ม 96 แรก (เนื้อหาค่อยๆ จางหายเข้าหาปุ่ม) → ทึบ 24 เหนือปุ่ม → ปุ่ม 88 → ห่างขอบจอ 80
+   เบลอ + ขาว 90–95% (mask ให้ขอบบนกลืน) · เนื้อหาทุกหน้าเว้นล่าง ≥ 288
+   อยู่ใน ::before เพื่อไม่ให้ mask ไปจางปุ่ม · Kotlin (Android 7 เบลอสดไม่ได้) ใช้ขาวโปร่งไล่เฉดชุดเดียวกันแต่ไม่เบลอ */
+.pp .foot::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0,rgba(255,255,255,.3) 32px,rgba(255,255,255,.66) 60px,rgba(255,255,255,.88) 84px,rgba(255,255,255,.93) 96px,rgba(255,255,255,.95) 100%);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 96px);mask-image:linear-gradient(180deg,transparent 0,#000 96px)}
 .pp .cancel{pointer-events:auto;height:88px;border-radius:99px;display:flex;align-items:center;gap:16px;
   padding:0 56px;border:0;cursor:pointer;font:inherit;font-size:28px;font-weight:600;color:var(--ink-muted);
   background:#fff;box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line),0 8px 20px rgba(20,38,90,.08);
@@ -286,7 +292,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .plan{border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);border-radius:24px;
   padding:32px;display:flex;flex-direction:column;gap:8px;
   background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 0 0 1px rgba(191,145,58,.32),0 0 0 2px rgba(255,255,255,.6),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 0 0 2px rgba(255,255,255,.6),
              0 1px 2px rgba(20,38,90,.04),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08);
   transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s cubic-bezier(.2,.8,.2,1)}
 .pp .plan:active{transform:scale(.982);
@@ -309,7 +315,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .plan .top .tag{align-self:center}
 
 /* ---------- หน้าส่งข้อมูล / ส่งสำเร็จ / ส่งนาน (ใต้แถบผู้ยืนยันตัวตน y504) ---------- */
-.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:600px;bottom:248px;z-index:1;
+.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:654px;bottom:288px;z-index:1;
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
 .pp .pane h2{font-size:48px;font-weight:700;line-height:64px}
 .pp .pane p{font-size:28px;line-height:44px;color:var(--ink-muted)}
@@ -328,7 +334,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .apps{width:100%;display:flex;flex-direction:column;gap:16px}
 .pp .app{display:flex;align-items:center;gap:24px;padding:24px 32px;border-radius:24px;text-align:left;
   background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
-  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+  box-shadow:inset 0 1px 0 #fff,0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
 .pp .app .aic{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;
   background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);box-shadow:0 0 0 1.5px rgba(191,145,58,.42)}
 .pp .app .aic svg{width:32px;height:32px;stroke:#A87C2A}
@@ -338,8 +344,6 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   color:#8A6420;background:rgba(191,145,58,.12);border-radius:99px;padding:8px 16px}
 .pp .app .st.done{color:#0F6B51;background:var(--green-050)}
 .pp .app .st svg{width:20px;height:20px;stroke:var(--green)}
-.pp .note-s{display:flex;gap:16px;align-items:flex-start;text-align:left;font-size:22px;line-height:32px;color:var(--ink-muted)}
-.pp .note-s svg{width:32px;height:32px;flex:none;stroke:var(--ink-soft)}
 .pp .rid{font-size:24px;color:var(--ink-soft)}
 .pp .rid b{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.5px}
 .pp .finish{pointer-events:auto;height:88px;min-width:360px;padding:0 56px;border-radius:99px;border:0;cursor:pointer;font:inherit;
@@ -350,12 +354,12 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 
 /* ---------- หน้าสรุปหลังส่งข้อมูล: หัวข้อ + เนื้อหาชิดซ้าย ---------- */
-.pp .pg{position:absolute;left:0;right:0;top:504px;bottom:248px;z-index:1;padding:0 var(--gutter);
+.pp .pg{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter);
   display:flex;flex-direction:column;gap:32px}   /* หัวข้อ → เนื้อหา 32 เท่าหน้าเลือกแบบประกัน */
 .pp .pgb{display:flex;flex-direction:column;gap:24px}
 .pp .psum{display:flex;align-items:center;gap:24px;padding:32px;border-radius:24px;
   background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
-  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+  box-shadow:inset 0 1px 0 #fff,0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
 .pp .psum .lg{position:relative;width:80px;height:80px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;
   background:#fff;box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
 .pp .psum .lg img{position:absolute;inset:12px;width:56px;height:56px;object-fit:contain;background:#fff}
@@ -378,7 +382,8 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .phd h2{font-size:48px;font-weight:700;line-height:68px}
 .pp .phd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);line-height:48px}
 /* modal กำลังส่งข้อมูล */
-.pp .sendov{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:0 var(--gutter);
+/* ขยายเลยขอบจอ 80 ทุกด้าน: backdrop-filter ของ Chrome สะท้อนภาพที่ขอบ จึงให้ขอบสะท้อนอยู่นอกกรอบ (กรอบตัดทิ้ง) */
+.pp .sendov{position:absolute;inset:-80px;z-index:10;display:flex;align-items:center;justify-content:center;padding:80px calc(var(--gutter) + 80px);
   background:rgba(10,25,60,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:ovIn .25s ease-out}
 .pp .sendbox{width:100%;display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;
   padding:64px 56px 56px;border-radius:40px;background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
@@ -387,6 +392,114 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .sendbox .psum{width:100%;text-align:left;margin-top:8px}
 @keyframes ovIn{from{opacity:0}to{opacity:1}}
 @keyframes boxIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+
+/* ---------- หน้ารายละเอียดแบบประกัน: อ่านให้ครบก่อนตัดสินใจส่งข้อมูล ----------
+   เลื่อนได้ใต้ผู้ยืนยันตัวตน (y496) · หัว = การ์ดสรุปแบบ + เบี้ย · ต่อด้วย ความคุ้มครอง / เงื่อนไข / ข้อยกเว้น
+   ระยะ: ส่วนห่างกัน 48 · หัวข้อ → การ์ด 24 · ในการ์ดแถวละ 24 คั่นเส้นบาง · ล่างเผื่อแถบปุ่ม 248 */
+.pp .dt{padding:8px var(--gutter) 336px;display:flex;flex-direction:column;gap:48px}
+.pp .card{border-radius:24px;background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
+  box-shadow:inset 0 1px 0 #fff,0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+.pp .dhero{padding:40px;display:flex;flex-direction:column;gap:32px}
+.pp .dhero .top{display:flex;align-items:center;gap:32px}
+.pp .dhero .lg{position:relative;width:112px;height:112px;border-radius:50%;flex:none;overflow:hidden;display:grid;place-items:center;
+  background:#fff;box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 10px rgba(191,145,58,.06)}
+.pp .dhero .lg img{position:absolute;inset:16px;width:80px;height:80px;object-fit:contain;background:#fff}
+.pp .dhero .lg img.cover{inset:0;width:112px;height:112px;object-fit:cover}
+.pp .dhero .lg b{font-size:28px;color:#A87C2A}
+.pp .dhero .tag{display:inline-block;font-size:22px;font-weight:600;color:#8A6420;background:rgba(191,145,58,.12);
+  border-radius:99px;padding:4px 16px;line-height:32px}
+.pp .dhero h2{font-size:52px;font-weight:700;line-height:68px;margin-top:8px;white-space:nowrap}
+.pp .dhero .co{font-size:26px;color:var(--ink-muted);line-height:36px}
+.pp .dhero .lead{font-size:30px;line-height:44px;font-weight:500}
+.pp .dhero .price{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  padding-top:32px;border-top:1px solid rgba(191,145,58,.24)}
+.pp .dhero .price .k{font-size:26px;color:var(--ink-muted);line-height:36px}
+.pp .dhero .price .k small{display:block;font-size:22px;color:var(--ink-soft);line-height:32px}
+.pp .dhero .price .v{white-space:nowrap;font-size:26px;color:var(--ink-muted)}
+.pp .dhero .price .v strong{font-size:64px;font-weight:700;color:var(--ink);line-height:72px;
+  font-variant-numeric:tabular-nums;margin-right:8px}
+.pp .dsec h3{font-size:40px;font-weight:700;line-height:56px;margin-bottom:24px}
+.pp .rows{padding:8px 40px}
+.pp .rows .r{display:flex;align-items:baseline;justify-content:space-between;gap:32px;padding:24px 0}
+.pp .rows .r + .r{border-top:1px solid rgba(20,38,90,.08)}
+.pp .rows .r .k{font-size:28px;line-height:40px;color:var(--ink)}
+.pp .rows .r .k small{display:block;font-size:22px;line-height:32px;color:var(--ink-soft)}
+.pp .rows .r .v{font-size:28px;line-height:40px;font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pp .bul{padding:32px 40px;display:flex;flex-direction:column;gap:16px}
+.pp .bul li{list-style:none;display:flex;gap:16px;font-size:26px;line-height:40px;color:var(--ink)}
+.pp .bul li::before{content:"";width:10px;height:10px;border-radius:50%;background:#C9A45A;flex:none;margin-top:15px}
+.pp .dnote{display:flex;gap:16px;padding:24px 32px;border-radius:24px;background:rgba(30,123,224,.06);
+  font-size:24px;line-height:36px;color:var(--ink-muted)}
+.pp .dnote svg{width:32px;height:32px;flex:none;stroke:var(--blue);margin-top:2px}
+.pp .dnote b{color:var(--ink)}
+/* แถบปุ่ม 2 ปุ่ม: ย้อนกลับ (รอง) + ส่งข้อมูล (หลัก) ขอบบนปุ่ม y1752 เท่าหน้าอื่น */
+.pp .foot.two{gap:24px}
+.pp .foot > .finish:only-child{flex:1;justify-content:center}   /* ปุ่มหลักเดี่ยว = เต็มความกว้าง (เป้ากดใหญ่) · ปุ่มรองเดี่ยวคงขนาดพอดีข้อความ */
+.pp .foot.two .cancel{justify-content:center;min-width:280px}
+.pp .foot.two .finish{flex:1}
+
+/* โทนสีตามบริษัทประกัน (หน้ารายละเอียด): ใช้สีโลโก้แทนทองเฉพาะจุดเน้น · ปุ่มยังเป็นสีของแอปเสมอ ตัวอักษรเนื้อหายังเป็นสีหมึกเดิมให้อ่านง่าย
+   --br = RGB สีโลโก้ · --brd = สีเข้มสำหรับตัวอักษรบนพื้นอ่อน (ผ่าน contrast 4.5:1) */
+.pp.br .card{--ring:var(--br)}   /* หน้ารายละเอียด: ขอบไล่สีโลโก้บริษัท */
+.pp.br .dhero{position:relative;overflow:hidden;
+  background:linear-gradient(180deg,rgba(var(--br),.10) 0%,rgba(var(--br),.03) 45%,rgba(var(--br),0) 100%),#fff}
+.pp.br .dhero .lg{box-shadow:0 0 0 1.5px rgba(var(--br),.45),0 0 0 10px rgba(var(--br),.08)}
+.pp.br .dhero .tag{color:var(--brd);background:rgba(var(--br),.12)}
+.pp.br .dhero .price{border-top-color:rgba(var(--br),.22)}
+.pp.br .dhero .price .v strong{color:var(--brd)}
+.pp.br .bul li::before{background:rgb(var(--br))}
+.pp.br .dnote{background:rgba(var(--br),.06)}
+.pp.br .dnote svg{stroke:var(--brd)}
+
+/* เต็มจอ (ตู้จริง / มือถือ / แท็บเล็ตแนวตั้ง): ไม่มีขอบดำ มุมโค้ง และเงากรอบตัวอย่าง */
+body.bleed{padding:0;overflow:hidden}
+body.bleed .screen{border-radius:0;box-shadow:none}
+
+/* ขอบการ์ดไล่สีแบบการ์ดเสียบบัตร (ไม่มีประกายวิ่ง): ขอบ 2px เข้มสุดที่มุมซ้ายบน (จุด 14,14) จางลงจนแทบหายที่มุมขวาล่าง
+   ระยะไล่เป็น % ของรัศมีถึงมุมไกลสุด การ์ดเล็กใหญ่จึงไล่สีสัดส่วนเดียวกัน · --ring = RGB สีขอบ (ค่าเริ่มต้นทอง) */
+.pp .plan,.pp .dhero{position:relative}
+.pp .plan::after,.pp .dhero::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;pointer-events:none;
+  /* ขอบโลหะเงา: ชั้นบน = แถบแสงขาวสะท้อน 2 เส้นใกล้มุม · ชั้นล่าง = สีขอบไล่จาง · filter = ขอบเรืองสีเดียวกันบางๆ */
+  background:
+    radial-gradient(circle farthest-corner at 14px 14px,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 3%,
+      rgba(255,255,255,0) 6%,rgba(255,250,235,.95) 10%,rgba(255,255,255,0) 17%,
+      rgba(255,255,255,0) 24%,rgba(255,250,235,.55) 30%,rgba(255,255,255,0) 38%),
+    radial-gradient(circle farthest-corner at 14px 14px,rgba(var(--ring,217,165,70),1) 0,rgba(var(--ring,217,165,70),1) 6.25%,
+      rgba(var(--ring,217,165,70),.55) 19.6%,rgba(var(--ring,217,165,70),.2) 44.6%,rgba(var(--ring,217,165,70),.08) 71.4%,rgba(var(--ring,217,165,70),.02) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  filter:drop-shadow(0 0 2px rgba(var(--ring,217,165,70),.45))}
+
+/* หน้าอื่นนอกจากหน้าเลือกแบบประกัน (รายละเอียด / ส่งสำเร็จ / ส่งนาน): พื้นขาวทั้งหน้าใต้หัวจอ ไม่เห็นภาพพื้นหลัง */
+.pp .veil.full{background:#fff}
+
+/* หน้ารายละเอียด: ขอบเงาสีบริษัทเฉพาะการ์ดบนสุด · การ์ดความคุ้มครอง/เงื่อนไข/ข้อยกเว้น ใช้ขอบทองบางเรียบแบบเดิม */
+.pp .card:not(.dhero){box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+
+/* การ์ดสรุปแบบประกัน + แถวแอป: ขอบทองบางเรียบแบบปกติ (ไม่ใช้ขอบไล่สีเงา) */
+.pp .psum,.pp .app{box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055),0 20px 38px rgba(20,38,90,.08)}
+/* ไอคอนแอปจริง: สี่เหลี่ยมมุมมนแบบไอคอนแอปบนมือถือ ขนาดเท่าวงไอคอนเดิม 64 */
+.pp .app .alg{width:64px;height:64px;border-radius:16px;flex:none;object-fit:cover;
+  box-shadow:0 0 0 1px rgba(20,38,90,.08),0 4px 10px rgba(20,38,90,.12)}
+
+/* หน้าสรุปผล: จัดกึ่งกลาง ไม่กระจุกบนซ้าย — ผู้ใช้ยืนมองระดับสายตา (กลาง–ล่างจอ) ได้โดยไม่ต้องเงยหน้า
+   ไอคอนสถานะใหญ่ 160 → หัวข้อกลาง → การ์ด → รหัสรายการ · ทั้งก้อนอยู่กลางพื้นที่ระหว่างข้อมูลผู้ป่วย (y504) กับแถบปุ่ม */
+.pp .pg{justify-content:center;gap:48px;padding-bottom:40px}
+.pp .pg .phd{display:flex;flex-direction:column;align-items:center;text-align:center}
+.pp .pg .phd .bigic{margin-bottom:32px}
+.pp .pg .rid{text-align:center;margin-top:8px}
+
+/* แบนเนอร์โรงพยาบาล (ชุดเดียวกับหน้าแรก): เต็มกว้าง สูง 262 · ไฟล์ภาพต่อท้องฟ้าแทนเส้นเทา/หญ้าท้ายภาพ (y238+)
+   ส่วนท้ายจาง y196→262 แบบ 1−t^2.2 (คงเข้มช่วงแรก ข้อความ "ระบบลงทะเบียนอัตโนมัติ" ยังชัด แล้วจางเร็วช่วงท้าย) ลงบนหมอกขาว
+   ใต้แบนเนอร์ต่อด้วยฟ้าไล่เฉด: ฟ้าท้ายแบนเนอร์ (178,238,244) → ฟ้าอ่อน → โทนพื้นหลัง แล้วจางหายช้าๆ (y196→1000)
+   หางยาวเพื่อให้ลายหน้าต่างของ bg_home ค่อยๆ โผล่ ไม่เกิดรอยเปลี่ยนข้างการ์ด
+   ภาพแบนเนอร์จางลงบนสีเดียวกับตัวเอง จึงกลืนเนียน ไม่เป็นแถบขาว · กลบเส้นโค้งเพดานของ bg_home ด้วย · อยู่ใต้การ์ด (z0) */
+
+/* หัวจอหน้าใน: แบนเนอร์อยู่เหนือพื้นขาว (veil เริ่ม y262) */
+.bannerFade{position:absolute;left:0;top:196px;width:1080px;height:804px;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(178,238,244,1.000) 0px,rgba(181,238,245,0.991) 20px,rgba(186,239,246,0.974) 40px,rgba(190,240,247,0.961) 60px,rgba(191,240,247,0.956) 80px,rgba(197,240,248,0.943) 100px,rgba(204,241,248,0.925) 121px,rgba(211,241,249,0.909) 141px,rgba(214,241,249,0.900) 161px,rgba(215,241,249,0.891) 181px,rgba(217,241,249,0.864) 201px,rgba(220,241,249,0.826) 221px,rgba(224,242,249,0.787) 241px,rgba(227,242,249,0.755) 261px,rgba(228,242,249,0.740) 281px,rgba(228,242,249,0.731) 302px,rgba(229,242,249,0.701) 322px,rgba(230,242,249,0.657) 342px,rgba(231,242,249,0.606) 362px,rgba(232,243,248,0.554) 382px,rgba(233,243,248,0.508) 402px,rgba(234,243,248,0.474) 422px,rgba(234,243,248,0.460) 442px,rgba(234,243,248,0.452) 462px,rgba(234,243,248,0.427) 482px,rgba(235,243,248,0.390) 502px,rgba(235,243,248,0.346) 523px,rgba(236,244,248,0.300) 543px,rgba(236,244,248,0.255) 563px,rgba(237,244,248,0.217) 583px,rgba(237,244,248,0.191) 603px,rgba(237,244,248,0.180) 623px,rgba(237,244,248,0.174) 643px,rgba(237,244,248,0.158) 663px,rgba(237,244,248,0.134) 683px,rgba(237,244,248,0.106) 704px,rgba(238,244,248,0.076) 724px,rgba(238,244,248,0.047) 744px,rgba(238,244,248,0.023) 764px,rgba(238,244,248,0.006) 784px,rgba(238,244,248,0.000) 804px)}
+.pp .banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:3;display:block;pointer-events:none}   /* ท้ายภาพโปร่งนุ่มอบไว้ในไฟล์ · จางลงบนพื้นขาว */
+.pp .rail img{-webkit-user-drag:none;pointer-events:none}
 </style>
 </head>
 <body>
@@ -397,12 +510,13 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 <script>
 /* ============================================================
    FLOW ตรวจสอบประกันชีวิต/สุขภาพ ที่ KIOSK — เฉพาะส่วน UX/UI
-   ลำดับ: ยินยอม (modal ที่หน้าแรกของตู้) → เลือกแบบประกัน → ส่งข้อมูล FMR/PHR → รับผล
+   ลำดับ: ยินยอม (modal ที่หน้าแรกของตู้) → เลือกแบบประกัน → อ่านรายละเอียด → ส่งข้อมูล FMR/PHR → รับผล
    ============================================================ */
 
 let idx = 0;
 const SCREENS = [
   {id:'select', nav:'2 · เลือกแบบประกัน'},
+  {id:'detail', nav:'2.1 · รายละเอียดแบบประกัน'},
   {id:'submit', nav:'3 · กำลังส่งข้อมูล'},
   {id:'sent',   nav:'4 · ส่งสำเร็จ'},
   {id:'slow',   nav:'4 · ส่งนาน รับผลทางแอป'},
@@ -454,11 +568,12 @@ const maskCid = c => `X-XXXX-XXXXX-${c.slice(10,12)}-${c.slice(12)}`;
    A: File:เมืองไทยประกันชีวิต-01.svg (CC BY-SA 4.0) · B: File:Thai Life Insurance Logo.svg (Public domain)
    C: File:AIA wordmark logo.svg (Public domain)
    fit: 'contain' = โลโก้วางกลางวงบนพื้นขาว · 'cover' = โลโก้พื้นเต็มสี่เหลี่ยมให้เต็มวง
-   ถ้าโหลดรูปไม่ได้ จะแสดงอักษรย่อแทน (onerror ลบรูปทิ้ง) */
+   ถ้าโหลดรูปไม่ได้ จะแสดงอักษรย่อแทน (onerror ลบรูปทิ้ง)
+   br / brd = สีหลักจากโลโก้ (RGB) / สีเข้มสำหรับตัวอักษร ใช้เปลี่ยนโทนหน้ารายละเอียดแบบประกันตามบริษัท */
 const INSURERS = {
-  A:{name:'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)', short:'MTL', logo:'ins_logo_a.png', fit:'contain'},
-  B:{name:'บริษัท ไทยประกันชีวิต จำกัด (มหาชน)',     short:'TL',  logo:'ins_logo_b.png', fit:'cover'},
-  C:{name:'บริษัท เอไอเอ จำกัด',                    short:'AIA', logo:'ins_logo_c.png', fit:'contain', slow:true},   // slow = สาธิตกรณีส่งข้อมูลนาน
+  A:{name:'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)', short:'MTL', logo:'ins_logo_a.png', fit:'contain', br:'226,0,122',  brd:'#B0005F'},
+  B:{name:'บริษัท ไทยประกันชีวิต จำกัด (มหาชน)',     short:'TL',  logo:'ins_logo_b.png', fit:'cover',   br:'0,128,195',  brd:'#005E94'},
+  C:{name:'บริษัท เอไอเอ จำกัด',                    short:'AIA', logo:'ins_logo_c.png', fit:'contain', br:'211,17,69', brd:'#A00D34', slow:true},   // slow = สาธิตกรณีส่งข้อมูลนาน
 };
 const PLANS_REC = [
   {co:'A', tag:'ประกันสุขภาพ', name:'Health Plus',      cov:'ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี', pr:'12,000'},
@@ -482,7 +597,7 @@ const planInfo = () => { const p = [...PLANS_REC, ...PLANS_MORE].find(x => x.nam
 
 /* การ์ดแบบประกัน: โลโก้บริษัท + ป้ายประเภทอยู่แถวบน (ใช้โครงเดียวกันทั้งส่วนแนะนำและแบบประกันอื่น) */
 const planCard = p => `
-  <button class="plan" data-go="submit" data-plan="${p.name}">
+  <button class="plan" data-go="detail" data-plan="${p.name}">
     <div class="top"><span class="ic lg" title="${INSURERS[p.co].name}"><b>${INSURERS[p.co].short}</b><img class="${INSURERS[p.co].fit}" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"></span><span class="tag">${p.tag}</span></div>
     <b>${p.name}</b>
     <span class="cov">${p.cov}</span>
@@ -490,16 +605,11 @@ const planCard = p => `
   </button>`;
 
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
-const ppHead = () => `
-    <div class="band">
-      <div class="id">
-        <div class="crest"><img src="logo_bms.svg" alt="BMS Group"></div>
-        <div><div class="ttl">Smart Hospital Kiosk</div><div class="sub">ระบบลงทะเบียนอัตโนมัติ</div></div>
-      </div>
-      <div class="clk"><div class="d" id="clkDate">—</div><div class="t" id="clkTime">--:--:--</div></div>
-    </div>
+const ppHead = (full = false) => `
+    <img class="banner" src="hdr_banlat.png" alt="โรงพยาบาลบ้านลาด · ระบบลงทะเบียนอัตโนมัติ">
+    <div class="bannerFade" aria-hidden="true"></div>
 
-    <div class="veil"></div>
+    <div class="veil${full ? ' full' : ''}"></div>
     <div class="who">
       <div class="id">
         <span class="av">${svg('user',1.8)}</span>
@@ -544,7 +654,12 @@ const ppFoot = () => `<div class="foot"><button class="finish" data-home>เข�
 const planSum = (plan, co, status) => `<div class="psum">
         <span class="lg"><b>${co.short}</b><img class="${co.fit}" src="${co.logo}" alt="${co.name}" onerror="this.remove()"></span>
         <span class="tx"><b>${plan.name}</b><span>${co.name}</span></span>${status}</div>`;
-const appRow = (name, sub, st) => `<div class="app"><span class="aic">${svg('phone',1.8)}</span>
+/* ไอคอนแอป: หมอพร้อม = ไอคอนจริงจาก Google Play (กระทรวงสาธารณสุข) · MyAtlas ยังไม่มีโลโก้ทางการ ใช้ไอคอนโทรศัพท์ไปก่อน
+   TODO: ขอไฟล์โลโก้ MyAtlas จากทีม BMS แล้วใส่ใน APP_ICON */
+const APP_ICON = {'แอปหมอพร้อม':'app_mohprom.png'};
+const appRow = (name, sub, st) => `<div class="app">${APP_ICON[name]
+          ? `<img class="alg" src="${APP_ICON[name]}" alt="${name}">`
+          : `<span class="aic">${svg('phone',1.8)}</span>`}
         <span class="tx"><b>${name}</b><span>${sub}</span></span>${st}</div>`;
 
 /* ส่งข้อมูล: modal เด้งบนหน้าเลือกแบบประกัน แสดงแบบที่เลือก + สถานะกำลังส่ง แล้วไปหน้าสรุปเอง */
@@ -561,9 +676,9 @@ const sendModal = () => { const {plan, co} = planInfo(); return `
 
 const sentScreen = () => { const {plan, co} = planInfo(); return `
   <div class="pp">
-${ppHead()}
+${ppHead(true)}
     <div class="pg" data-screen="sent">
-      <div class="phd"><h2>ส่งข้อมูลให้บริษัทประกันแล้ว</h2><p>ท่านจะได้รับผลผ่านแอปด้านล่าง</p></div>
+      <div class="phd"><span class="bigic ok">${svg('bigcheck',2.4)}</span><h2>ส่งข้อมูลให้บริษัทประกันแล้ว</h2><p>ท่านจะได้รับผลผ่านแอปด้านล่าง</p></div>
       <div class="pgb">
         ${planSum(plan, co, `<span class="st done">${svg('check',3)} บริษัทได้รับแล้ว</span>`)}
         <div class="apps">
@@ -578,28 +693,92 @@ ${ppFoot()}
 
 const slowScreen = () => { const {plan, co} = planInfo(); return `
   <div class="pp">
-${ppHead()}
+${ppHead(true)}
     <div class="pg" data-screen="slow">
-      <div class="phd"><h2>การส่งข้อมูลใช้เวลานานกว่าปกติ</h2><p>ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป</p></div>
+      <div class="phd"><span class="bigic wait">${svg('clock',1.8)}</span><h2>การส่งข้อมูลใช้เวลานานกว่าปกติ</h2><p>ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป</p></div>
       <div class="pgb">
         ${planSum(plan, co, `<span class="st wait">${svg('clock',2)} กำลังดำเนินการ</span>`)}
         <div class="apps">
           ${appRow('แอปหมอพร้อม','แจ้งเตือนเมื่อส่งข้อมูลเสร็จ','<span class="st">รอแจ้งผล</span>')}
           ${appRow('แอป MyAtlas','แจ้งเตือนและดูรายละเอียดที่ “ประกันของฉัน”','<span class="st">รอแจ้งผล</span>')}
         </div>
-        <div class="note-s">${svg('shield')}<span>การแจ้งเตือนจะไม่แสดงข้อมูลสุขภาพ ท่านต้องยืนยันตัวตนในแอปก่อนจึงจะเห็นรายละเอียด</span></div>
         <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
       </div>
     </div>
 ${ppFoot()}
   </div>`; };
 
+
+/* ---------- รายละเอียดแบบประกัน (ข้อมูลสมมติสำหรับต้นแบบ) ----------
+   TODO(integration): รับจาก API ของบริษัทประกันผ่านระบบกลาง BMS */
+const TERMS = {
+  'ประกันสุขภาพ':    {age:'แรกเกิด 15 วัน – 70 ปี', term:'1 ปี ต่ออายุได้ถึง 99 ปี', wait:'30 วัน (โรคทั่วไป) · 120 วัน (โรคเฉพาะ)', pay:'รายปี / รายเดือน',
+                     ex:['โรคหรืออาการที่เป็นมาก่อนทำประกัน (ต้องแถลงสุขภาพ)','การรักษาเพื่อความงามหรือศัลยกรรมตกแต่ง','การตั้งครรภ์ การคลอดบุตร และภาวะแทรกซ้อน','การบาดเจ็บจากการใช้สารเสพติดหรือแอลกอฮอล์']},
+  'ประกันชีวิต':     {age:'1 เดือน – 65 ปี', term:'ตามระยะของแบบประกัน', wait:'ไม่มี (คุ้มครองทันทีเมื่ออนุมัติ)', pay:'รายปี / ราย 6 เดือน',
+                     ex:['การฆ่าตัวตายภายใน 1 ปีแรกนับจากวันเริ่มสัญญา','การถูกฆาตกรรมโดยผู้รับประโยชน์','การปกปิดข้อมูลสุขภาพที่ควรแถลง']},
+  'ประกันอุบัติเหตุ': {age:'6 – 70 ปี', term:'1 ปี ต่ออายุได้', wait:'ไม่มี (คุ้มครองทันที)', pay:'รายปี',
+                     ex:['การบาดเจ็บขณะเล่นกีฬาอันตราย เช่น ดำน้ำลึก กระโดดร่ม','การบาดเจ็บขณะเมาสุราหรือใช้สารเสพติด','สงคราม การจลาจล การก่อการร้าย']},
+  'ประกันโรคร้ายแรง': {age:'15 วัน – 65 ปี', term:'1 ปี ต่ออายุได้ถึง 85 ปี', wait:'90 วัน นับจากวันเริ่มสัญญา', pay:'รายปี',
+                     ex:['โรคร้ายแรงที่ตรวจพบภายในระยะเวลารอคอย','โรคที่เป็นมาก่อนทำประกัน','การติดเชื้อ HIV หรือโรคเอดส์']},
+};
+const COVER = {
+  'Health Plus':         [['ค่ารักษาผู้ป่วยใน (IPD)','สูงสุดต่อปี','500,000 บาท'],['ค่าห้องและค่าอาหาร','ต่อวัน สูงสุด 365 วัน','5,000 บาท'],['ค่าผ่าตัดและหัตถการ','','ตามจ่ายจริง'],['ค่ารักษาผู้ป่วยนอกหลังออกจากโรงพยาบาล','ภายใน 30 วัน','จ่ายจริง']],
+  'Health Care Lite':    [['ค่ารักษาผู้ป่วยใน (IPD)','สูงสุดต่อปี','200,000 บาท'],['ค่าห้องและค่าอาหาร','ต่อวัน สูงสุด 180 วัน','2,500 บาท'],['ค่าผ่าตัดและหัตถการ','ต่อครั้ง','50,000 บาท']],
+  'Life Protect 20':     [['ทุนประกันชีวิต','กรณีเสียชีวิตทุกกรณี','1,000,000 บาท'],['ทุพพลภาพถาวรสิ้นเชิง','','1,000,000 บาท'],['ระยะเวลาคุ้มครอง','','20 ปี'],['ระยะเวลาชำระเบี้ย','','10 ปี']],
+  'Cancer Care':         [['ตรวจพบมะเร็งระยะเริ่มต้น','จ่ายครั้งเดียว','250,000 บาท'],['ตรวจพบมะเร็งระยะลุกลาม','จ่ายครั้งเดียว','1,000,000 บาท'],['ค่ายาเคมีบำบัด / รังสีรักษา','','ตามจ่ายจริง']],
+  'Accident Shield':     [['ค่ารักษาจากอุบัติเหตุ','ต่อครั้ง','100,000 บาท'],['เสียชีวิต / ทุพพลภาพจากอุบัติเหตุ','','500,000 บาท'],['ชดเชยรายได้ระหว่างนอนโรงพยาบาล','ต่อวัน','1,000 บาท']],
+  'Critical Illness 30': [['ตรวจพบโรคร้ายแรง 30 โรค','จ่ายเงินก้อนครั้งเดียว','1,000,000 บาท'],['ตรวจพบโรคร้ายแรงระยะเริ่มต้น','','250,000 บาท'],['ยกเว้นเบี้ยหลังตรวจพบ','','มี']],
+  'Saving Life 15':      [['ทุนประกันชีวิต','','300,000 บาท'],['เงินคืนระหว่างสัญญา','ทุก 3 ปี','2% ของทุน'],['เงินครบกำหนดสัญญา','ปีที่ 15','120% ของทุน'],['ลดหย่อนภาษี','ตามที่กฎหมายกำหนด','สูงสุด 100,000 บาท']],
+  'OPD Care':            [['ค่ารักษาผู้ป่วยนอก (OPD)','ต่อครั้ง','1,500 บาท'],['จำนวนครั้งที่คุ้มครอง','ต่อปี','30 ครั้ง'],['ค่ายาและเวชภัณฑ์','','รวมในวงเงินต่อครั้ง']],
+  'Senior Health 60+':   [['ค่ารักษาผู้ป่วยใน (IPD)','สูงสุดต่อปี','300,000 บาท'],['ค่าห้องและค่าอาหาร','ต่อวัน','3,000 บาท'],['ตรวจสุขภาพประจำปี','','1 ครั้ง/ปี']],
+  'Life Care 99':        [['ทุนประกันชีวิต','คุ้มครองถึงอายุ 99 ปี','500,000 บาท'],['เงินครบกำหนดสัญญา','เมื่ออายุ 99 ปี','500,000 บาท'],['ระยะเวลาชำระเบี้ย','','20 ปี']],
+  'Family Health':       [['ค่ารักษาผู้ป่วยใน (IPD)','ต่อคน ต่อปี','300,000 บาท'],['จำนวนสมาชิกที่คุ้มครอง','','สูงสุด 4 คน'],['ค่าห้องและค่าอาหาร','ต่อวัน','3,000 บาท'],['ค่ารักษาผู้ป่วยนอก (OPD)','ต่อครั้ง','1,000 บาท']],
+};
+const row = (k, sub, v) => `<div class="r"><span class="k">${k}${sub ? `<small>${sub}</small>` : ''}</span><span class="v">${v}</span></div>`;
+
+const detailScreen = () => { const {plan, co} = planInfo(); const t = TERMS[plan.tag]; return `
+  <div class="pp br" style="--br:${co.br};--brd:${co.brd}">
+${ppHead(true)}
+    <div class="scroll"><div class="dt" data-screen="detail">
+      <section class="card dhero">
+        <div class="top">
+          <span class="lg"><b>${co.short}</b><img class="${co.fit}" src="${co.logo}" alt="${co.name}" onerror="this.remove()"></span>
+          <div><span class="tag">${plan.tag}</span><h2>${plan.name}</h2><div class="co">${co.name}</div></div>
+        </div>
+        <div class="lead">${plan.cov}</div>
+        <div class="price">
+          <span class="k">เบี้ยประกันเริ่มต้น<small>ประมาณการสำหรับอายุ ${ageYMD(PATIENT.dob).split(' ')[0]} ปี</small></span>
+          <span class="v"><strong>${plan.pr}</strong>บาท/ปี</span>
+        </div>
+      </section>
+
+      <section class="dsec"><h3>ความคุ้มครอง</h3>
+        <div class="card rows">${(COVER[plan.name] || []).map(r => row(...r)).join('')}</div>
+      </section>
+
+      <section class="dsec"><h3>เงื่อนไขสำคัญ</h3>
+        <div class="card rows">
+          ${row('อายุที่รับประกัน','',t.age)}${row('ระยะเวลาคุ้มครอง','',t.term)}${row('ระยะเวลารอคอย','',t.wait)}${row('การชำระเบี้ย','',t.pay)}
+        </div>
+      </section>
+
+      <section class="dsec"><h3>ข้อยกเว้นที่ควรทราบ</h3>
+        <ul class="card bul">${t.ex.map(x => `<li>${x}</li>`).join('')}</ul>
+      </section>
+
+      <div class="dnote">${svg('info',2)}<span>ข้อมูลนี้เป็น<b>สรุปเบื้องต้น</b> เงื่อนไขจริงเป็นไปตามกรมธรรม์ เมื่อกดส่ง ระบบจะส่งข้อมูลสุขภาพตามที่ท่านยินยอมให้ <b>${co.name}</b> เท่านั้น เพื่อพิจารณาเบี้ยและการรับประกัน</span></div>
+    </div></div>
+
+    <div class="foot two"><button class="cancel" data-go="select">ย้อนกลับ</button><button class="finish" data-go="submit">ส่งข้อมูลเพื่อขอพิจารณา</button></div>
+  </div>`; };
+
 /* ---------- ประกอบเป็นหน้าจอ ---------- */
 const VIEW = {
   /* ความยินยอมเกิดที่หน้าแรกของตู้แล้ว (welcome_v2.html) ขั้นที่ 1 จึงแสดงเป็นเสร็จแล้ว */
   select:   () => selectScreen(),
+  detail:   () => detailScreen(),
 
-  submit: () => selectScreen().replace(/<\/div>\s*$/, sendModal() + '\n  </div>'),
+  submit: () => detailScreen().replace(/<\/div>\s*$/, sendModal() + '\n  </div>'),
   sent:   () => sentScreen(),
   slow:   () => slowScreen(),
 };
@@ -627,9 +806,9 @@ function wire(){
     el.onclick = () => { if (el.disabled) return; if (el.dataset.plan) CHOSEN = el.dataset.plan; render(el.dataset.go); };
   });
 
-  /* ออกจากบริการ กลับหน้าแรกของตู้ */
+  /* ออกจาก flow ประกัน → ระบบลงทะเบียน (หน้าเลือกบริการ) */
   scr.querySelectorAll('[data-home]').forEach(el => {
-    el.onclick = () => { if (!el.disabled) location.href = 'welcome_v2.html'; };
+    el.onclick = () => { if (!el.disabled) location.href = 'services.html' + location.search; };   /* ไปที่ระบบลงทะเบียน (เลือกบริการ) */
   });
 
   scr.querySelectorAll('[data-radio]').forEach(el => {
@@ -666,6 +845,30 @@ function wire(){
 
   /* หน้าส่งข้อมูล: ส่งเร็ว → หน้าส่งสำเร็จ · บริษัทที่ตอบช้า → รอเกินเกณฑ์แล้วแจ้งให้รับผลทางแอป */
   /* พื้นที่เลื่อน: ใส่คลาส scrolled เมื่อเลื่อนลงจากบนสุด เพื่อขยายช่วงจางขอบบน */
+  /* แถบการ์ดแนะนำ: ลากด้วยเมาส์/นิ้วซ้าย-ขวาได้ (บนคอมพิวเตอร์ overflow แนวนอนลากด้วยเมาส์ไม่ได้เอง)
+     ระหว่างลากปิด snap ชั่วคราว · ปล่อยแล้วดีดเข้าการ์ดใบใกล้สุด · ลากเกิน 6px = ไม่นับเป็นการแตะเลือกการ์ด */
+  scr.querySelectorAll('.pp .rail').forEach(rail => {
+    let x0 = 0, s0 = 0, moved = false, down = false;
+    rail.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; down = true; moved = false; x0 = e.clientX; s0 = rail.scrollLeft; });
+    addEventListener('pointermove', e => {
+      if (!down) return;
+      const dx = (e.clientX - x0) / (parseFloat(getComputedStyle(document.getElementById('stage')).transform.split(',')[3]) || 1);
+      if (Math.abs(dx) > 6 && !moved){ moved = true; rail.style.scrollSnapType = 'none'; rail.style.cursor = 'grabbing'; }
+      if (moved) rail.scrollLeft = s0 - dx;
+    });
+    addEventListener('pointerup', () => {
+      if (!down) return; down = false; rail.style.cursor = '';
+      if (moved){
+        const cards = [...rail.querySelectorAll('.plan')], pad = 40;
+        const target = cards.map(c => c.offsetLeft - pad).reduce((a, b) => Math.abs(b - rail.scrollLeft) < Math.abs(a - rail.scrollLeft) ? b : a, 0);
+        rail.scrollTo({left: target, behavior: 'smooth'});
+        setTimeout(() => { rail.style.scrollSnapType = ''; }, 400);
+      }
+    });
+    rail.addEventListener('click', e => { if (moved){ e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+    /* ล้อเมาส์แนวตั้งบนแถบ = เลื่อนแนวนอน */
+    rail.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); rail.scrollBy({left: e.deltaY, behavior: 'smooth'}); } }, {passive: false});
+  });
   const sc = scr.querySelector('.pp .scroll');
   if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
 
@@ -679,11 +882,19 @@ function wire(){
 }
 
 
+/* Responsive: จอแนวตั้งที่สูง ≥ 1600 เมื่อกว้าง 1080 (ตู้ 9:16, มือถือ, แท็บเล็ต 10:16) → เต็มจอ ไม่มีกรอบ
+   ความสูงกรอบ (--H) ยืด/หดตามจอ: หัวจอยึดบน แถบปุ่มยึดล่าง ส่วนกลางกระจายระยะ
+   จอที่เตี้ยกว่านั้น (จอคอมแนวนอน, 3:4) → แสดงกรอบตัวอย่าง 1080x1920 ย่อพอดีจอเหมือนเดิม */
 function fit(){
-  const s = Math.min((innerWidth - 40) / 1080, (innerHeight - 40) / 1920);
   const st = document.getElementById('stage');
+  const bleed = innerHeight / innerWidth >= 1600 / 1080;
+  document.body.classList.toggle('bleed', bleed);
+  const s = bleed ? innerWidth / 1080 : Math.min((innerWidth - 40) / 1080, (innerHeight - 40) / 1920);
+  const H = bleed ? innerHeight / s : 1920;
+  st.style.setProperty('--H', H + 'px');
+  st.style.setProperty('--mid', (208 + Math.max(0, H - 1464) * 208 / 456) + 'px');   /* y การ์ดเสียบบัตร: 416 บนจอ 1920 */
   st.style.transform = `scale(${s})`;
-  st.style.height = (1920 * s) + 'px';
+  st.style.height = (H * s) + 'px';
 }
 
 /* ---------- นาฬิกาเรียลไทม์ มุมขวาบน ---------- */
@@ -691,7 +902,7 @@ const TH_MON = ['มกราคม','กุมภาพันธ์','มีน
                 'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 function tickClock(){
   const dt = document.getElementById('clkDate');
-  if (!dt) return;
+  if (!dt) return;   /* หน้าในใช้แบนเนอร์ ไม่มีนาฬิกา */
   const d = new Date(), p = n => String(n).padStart(2,'0');
   dt.textContent = `${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear() + 543}`;
   document.getElementById('clkTime').textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
@@ -717,5 +928,6 @@ if (['localhost','127.0.0.1'].includes(location.hostname)) {
   }, 1000);
 }
 </script>
+<script src="idle.js"></script>
 </body>
 </html>

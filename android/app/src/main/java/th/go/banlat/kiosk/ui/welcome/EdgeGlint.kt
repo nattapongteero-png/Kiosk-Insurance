@@ -59,6 +59,13 @@ fun EdgeGlint(clock: State<Float>, modifier: Modifier) {
                 0f to Color(0xFFE2AE4C), 70f / 1120f to Color(0xFFD9A546), 220f / 1120f to Color(0x73D6A850),
                 500f / 1120f to Color(0x29D6A850), 800f / 1120f to Color(0x0FD6A850), 1f to Color(0x00D6A850),
                 center = Offset(14f * u, 14f * u), radius = 1120f * u))
+            // แสงขาวสะท้อน 2 แถบใกล้มุม (ขอบโลหะเงา ชุดเดียวกับการ์ดหน้าประกัน) รัศมี = ระยะถึงมุมไกลสุด
+            val far = kotlin.math.hypot(size.width - 14f * u, size.height - 14f * u)
+            ring(2f * u, 48f * u, Brush.radialGradient(
+                0f to Color.White.copy(alpha = .55f), .03f to Color.Transparent, .06f to Color.Transparent,
+                .10f to Color(0xF2FFFAEB), .17f to Color.Transparent, .24f to Color.Transparent,
+                .30f to Color(0x8CFFFAEB), .38f to Color.Transparent, 1f to Color.Transparent,
+                center = Offset(14f * u, 14f * u), radius = far))
         }
         // ประกายวิ่ง — linear-gradient(135deg) ตำแหน่ง g ตามแนวทแยง แล้วจำกัดอยู่รอบมุมด้วย radial mask (ชั้นแยก)
         Canvas(Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {

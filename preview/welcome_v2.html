@@ -24,8 +24,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   display:flex;flex-direction:column;align-items:center;padding:20px 12px;gap:0}
-.stage{width:1080px;height:1920px;transform-origin:top center;flex:none}
-.screen{position:relative;width:1080px;height:1920px;overflow:hidden;border-radius:10px;
+.stage{width:1080px;height:var(--H,1920px);transform-origin:top center;flex:none}
+.screen{position:relative;width:1080px;height:var(--H,1920px);overflow:hidden;border-radius:10px;
   background:#EAF2FB url("bg_home.png") center/cover no-repeat;
   box-shadow:0 30px 90px rgba(0,0,0,.5);display:flex;flex-direction:column;color:var(--ink)}
 
@@ -37,18 +37,21 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .crest{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;
   overflow:hidden;background:#fff;border:1.5px solid var(--glass-border);
   box-shadow:0 10px 30px rgba(20,38,90,.12)}
-.crest img{width:72px;height:72px;object-fit:contain}
+.crest img{width:62px;height:62px;object-fit:contain}   /* โลโก้โรงพยาบาลบ้านลาด (ตัดจากแบนเนอร์ พื้นโปร่งใส) */
 .brand h1{font-size:40px;font-weight:700;color:var(--ink);height:44px;line-height:44px;white-space:nowrap}
 .brand .en{font-size:28px;letter-spacing:1px;color:var(--blue);font-weight:600;
   height:44px;line-height:44px;white-space:nowrap}
-.clockbox{position:absolute;right:var(--gutter);top:80px;text-align:right;z-index:2}
-.clockbox .d{font-size:28px;color:var(--ink-muted);font-weight:500;height:44px;line-height:44px}
-.clockbox .t{font-size:46px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
-  letter-spacing:1px;height:44px;line-height:44px}
+/* แบนเนอร์หน้าแรก: เต็มกว้าง สูง 262 · ความทึบอบในไฟล์: ทึบถึง y222 (ตัวหนังสือ/โลโก้ชัดเต็ม) แล้วโปร่งนุ่ม (smootherstep) จนเป็น 0 ที่ขอบล่าง
+   ไม่มีชั้นสีรอง — ส่วนล่างของแบนเนอร์ละลายลงบนภาพพื้นหลังโดยตรง */
+.banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:2;display:block;pointer-events:none}
+/* ชั้นไล่สีหลังแบนเนอร์ (container แยก อยู่ใต้แบนเนอร์): เริ่มจากสีฟ้าท้ายแบนเนอร์ ทึบถึง y200 (ซ่อนหลังแบนเนอร์)
+   แล้วจางนุ่ม (smootherstep) พร้อมอ่อนลงเข้าโทนพื้นหลัง จนเป็น 0 ที่ y600 · แบนเนอร์โปร่งลงบนชั้นนี้จึงต่อกันเนียน */
+.bannerFade{position:absolute;left:0;top:0;width:1080px;height:600px;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(176,236,244,1.000) 0px,rgba(176,236,244,1.000) 15px,rgba(176,236,244,1.000) 30px,rgba(176,236,244,1.000) 45px,rgba(176,236,244,1.000) 60px,rgba(176,236,244,1.000) 75px,rgba(176,236,244,1.000) 90px,rgba(176,236,244,1.000) 105px,rgba(176,236,244,1.000) 120px,rgba(176,236,244,1.000) 135px,rgba(176,236,244,1.000) 150px,rgba(176,236,244,1.000) 165px,rgba(176,236,244,1.000) 180px,rgba(176,236,244,1.000) 195px,rgba(176,236,244,1.000) 210px,rgba(176,236,244,0.998) 225px,rgba(176,236,244,0.991) 240px,rgba(177,236,244,0.979) 255px,rgba(178,236,244,0.959) 270px,rgba(179,236,244,0.932) 285px,rgba(181,236,244,0.896) 300px,rgba(183,237,244,0.853) 315px,rgba(186,237,245,0.802) 330px,rgba(189,237,245,0.745) 345px,rgba(192,237,245,0.683) 360px,rgba(195,238,245,0.616) 375px,rgba(199,238,245,0.547) 390px,rgba(202,238,246,0.477) 405px,rgba(206,238,246,0.407) 420px,rgba(209,239,246,0.339) 435px,rgba(212,239,246,0.275) 450px,rgba(215,239,246,0.216) 465px,rgba(218,239,247,0.163) 480px,rgba(220,240,247,0.117) 495px,rgba(222,240,247,0.079) 510px,rgba(224,240,247,0.049) 525px,rgba(225,240,247,0.027) 540px,rgba(225,240,247,0.012) 555px,rgba(226,240,247,0.004) 570px,rgba(226,240,247,0.000) 585px,rgba(226,240,247,0.000) 600px)}
 
 
 /* ---- กรอบขาว (66,667) กว้าง 948 ให้ขอบซ้าย-ขวาเท่ากันที่ 66 ---- */
-.panelCard{position:absolute;left:var(--gutter);top:416px;width:920px;height:704px;z-index:1;
+.panelCard{position:absolute;left:var(--gutter);top:var(--mid,445px);width:920px;height:704px;z-index:1;
   border-radius:48px;overflow:hidden;
   /* ขาวด้านบน (หัวข้อ) ไล่ลงเป็นฟ้าอ่อนด้านล่าง ให้กลืนกับลายหลังบัตร (≈#D5E6F5) เป็นแผ่นเดียวกัน
      ปลายล่าง #EEF3F9 ยังสว่างกว่าลาย บัตรประชาชน (#D3E5F5→#E8F2FB) มีขอบน้ำเงินและเงาจึงไม่จมพื้น */
@@ -66,12 +69,16 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
    จังหวะผูกกับแอนิเมชันเสียบบัตร (insert 7s alternate = รอบละ 14 วิ · บัตรเข้าสุดที่วินาที 5.04 = 36%)
    ประกายจึงเล่นหลังบัตรเสียบเข้าช่องแล้ว · ทั้งสองแอนิเมชันเริ่มพร้อมกันตอนโหลดหน้า จึงตรงจังหวะกันตลอด */
 @property --glint{syntax:'<length>';inherits:false;initial-value:-140px}
-.edgeGlints{position:absolute;left:var(--gutter);top:416px;width:920px;height:704px;z-index:2;pointer-events:none}
+.edgeGlints{position:absolute;left:var(--gutter);top:var(--mid,445px);width:920px;height:704px;z-index:2;pointer-events:none}
 .edgeGlints .ring{position:absolute;inset:0;border-radius:48px;padding:2px;
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
           mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 .edgeGlints .ring.base{
-  background:radial-gradient(circle at 14px 14px,#E2AE4C 0,#D9A546 70px,rgba(214,168,80,.45) 220px,
+  /* ชั้นบน = แถบแสงขาวสะท้อน 2 เส้นใกล้มุม (ขอบโลหะเงา ชุดเดียวกับการ์ดหน้าประกัน) · ชั้นล่าง = ทองไล่จาง */
+  background:radial-gradient(circle farthest-corner at 14px 14px,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 3%,
+      rgba(255,255,255,0) 6%,rgba(255,250,235,.95) 10%,rgba(255,255,255,0) 17%,
+      rgba(255,255,255,0) 24%,rgba(255,250,235,.55) 30%,rgba(255,255,255,0) 38%),
+    radial-gradient(circle at 14px 14px,#E2AE4C 0,#D9A546 70px,rgba(214,168,80,.45) 220px,
                              rgba(214,168,80,.16) 500px,rgba(214,168,80,.06) 800px,rgba(214,168,80,0) 1120px);
   filter:drop-shadow(0 0 3px rgba(255,210,120,.4))}
 .edgeGlints .corner{position:absolute;inset:0;
@@ -105,21 +112,49 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .panelCard .wm img{position:absolute;left:-77px;top:100px;width:760px;height:760px}
 .panelCard .wm img.flip{left:683px;transform:scaleX(-1)}
 .copy h2{font-size:72px;font-weight:700;line-height:88px;color:var(--ink);letter-spacing:-1px;white-space:nowrap}
-.copy .rule{width:88px;height:6px;border-radius:3px;margin:32px 0 32px;
+.copy .rule{width:88px;height:6px;border-radius:3px;margin:24px 0 24px;
   background:linear-gradient(90deg,#B4780C 0%,#E0A93A 55%,#CC9017 100%);
   box-shadow:0 2px 8px rgba(204,144,23,.30)}
 .copy p{font-size:46px;font-weight:500;line-height:64px;color:#5B6B8A;white-space:nowrap}
 /* ภาพชิปแทนคำว่า "ชิปสีทอง" · สี่เหลี่ยมผืนผ้า 144×104 แยกบรรทัดของตัวเอง */
-.copy .chipIco{display:block;width:144px;height:104px;margin:16px 0;
+.copy .chipIco{display:block;width:144px;height:104px;margin:8px 0;
   filter:drop-shadow(0 4px 8px rgba(138,106,32,.28))}
 
+/* ปุ่มอ่านบัตร: เสียบบัตรแล้วกดเพื่อสั่งอ่าน (ตามตู้เดิม) · ปุ่มหลักสีกรมท่า ชิดใต้คำอธิบาย ใกล้ช่องเสียบบัตร */
+.readBtn{display:inline-flex;align-items:center;justify-content:center;margin-top:24px;height:112px;min-width:340px;padding:0 56px;border:0;border-radius:99px;cursor:pointer;
+  font:inherit;font-size:40px;font-weight:700;color:#fff;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);
+  box-shadow:0 10px 24px rgba(20,38,90,.28),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .15s}
+.readBtn:active{transform:scale(.97)}
+
+/* แจ้งเตือนอ่านบัตรไม่ได้ (ไม่พบบัตร / อ่านไม่สำเร็จ) — กล่องไข่มุกขอบทองแบบ modal ความยินยอม · ไอคอนวงอำพัน */
+.alertOv{position:absolute;inset:0;z-index:7;display:flex;align-items:center;justify-content:center;padding:0 100px;
+  background:rgba(10,25,60,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:ovIn .25s ease-out}
+.alertOv[hidden]{display:none}
+.alertBox{width:100%;padding:64px 56px 48px;border-radius:40px;display:flex;flex-direction:column;align-items:center;text-align:center;color:var(--ink);
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
+  box-shadow:0 0 0 1px rgba(191,145,58,.32),0 40px 100px rgba(6,20,50,.35);animation:boxIn .35s cubic-bezier(.2,.8,.2,1)}
+.alertBox .aic{width:136px;height:136px;border-radius:50%;display:grid;place-items:center;margin-bottom:32px;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FFF8EE 55%,#FCEBD3 100%);
+  box-shadow:0 0 0 2px rgba(180,83,9,.35),0 0 0 14px rgba(180,83,9,.06),0 18px 40px rgba(120,60,10,.12)}
+.alertBox .aic svg{width:68px;height:68px;stroke:#B45309}
+.alertBox h2{font-size:44px;font-weight:700;line-height:60px}
+.alertBox p{margin-top:16px;font-size:38px;line-height:62px;color:var(--ink-muted)}
+.alertBox p b{color:var(--ink)}
+.alertBox p .chipIn{display:inline-block;width:76px;height:55px;vertical-align:-14px;margin:0 2px;filter:drop-shadow(0 2px 4px rgba(138,106,32,.28))}   /* รูปชิปแทนคำว่า "ชิป" */
+.alertBox .aFoot{display:flex;gap:24px;width:100%;margin-top:48px}
+.alertBox .aFoot button{flex:1;height:96px;border-radius:99px;font:inherit;font-size:30px;font-weight:700;cursor:pointer}
+.alertBox .aFoot .ghost{flex:0 0 auto;min-width:280px;padding:0 32px;background:#fff;border:0;color:var(--ink-muted);box-shadow:0 0 0 2px #DCE4EE}
+.alertBox .aFoot .pri{border:0;color:#fff;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);box-shadow:0 10px 24px rgba(20,38,90,.28)}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+@keyframes boxIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+
 /* ---- "หรือ" — เว้น 96 จากกรอบขาว และ 96 ถึงปุ่ม ---- */
-.orRow{position:absolute;left:0;right:0;top:1216px;height:40px;display:flex;align-items:center;justify-content:center;gap:24px;z-index:2}
-.orRow i{width:170px;height:1px;flex:none;background:rgba(20,38,90,.30)}
+.orRow{position:absolute;left:0;right:0;top:calc(var(--mid,445px) + 788px);height:40px;display:flex;align-items:center;justify-content:center;gap:24px;z-index:2}
+.orRow i{width:170px;height:2px;border-radius:1px;flex:none;background:rgba(20,38,90,.28)}   /* 2px: ย่อจอแล้วไม่หาย */
 .orRow span{font-size:24px;color:var(--ink-muted);font-weight:500;letter-spacing:.6px;flex:none}
 
 /* ---- ปุ่มทางเลือก: เต็มความกว้างใช้งาน 66..1014 เว้นกลาง 24 ---- */
-.optRow{position:absolute;left:var(--gutter);right:var(--gutter);top:1352px;display:flex;gap:24px;z-index:2}
+.optRow{position:absolute;left:var(--gutter);right:var(--gutter);top:calc(var(--mid,445px) + 912px);display:flex;gap:24px;z-index:2}
 .opt{flex:1;min-width:0;height:152px;border-radius:32px;
   border:0;cursor:pointer;font:inherit;text-align:left;display:flex;align-items:center;gap:24px;
   padding:0 32px;
@@ -144,9 +179,16 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .opt .ic svg{width:42px;height:42px;stroke:#A87C2A}
 .opt b{display:block;font-size:30px;font-weight:700;color:var(--ink);line-height:1.2;white-space:nowrap}
 .opt span{display:block;font-size:22px;color:var(--ink-muted);margin-top:4px;white-space:nowrap}
+/* 3 ปุ่มเรียงแถวเดียว: ไอคอนบน ชื่อ + คำอธิบายล่าง จัดกลาง */
+.optRow.three .opt{height:204px;   /* เว้นบน-ล่างในปุ่ม ~22 · จอเตี้ยสุด 1600 ยังห่างปุ่มภาษา 20 */
+  flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:0 12px;text-align:center}
+.optRow.three .opt .ic{width:76px;height:76px}
+.optRow.three .opt .ic svg{width:38px;height:38px}
+.optRow.three .opt b{font-size:28px;line-height:36px;margin-top:4px}
+.optRow.three .opt > span:last-child{font-size:21px;margin-top:0}
 
 /* ---- ปุ่มตั้งค่าระบบ 88x88 มุมขวาล่าง ขอบขวา 66 เท่าขอบซ้ายของปุ่มภาษา ---- */
-.sysBtn{position:absolute;right:var(--gutter);top:1752px;width:88px;height:88px;border-radius:50%;z-index:3;
+.sysBtn{position:absolute;right:var(--gutter);top:calc(var(--H,1920px) - 168px);width:88px;height:88px;border-radius:50%;z-index:3;
   border:1.5px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(14px);
   cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 30px rgba(20,38,90,.14);
   transition:transform .14s}
@@ -278,15 +320,19 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .kpSheet .sh p{font-size:23px;color:var(--cs-muted);margin-top:6px}
 .kpSheet .sb{padding:26px 46px 32px;display:flex;flex-direction:column;gap:22px}
 
-/* สลับประเภทเลข — รางฝังลึก ปุ่มที่เลือกเป็นน้ำเงินไล่สีเหมือนปุ่มภาษา */
-.kpMode{display:flex;gap:10px;border-radius:99px;padding:9px;
-  background:linear-gradient(180deg,#E7EFF9,#F2F7FC);
-  box-shadow:inset 0 2px 6px rgba(20,38,90,.12), 0 1px 0 rgba(255,255,255,.9)}
-.kpMode button{flex:1;font:inherit;font-size:27px;font-weight:600;color:var(--cs-muted);background:transparent;
-  border:0;border-radius:99px;padding:18px 0;cursor:pointer;transition:.2s}
-.kpMode button[aria-pressed="true"]{color:#fff;
-  background:linear-gradient(135deg,#5FB2FF,#1E7BE0 48%,#0D5BC6);
-  box-shadow:0 8px 20px rgba(30,123,224,.34), inset 0 1px 0 rgba(255,255,255,.35)}
+/* ช่องสแกนบาร์โค้ด HN: ภาพบาร์โค้ด + เส้นแสงสแกนวิ่ง · แตะ = จำลองการสแกน (ต้นแบบ) */
+.kpScan{width:100%;display:flex;align-items:center;gap:28px;padding:24px 30px;border-radius:26px;cursor:pointer;font:inherit;text-align:left;
+  border:1px solid #DCE7F4;background:linear-gradient(180deg,#FFFFFF,#F4F8FD);box-shadow:0 6px 16px rgba(20,38,90,.08)}
+.kpScan .bc{position:relative;flex:none;width:150px;height:100px;overflow:hidden;border-radius:12px}
+.kpScan .bc svg{width:100%;height:100%;display:block}
+.kpScan .beam{position:absolute;left:6px;right:6px;top:10%;height:3px;border-radius:2px;background:#E5484D;box-shadow:0 0 10px 2px rgba(229,72,77,.55);
+  animation:kpBeam 1.6s ease-in-out infinite alternate}
+@keyframes kpBeam{to{top:78%}}
+.kpScan .tx b{display:block;font-size:32px;font-weight:700;color:var(--cs-ink);line-height:44px}
+.kpScan .tx span{display:block;font-size:24px;line-height:36px;color:var(--cs-muted);margin-top:4px;white-space:nowrap}
+.kpOr{display:flex;align-items:center;gap:20px;margin-top:22px}
+.kpOr i{flex:1;height:2px;background:rgba(20,38,90,.12);border-radius:1px}
+.kpOr span{font-size:24px;font-weight:500;color:var(--cs-muted)}
 
 /* ช่องแสดงตัวเลข — ผิวฝังลึกเหมือนหน้าจอย่อย */
 .kpView{border-radius:26px;padding:26px 30px;display:flex;align-items:center;gap:18px;min-height:130px;
@@ -337,11 +383,76 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
   box-shadow:none;color:#F2F6FA}
 
 /* ================= ปุ่มภาษา ================= */
-.lang{position:absolute;left:var(--gutter);top:1755px;width:310px;height:81px;z-index:3;
+.lang{position:absolute;left:var(--gutter);top:calc(var(--H,1920px) - 165px);width:310px;height:81px;z-index:3;
   filter:drop-shadow(0 10px 24px rgba(20,38,90,.16))}
 .lang img{display:block;width:100%;height:100%;object-fit:contain}
 .lang button{position:absolute;top:0;bottom:0;width:50%;background:transparent;border:0;cursor:pointer;border-radius:999px}
 .lang button.en{left:0}.lang button.th{right:0}
+
+/* เต็มจอ (ตู้จริง / มือถือ / แท็บเล็ตแนวตั้ง): ไม่มีขอบดำ มุมโค้ง และเงากรอบตัวอย่าง */
+body.bleed{padding:0;overflow:hidden}
+body.bleed .screen{border-radius:0;box-shadow:none}
+
+
+/* ================= Modal ความยินยอม — ปรับให้เข้ากับ UI ปัจจุบัน (ผิวไข่มุก · ขอบทองบาง · ปุ่มกรมท่า) =================
+   ข้อ 3 คงแนวเดิม: รายการ ✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์ เปลี่ยนแค่ผิวการ์ดและระยะ */
+#consentOv{background:rgba(10,25,60,.42);backdrop-filter:blur(8px);padding:120px 64px}
+#consentOv .sheet{width:100%;border-radius:40px;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
+  box-shadow:0 0 0 1px rgba(191,145,58,.32),0 40px 100px rgba(6,20,50,.35)}
+#consentOv .sh{padding:48px 136px 28px 48px;gap:24px;align-items:center;border-bottom:1px solid rgba(191,145,58,.2)}
+#consentOv .sh .ic{width:88px;height:88px;border-radius:50%;border:0;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
+  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
+#consentOv .sh .ic svg{width:44px;height:44px;stroke:#A87C2A}
+#consentOv .csClose{position:absolute;top:32px;right:32px;z-index:2;width:88px;height:88px;border-radius:50%;border:0;cursor:pointer;
+  display:grid;place-items:center;background:rgba(20,38,90,.06);transition:transform .15s}
+#consentOv .csClose:active{transform:scale(.94)}
+#consentOv .csClose svg{width:40px;height:40px;stroke:var(--ink-muted)}
+/* แจ้งผลตอนกลับหน้าแรก (ยกเลิก / หมดเวลา) · ป้ายกรมท่าใต้แบนเนอร์ หายเองใน 4 วิ */
+.bye{position:absolute;left:50%;top:296px;z-index:8;transform:translateX(-50%);display:flex;align-items:center;gap:16px;white-space:nowrap;
+  padding:22px 40px 22px 32px;border-radius:99px;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);color:#fff;
+  font-size:30px;font-weight:600;box-shadow:0 16px 40px rgba(20,38,90,.3);animation:byeIn .35s cubic-bezier(.2,.8,.2,1)}
+.bye svg{width:36px;height:36px;stroke:#fff;flex:none}
+@keyframes byeIn{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translateX(-50%)}}
+#consentOv .sh h2{font-size:40px;line-height:52px;color:var(--ink)}
+#consentOv .sh p{font-size:24px;line-height:36px;color:var(--ink-muted);margin-top:2px}
+#consentOv .sb{padding:32px 48px;gap:24px}
+#consentOv .csCard{border:0;border-radius:24px;padding:28px 32px;background:#fff;
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.28),0 6px 14px rgba(20,38,90,.05)}
+#consentOv .csCard h3{font-size:30px;line-height:40px;color:var(--ink);gap:16px;margin-bottom:16px}
+#consentOv .csCard h3 .n{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;
+  color:#8A6420;background:rgba(191,145,58,.14)}
+#consentOv .csCard p{font-size:26px;line-height:42px;color:var(--ink)}
+#consentOv .csCard p b{color:var(--ink)}
+/* ข้อ 3: ✓/✗ คงเดิม */
+#consentOv .scope{gap:16px 32px}
+#consentOv .scope li{font-size:25px;line-height:36px;color:var(--ink);font-weight:600}
+#consentOv .scope li i{width:32px;height:32px;margin-top:2px}
+#consentOv .scope li i svg{width:18px;height:18px}
+#consentOv .scope li small{font-size:21px;line-height:30px;color:var(--ink-soft);font-weight:400}
+#consentOv .scope li.no{color:#98211A}
+#consentOv .scope li.no small{color:#B07871}
+#consentOv .csNote{border:0;border-radius:24px;padding:24px 32px;font-size:25px;line-height:38px;gap:16px}
+#consentOv .csNote.blue{background:rgba(30,123,224,.06);color:var(--ink-muted)}
+#consentOv .csNote.blue b{color:var(--ink)}
+#consentOv .csNote.amber{background:var(--amber-050,#FEF5E7);color:#7A4A0A}
+#consentOv .csNote i{width:40px;height:40px;background:transparent!important}
+#consentOv .csNote i svg{width:32px;height:32px}
+#consentOv .sf{padding:28px 48px 40px;gap:24px;border-top:1px solid rgba(191,145,58,.2)}
+#consentOv .agree{border:0;border-radius:24px;padding:24px 28px;gap:20px;background:#fff;
+  box-shadow:0 0 0 1.5px var(--line,#D7E4F2)}
+#consentOv .agree[aria-checked="true"]{background:#E8F7F2;box-shadow:0 0 0 2px #1E9C78}
+#consentOv .agree .bx{width:44px;height:44px;border-radius:12px}
+#consentOv .agree .tx{font-size:26px;line-height:40px}
+#consentOv .sf .row{gap:24px}
+#consentOv .csBtn{height:88px;padding:0 40px;border-radius:99px}
+#consentOv .csBtn.ghost{flex:none;min-width:360px;border:0;background:#fff;color:var(--ink-muted);font-size:26px;font-weight:600;
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line,#D7E4F2),0 8px 20px rgba(20,38,90,.08)}
+#consentOv .csBtn.primary{background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);font-size:30px;
+  box-shadow:0 10px 24px rgba(20,38,90,.22)}
+#consentOv .csBtn.primary[disabled]{background:#D5DCE6;color:#fff;box-shadow:none}
+#consentOv .scrollcue{background:var(--ink)}
 </style>
 </head>
 <body>
@@ -350,17 +461,9 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 <div class="stage" id="stage">
 <div class="screen">
 
-  <div class="hdr">
-    <div class="crest"><img src="logo_bms.svg" alt="BMS Group"></div>
-    <div class="brand">
-      <h1>Smart Hospital Kiosk</h1>
-      <div class="en">ระบบลงทะเบียนอัตโนมัติ</div>
-    </div>
-  </div>
-  <div class="clockbox">
-    <div class="d" id="clkDate">—</div>
-    <div class="t" id="clkTime">--:--:--</div>
-  </div>
+  <!-- แบนเนอร์โรงพยาบาล (เฉพาะหน้าแรก) เต็มกว้าง 1080 x 262 · ขอบล่างไล่จางเข้าพื้นหลัง ไม่เป็นเส้นตัด -->
+  <div class="bannerFade" aria-hidden="true"></div>
+  <img class="banner" src="hdr_banlat.png" alt="โรงพยาบาลบ้านลาด · ระบบลงทะเบียนอัตโนมัติ">
 
   <!-- แสงแดดสะท้อนขอบทองที่มุมซ้ายบน ดึงสายตาไปที่หัวข้อ "กรุณาเสียบบัตรประชาชน" -->
   <div class="edgeGlints" aria-hidden="true">
@@ -446,7 +549,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
           </linearGradient>
           <!-- เงาบัตรตกลงบนหน้าเครื่อง -->
           <filter id="cardShadow" x="-30%" y="-30%" width="170%" height="170%">
-            <feDropShadow dx="11" dy="24" stdDeviation="15" flood-color="#001334" flood-opacity=".36"/>
+            <feDropShadow dx="8" dy="16" stdDeviation="12" flood-color="#001334" flood-opacity=".2"/>
           </filter>
         </defs>
 
@@ -574,28 +677,31 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
         <rect x="1" y="1" width="106" height="76" rx="13" fill="url(#gChipIco)" stroke="#8A6A20" stroke-width="1.6"/>
         <path d="M38 1v76M70 1v76M1 27h37M1 51h37M70 27h37M70 51h37M38 39h32"
               fill="none" stroke="#8A6A20" stroke-width="1.6"/>
-      </svg>เข้าช่องอ่านบัตร</p>
+      </svg></p>
+      <button class="readBtn" id="readBtn">กดเพื่ออ่านบัตร</button>
     </div>
   </div>
 
   <div class="orRow"><i></i><span>หรือ</span><i></i></div>
 
-  <div class="optRow">
-    <button class="opt hn">
-      <span class="ic">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
-      </span>
-      <span><b>HN หรือบัตรประชาชน</b><span>ลงทะเบียนผู้ป่วยใหม่</span></span>
+  <!-- 3 ทางเลือก (ตาม flow ตู้เดิม + ตั้งค่า "Scan ใบหน้า"): เลขบัตรประชาชน · สแกน/กรอก HN · สแกนใบหน้า
+       TODO(integration): ซ่อนแต่ละปุ่มตามตั้งค่าตู้ (ปิดหน้าจอใส่เลขบัตรประชาชน / ปิด Scan HN / ปิด Scan ใบหน้า) -->
+  <div class="optRow three">
+    <button class="opt cid">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="5" width="19" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M14 10h4.5M14 13.5h3"/></svg></span>
+      <b>เลขบัตรประชาชน</b><span>กรอกเลข 13 หลัก</span>
     </button>
-
+    <button class="opt hn">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7V5.5A1.5 1.5 0 0 1 4.5 4H6M18 4h1.5A1.5 1.5 0 0 1 21 5.5V7M21 17v1.5a1.5 1.5 0 0 1-1.5 1.5H18M6 20H4.5A1.5 1.5 0 0 1 3 18.5V17"/><path d="M7 8v8M10 8v8M12.5 8v8M15.5 8v8M17.5 8v8"/></svg></span>
+      <b>สแกน / กรอก HN</b><span>บาร์โค้ดบัตรโรงพยาบาล</span>
+    </button>
     <button class="opt scan">
-      <span class="ic">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>
-          <circle cx="12" cy="11" r="2.4"/><path d="M8.5 16.4a4.2 4.2 0 0 1 7 0"/></svg>
-      </span>
-      <span><b>สแกนหน้า</b><span>ลงทะเบียนผู้ป่วยใหม่</span></span>
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/>
+        <circle cx="12" cy="11" r="2.4"/><path d="M8.5 16.4a4.2 4.2 0 0 1 7 0"/></svg></span>
+      <b>สแกนใบหน้า</b><span>ยืนยันตัวตนด้วยใบหน้า</span>
     </button>
   </div>
 
@@ -623,9 +729,15 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
       </div>
 
       <div class="sb">
-        <div class="kpMode">
-          <button id="kpCid" aria-pressed="true">เลขบัตรประชาชน</button>
-          <button id="kpHn"  aria-pressed="false">เลข HN</button>
+        <!-- โหมด HN: สแกนบาร์โค้ดบนบัตรโรงพยาบาล หรือกรอกเลขเอง · TODO(integration): รับค่าจากเครื่องสแกนบาร์โค้ด (แปลงสัญลักษณ์ตามตั้งค่า "การแปลงสัญลักษณ์จากการ Scan HN") -->
+        <div id="kpScanWrap" hidden>
+          <button class="kpScan" id="kpScan" aria-label="สแกนบาร์โค้ด HN (ต้นแบบ: แตะเพื่อจำลองการสแกน)">
+            <span class="bc"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="1" y="1" width="118" height="78" rx="10" fill="#fff" stroke="#DCE7F4" stroke-width="2"/>
+              <path d="M18 16v40M24 16v40M28 16v40M35 16v40M40 16v40M44 16v40M52 16v40M56 16v40M63 16v40M67 16v40M74 16v40M80 16v40M84 16v40M91 16v40M96 16v40M102 16v40" stroke="#14265A" stroke-width="3"/>
+              <text x="60" y="71" text-anchor="middle" font-size="10" font-weight="700" fill="#14265A" font-family="Noto Sans Thai,sans-serif">HN 000890314</text></svg><i class="beam"></i></span>
+            <span class="tx"><b>สแกนบาร์โค้ด HN</b><span>ยื่นบาร์โค้ดบนบัตรโรงพยาบาลที่ช่องสแกนใต้จอ</span></span>
+          </button>
+          <div class="kpOr"><i></i><span>หรือกรอกเลข HN</span><i></i></div>
         </div>
 
         <div class="kpView">
@@ -657,9 +769,23 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
     <span id="readSub">กรุณาอย่าดึงบัตรออกจนกว่าจะอ่านเสร็จ</span>
   </div>
 
+  <div class="bye" id="bye" hidden role="status"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.1"/></svg><span id="byeT"></span></div>
+
+  <!-- แจ้งเตือนอ่านบัตรไม่ได้: กดอ่านบัตรแล้วไม่พบบัตร / อ่านไม่สำเร็จ -->
+  <div class="alertOv" id="rdErr" hidden role="alertdialog" aria-modal="true" aria-labelledby="rdErrT">
+    <div class="alertBox">
+      <span class="aic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 20h18.4L12 4Z"/><path d="M12 10v4.5M12 17.4v.1"/></svg></span>
+      <h2 id="rdErrT"></h2>
+      <p id="rdErrP"></p>
+      <div class="aFoot"><button class="ghost" id="rdErrAlt"></button><button class="pri" id="rdErrRetry">อ่านบัตรอีกครั้ง</button></div>
+    </div>
+  </div>
+
   <!-- Modal ความยินยอม: เด้งทันทีหลังยืนยันตัวตนสำเร็จ -->
   <div class="ov" id="consentOv" hidden>
     <div class="sheet">
+      <!-- ปิด = ยกเลิกทั้งรายการ กลับหน้าแรก (ต่างจาก "ไม่ยินยอม" ที่ยังลงทะเบียนต่อ) -->
+      <button class="csClose" id="csClose" aria-label="ปิด ยกเลิกรายการ"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
 
       <div class="sh">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h6M10 16h6"/></svg></div>
@@ -732,7 +858,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
             ตามรายการที่ระบุไปยังบริษัทประกันที่ร่วมโครงการ</span>
         </button>
         <div class="row">
-          <button class="csBtn ghost" id="csDecline">ไม่ยินยอม ออกจากบริการ</button>
+          <button class="csBtn ghost" id="csDecline">ไม่ยินยอม, ไปที่ระบบลงทะเบียน</button>
           <button class="csBtn primary" id="csAccept" disabled>ยินยอม</button>
         </div>
       </div>
@@ -747,13 +873,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 <script>
 const TH_MON = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                 'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-function tickClock(){
-  const d = new Date(), p = n => String(n).padStart(2,'0');
-  document.getElementById('clkDate').textContent =
-    `${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear()+543}`;
-  document.getElementById('clkTime').textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
-}
-tickClock(); setInterval(tickClock, 1000);
+/* หน้าแรกไม่มีวันที่/เวลา (แบนเนอร์แทนหัวจอ) */
 document.querySelector('.lang .en').onclick = () => { langImg.src = 'lang_en.png'; };
 document.querySelector('.lang .th').onclick = () => { langImg.src = 'lang_th.png'; };
 
@@ -775,7 +895,7 @@ function resetFlow(){
   accept.disabled = true; cue.classList.remove('hide'); cbody.scrollTop = 0;
 }
 function insertCard(){
-  resetFlow();
+  resetFlow(); RIGHTS_Q = '';
   reading.hidden = false;
   setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 1800);
 }
@@ -790,8 +910,28 @@ agree.onclick = () => {
   agree.setAttribute('aria-checked', String(on));
   accept.disabled = !on;
 };
-accept.onclick = () => { location.href = 'insurance.html'; };
-document.getElementById('csDecline').onclick = resetFlow;
+/* ต้นแบบ: เสียบบัตร = สิทธิใช้ได้ · กรอก HN/เลขบัตร = สิทธิใช้ที่นี่ไม่ได้ (สาธิตหน้าผลตรวจสอบสิทธิทั้ง 2 กรณี)
+   TODO(integration): ผลจริงจาก NHSO Smartcard Agent / สปสช. */
+let RIGHTS_Q = '';
+accept.onclick = () => { location.href = 'insurance.html' + RIGHTS_Q; };
+/* ไม่ยินยอมเรื่องประกันก็ลงทะเบียนต่อได้ — ประกันไม่ใช่เงื่อนไขการรับบริการ */
+document.getElementById('csDecline').onclick = () => { location.href = 'services.html' + RIGHTS_Q; };
+
+/* ---------- ยกเลิก / หมดเวลา → กลับหน้าแรก ล้างข้อมูล + แจ้งให้รับบัตรคืน ----------
+   TODO(integration): ล้างข้อมูลผู้ป่วยที่อ่านจากบัตร / session */
+const BYE = {cancel:'ยกเลิกรายการแล้ว · กรุณารับบัตรประชาชนคืน', idle:'หมดเวลาทำรายการ · กรุณารับบัตรประชาชนคืน'};
+function showBye(k){
+  const b = document.getElementById('bye');
+  document.getElementById('byeT').textContent = BYE[k];
+  b.hidden = false; clearTimeout(window._byeT); window._byeT = setTimeout(() => { b.hidden = true; }, 4000);
+}
+function cancelFlow(k){ resetFlow(); rdErr.hidden = true; showBye(k); }
+document.getElementById('csClose').onclick = () => cancelFlow('cancel');
+/* ตัวจับเวลาไม่มีการแตะ (idle.js): หน้าแรกนับเฉพาะตอนมีชั้นซ้อนเปิดอยู่ */
+window.IDLE_BUSY = () => !ov.hidden || !kpOv.hidden || !rdErr.hidden;
+window.IDLE_HOME = k => cancelFlow(k);
+{ const k = new URLSearchParams(location.search).get('bye');
+  if (BYE[k]){ showBye(k); history.replaceState(null, '', location.pathname); } }
 
 
 /* ---------- แป้นตัวเลข: กรอกเลขบัตรประชาชน / HN ---------- */
@@ -819,14 +959,14 @@ function kpRender(){
 }
 function kpSetMode(m){
   KP.mode = m; KP.digits = '';
-  document.getElementById('kpCid').setAttribute('aria-pressed', String(m === 'cid'));
-  document.getElementById('kpHn').setAttribute('aria-pressed', String(m === 'hn'));
-  document.getElementById('kpTitle').textContent = m === 'cid' ? 'กรอกเลขบัตรประชาชน' : 'กรอกเลข HN';
+  document.getElementById('kpScanWrap').hidden = m !== 'hn';
+  document.getElementById('kpTitle').textContent = m === 'cid' ? 'กรอกเลขบัตรประชาชน' : 'สแกน หรือกรอกเลข HN';
   document.getElementById('kpHint').textContent = m === 'cid'
     ? 'เลข 13 หลักหน้าบัตรประชาชน' : 'เลขประจำตัวผู้ป่วย 9 หลักจากบัตรโรงพยาบาล';
   kpRender();
 }
-function kpOpen(){ resetFlow(); kpSetMode('cid'); kpOv.hidden = false; }
+/* m: 'cid' = เลขบัตรประชาชน · 'hn' = สแกนบาร์โค้ด / กรอก HN */
+function kpOpen(m = 'cid'){ resetFlow(); kpSetMode(m); kpOv.hidden = false; }
 function kpClose(){ kpOv.hidden = true; }
 
 document.getElementById('kpPad').onclick = (e) => {
@@ -837,10 +977,14 @@ document.getElementById('kpPad').onclick = (e) => {
   else if (KP.digits.length < KP_LEN[KP.mode]) KP.digits += k;
   kpRender();
 };
-document.getElementById('kpCid').onclick = () => kpSetMode('cid');
-document.getElementById('kpHn').onclick  = () => kpSetMode('hn');
+/* ต้นแบบ: แตะช่องสแกน = จำลองสแกนบาร์โค้ดสำเร็จ → เติมเลข HN แล้วยืนยันให้เอง */
+document.getElementById('kpScan').onclick = () => {
+  KP.digits = '000890314'; kpRender();
+  setTimeout(() => document.getElementById('kpOk').click(), 500);
+};
 document.getElementById('kpCancel').onclick = kpClose;
 document.getElementById('kpOk').onclick = () => {
+  RIGHTS_Q = '?r=fail';
   kpClose();
   document.getElementById('readTitle').textContent = 'กำลังตรวจสอบข้อมูล';
   document.getElementById('readSub').textContent = 'ระบบกำลังค้นหาข้อมูลผู้ป่วยจากเลขที่ท่านกรอก';
@@ -850,7 +994,8 @@ document.getElementById('kpOk').onclick = () => {
 
 
 /* ---------- ผูกปุ่มบนหน้าจอจริง ---------- */
-document.querySelector('.opt.hn').onclick = kpOpen;
+document.querySelector('.opt.cid').onclick = () => kpOpen('cid');
+document.querySelector('.opt.hn').onclick = () => kpOpen('hn');
 document.querySelector('.opt.scan').onclick = () => {
   resetFlow();
   document.getElementById('readTitle').textContent = 'กำลังสแกนใบหน้า';
@@ -858,18 +1003,54 @@ document.querySelector('.opt.scan').onclick = () => {
   reading.hidden = false;
   setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 2000);
 };
+/* ---------- ปุ่มอ่านบัตร + แจ้งเตือนอ่านไม่ได้ ----------
+   ต้นแบบวนผล: กดครั้งที่ 1 = ไม่พบบัตร · 2 = อ่านบัตรไม่สำเร็จ · 3 = อ่านสำเร็จ → consent
+   TODO(integration): ผลจาก NHSO Secure Smartcard Agent (ไม่มีบัตรในช่อง / อ่านชิปไม่ได้ / สำเร็จ) */
+const rdErr = document.getElementById('rdErr');
+const RD_ERR = {
+  nocard: {t:'ไม่พบบัตรประชาชน', p:'กรุณาเสียบบัตรให้สุดช่อง<br>โดยหันด้านที่มี <svg class="chipIn" viewBox="0 0 108 78" role="img" aria-label="ชิป"><rect x="1" y="1" width="106" height="76" rx="13" fill="url(#gChipIco)" stroke="#8A6A20" stroke-width="3"/><path d="M38 1v76M70 1v76M1 27h37M1 51h37M70 27h37M70 51h37M38 39h32" fill="none" stroke="#8A6A20" stroke-width="3"/></svg> เข้าช่องอ่านบัตร<br>แล้วกด <b>อ่านบัตรอีกครั้ง</b>', alt:'ปิด'},
+  fail:   {t:'อ่านบัตรไม่สำเร็จ', p:'กรุณาดึงบัตรออก เช็ดชิปให้สะอาด<br>แล้วเสียบใหม่อีกครั้ง<br>หากยังอ่านไม่ได้ ใช้<b>กรอกเลขบัตรแทน</b><br>หรือติดต่อเจ้าหน้าที่', alt:'กรอกเลขบัตรแทน'},
+};
+let readN = 0;
+function readCard(){
+  resetFlow(); rdErr.hidden = true;
+  const r = ['nocard', 'fail', 'ok'][readN % 3]; readN++;
+  if (r === 'ok'){ insertCard(); return; }
+  reading.hidden = false;
+  setTimeout(() => {
+    reading.hidden = true;
+    const e = RD_ERR[r];
+    document.getElementById('rdErrT').textContent = e.t;
+    document.getElementById('rdErrP').innerHTML = e.p;
+    const alt = document.getElementById('rdErrAlt');
+    alt.textContent = e.alt;
+    alt.onclick = () => { rdErr.hidden = true; if (r === 'fail') kpOpen(); };
+    rdErr.hidden = false;
+  }, 1200);
+}
+document.getElementById('readBtn').onclick = (ev) => { ev.stopPropagation(); readCard(); };
+document.getElementById('rdErrRetry').onclick = readCard;
+
 /* แตะที่ตัวตู้ = เสียบบัตร */
 const mc = document.querySelector('.machine');
 mc.style.cursor = 'pointer';
 mc.onclick = insertCard;
 /* ยินยอมแล้วไปขั้นตอนถัดไป */
-accept.onclick = () => { location.href = 'insurance.html'; };
 
+
+/* Responsive: จอแนวตั้งที่สูง ≥ 1600 เมื่อกว้าง 1080 (ตู้ 9:16, มือถือ, แท็บเล็ต 10:16) → เต็มจอ ไม่มีกรอบ
+   ความสูงกรอบ (--H) ยืด/หดตามจอ: หัวจอยึดบน แถบปุ่มยึดล่าง ส่วนกลางกระจายระยะ
+   จอที่เตี้ยกว่านั้น (จอคอมแนวนอน, 3:4) → แสดงกรอบตัวอย่าง 1080x1920 ย่อพอดีจอเหมือนเดิม */
 function fit(){
-  const s = Math.min((innerWidth - 40) / 1080, (innerHeight - 40) / 1920);
   const st = document.getElementById('stage');
+  const bleed = innerHeight / innerWidth >= 1600 / 1080;
+  document.body.classList.toggle('bleed', bleed);
+  const s = bleed ? innerWidth / 1080 : Math.min((innerWidth - 40) / 1080, (innerHeight - 40) / 1920);
+  const H = bleed ? innerHeight / s : 1920;
+  st.style.setProperty('--H', H + 'px');
+  st.style.setProperty('--mid', (262 + Math.max(0, H - 1518) * 208 / 456) + 'px');   /* ใต้แบนเนอร์ 262 · ที่ว่างที่เหลือแบ่งบน:ล่าง = 208:248 */
   st.style.transform = `scale(${s})`;
-  st.style.height = (1920 * s) + 'px';
+  st.style.height = (H * s) + 'px';
 }
 addEventListener('resize', fit); fit();
 </script>
@@ -888,5 +1069,6 @@ if (['localhost','127.0.0.1'].includes(location.hostname)) {
   }, 1000);
 }
 </script>
+<script src="idle.js"></script>
 </body>
 </html>

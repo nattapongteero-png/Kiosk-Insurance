@@ -1,5 +1,7 @@
 package th.go.banlat.kiosk.ui.welcome
 
+import th.go.banlat.kiosk.ui.common.creamDisc
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -50,6 +52,22 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
+import th.go.banlat.kiosk.ui.theme.NotoSansThai
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import th.go.banlat.kiosk.ui.theme.st
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.ui.text.style.TextAlign
 import th.go.banlat.kiosk.ui.common.KIcon
 import th.go.banlat.kiosk.ui.common.LineIcon
 import th.go.banlat.kiosk.ui.common.Shade
@@ -78,6 +96,75 @@ fun ReadingOverlay(title: String, sub: String) {
         }
         KText(title, 46, weight = FontWeight.Bold)
         KText(sub, 28, color = K.InkMuted)
+    }
+}
+
+// ================= แจ้งเตือนอ่านบัตรไม่ได้ (ตรงกับ welcome_v2.html #rdErr) =================
+// กล่องไข่มุกขอบทองแบบ modal ความยินยอม · ไอคอนเตือนในวงอำพัน · ปุ่มรอง + "อ่านบัตรอีกครั้ง"
+@Composable
+fun ReadErrorModal(fail: Boolean, onAlt: () -> Unit, onRetry: () -> Unit) {
+    val strong = SpanStyle(color = K.Ink, fontWeight = FontWeight.Bold)
+    Box(Modifier.fillMaxSize().background(K.ScrimLight).swallowTaps().padding(horizontal = 100.s), contentAlignment = Alignment.Center) {
+        Column(Modifier.fillMaxWidth()
+            .softShadow(40f, Shade(Color(0x59061432), 40f, 100f))
+            .clip(RoundedCornerShape(40.s))
+            .background(Brush.linearGradient(0f to K.PearlTop, .55f to K.PearlMid, 1f to K.PearlBottom))
+            .border(1.s, Color(0x52BF913A), RoundedCornerShape(40.s))
+            .padding(start = 56.s, end = 56.s, top = 64.s, bottom = 48.s),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.padding(bottom = 32.s).size(136.s)
+                .drawBehind { drawCircle(Color(0x0FB45309), radius = size.minDimension * .6f) }
+                .clip(CircleShape).background(Brush.radialGradient(listOf(Color.White, Color(0xFFFFF8EE), Color(0xFFFCEBD3))))
+                .border(2.s, Color(0x59B45309), CircleShape), contentAlignment = Alignment.Center) {
+                LineIcon(KIcon.Warn, K.Amber, Modifier.size(68.s), 2f)
+            }
+            KText(if (fail) "อ่านบัตรไม่สำเร็จ" else "ไม่พบบัตรประชาชน", 44, weight = FontWeight.Bold, lineHeight = 60f, align = TextAlign.Center)
+            KText(buildAnnotatedString {
+                if (fail) {
+                    append("กรุณาดึงบัตรออก เช็ดชิปให้สะอาด\nแล้วเสียบใหม่อีกครั้ง\nหากยังอ่านไม่ได้ ใช้"); withStyle(strong) { append("กรอกเลขบัตรแทน") }; append("\nหรือติดต่อเจ้าหน้าที่")
+                } else {
+                    // "ด้านที่มี" + รูปชิป (แบบเดียวกับการ์ดเสียบบัตรหน้าแรก)
+                    append("กรุณาเสียบบัตรให้สุดช่อง\nโดยหันด้านที่มี "); appendInlineContent("chip", "ชิป"); append(" เข้าช่องอ่านบัตร\nแล้วกด "); withStyle(strong) { append("อ่านบัตรอีกครั้ง") }
+                }
+            }, 38, Modifier.padding(top = 16.s), color = K.InkMuted, lineHeight = 62f, align = TextAlign.Center,
+                inline = mapOf("chip" to InlineTextContent(Placeholder(80.st, 55.st, PlaceholderVerticalAlign.TextCenter)) {
+                    ChipIcon(Modifier.padding(horizontal = 2.s).fillMaxSize())
+                }))
+            Row(Modifier.fillMaxWidth().padding(top = 48.s), horizontalArrangement = Arrangement.spacedBy(24.s)) {
+                Box(Modifier.widthIn(min = 280.s).height(96.s).clip(RoundedCornerShape(99.s)).background(Color.White)
+                    .border(2.s, Color(0xFFDCE4EE), RoundedCornerShape(99.s)).press(onClick = onAlt).padding(horizontal = 32.s),
+                    contentAlignment = Alignment.Center) {
+                    KText(if (fail) "กรอกเลขบัตรแทน" else "ปิด", 30, weight = FontWeight.Bold, color = K.InkMuted, softWrap = false)
+                }
+                Box(Modifier.weight(1f).height(96.s).softShadow(99f, Shade(Color(0x4714265A), 10f, 24f)).clip(RoundedCornerShape(99.s))
+                    .background(Brush.linearGradient(listOf(Color(0xFF223A7A), K.Ink))).press(onClick = onRetry),
+                    contentAlignment = Alignment.Center) {
+                    KText("อ่านบัตรอีกครั้ง", 30, weight = FontWeight.Bold, color = Color.White, softWrap = false)
+                }
+            }
+        }
+    }
+}
+
+/** ภาพบาร์โค้ดบนบัตรโรงพยาบาล + เส้นแสงสแกนสีแดงวิ่งขึ้นลง (ตรงกับ .kpScan .bc) */
+@Composable
+private fun BarcodeArt(modifier: Modifier) {
+    val beam = rememberInfiniteTransition(label = "beam").animateFloat(.1f, .78f,
+        infiniteRepeatable(tween(1600, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "y")
+    val tm = rememberTextMeasurer()
+    val u = unitPx()
+    Canvas(modifier) {
+        val k = size.width / 120f
+        drawRoundRect(Color.White, size = size, cornerRadius = CornerRadius(10f * k))
+        drawRoundRect(Color(0xFFDCE7F4), size = size, cornerRadius = CornerRadius(10f * k), style = Stroke(2f * k))
+        listOf(18, 24, 28, 35, 40, 44, 52, 56, 63, 67, 74, 80, 84, 91, 96, 102).forEach { x ->
+            drawLine(K.Ink, Offset(x * k, 16f * k), Offset(x * k, 56f * k), 3f * k)
+        }
+        val t = tm.measure("HN 000890314", TextStyle(fontFamily = NotoSansThai, fontSize = (10f * k / density).sp, fontWeight = FontWeight.Bold, color = K.Ink))
+        drawText(t, topLeft = Offset((size.width - t.size.width) / 2, 71f * k - t.size.height * .8f))
+        val y = size.height * beam.value
+        drawRect(Color(0x55E5484D), Offset(6f * k, y - 3f * u), Size(size.width - 12f * k, 9f * u))
+        drawRect(Color(0xFFE5484D), Offset(6f * k, y), Size(size.width - 12f * k, 3f * u))
     }
 }
 
@@ -139,32 +226,37 @@ private val SheetBg = Brush.linearGradient(0f to Color.White, .42f to Color(0xFF
 
 // ================= แป้นตัวเลข: เลขบัตรประชาชน 13 หลัก / HN 9 หลัก =================
 @Composable
-fun KeypadModal(onCancel: () -> Unit, onConfirm: (String) -> Unit) {
-    var cid by remember { mutableStateOf(true) }
+fun KeypadModal(hn: Boolean, onCancel: () -> Unit, onConfirm: (String) -> Unit) {
     var digits by remember { mutableStateOf("") }
-    val len = if (cid) 13 else 9
-    val groups = if (cid) listOf(1, 4, 5, 2, 1) else listOf(3, 3, 3)
+    val len = if (hn) 9 else 13
+    val groups = if (hn) listOf(3, 3, 3) else listOf(1, 4, 5, 2, 1)
+    var scanned by remember { mutableStateOf(false) }
+    LaunchedEffect(scanned) { if (scanned) { delay(500); onConfirm(digits) } }
 
     ModalScrim(padV = 130) {
         Column(Modifier.width(880.s)
             .softShadow(40f, Shade(Color(0x80061432), 60f, 130f))
             .clip(RoundedCornerShape(40.s)).background(SheetBg).border(1.s, Color(0x0F14265A), RoundedCornerShape(40.s))) {
-            SheetHeader(if (cid) "กรอกเลขบัตรประชาชน" else "กรอกเลข HN",
-                if (cid) "เลข 13 หลักหน้าบัตรประชาชน" else "เลขประจำตัวผู้ป่วย 9 หลักจากบัตรโรงพยาบาล", icon = 70)
+            SheetHeader(if (hn) "สแกน หรือกรอกเลข HN" else "กรอกเลขบัตรประชาชน",
+                if (hn) "เลขประจำตัวผู้ป่วย 9 หลักจากบัตรโรงพยาบาล" else "เลข 13 หลักหน้าบัตรประชาชน", icon = 70)
             Column(Modifier.padding(start = 46.s, end = 46.s, top = 26.s, bottom = 32.s), verticalArrangement = Arrangement.spacedBy(22.s)) {
-                // สลับประเภทเลข
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(99.s))
-                    .background(Brush.verticalGradient(listOf(Color(0xFFE7EFF9), Color(0xFFF2F7FC)))).padding(9.s),
-                    horizontalArrangement = Arrangement.spacedBy(10.s)) {
-                    listOf(true to "เลขบัตรประชาชน", false to "เลข HN").forEach { (isCid, label) ->
-                        val on = cid == isCid
-                        Box(Modifier.weight(1f).height(76.s)
-                            .then(if (on) Modifier.softShadow(99f, Shade(Color(0x571E7BE0), 8f, 20f)) else Modifier)
-                            .clip(RoundedCornerShape(99.s))
-                            .then(if (on) Modifier.background(Brush.linearGradient(0f to K.BlueLight, .48f to K.Blue, 1f to K.BlueDeep)) else Modifier)
-                            .press { cid = isCid; digits = "" }, contentAlignment = Alignment.Center) {
-                            KText(label, 27, weight = FontWeight.SemiBold, color = if (on) Color.White else K.InkMuted)
+                // โหมด HN: สแกนบาร์โค้ดบนบัตรโรงพยาบาล หรือกรอกเลขเอง (ต้นแบบ: แตะช่องสแกน = จำลองสแกนสำเร็จ)
+                // TODO(integration): รับค่าจากเครื่องสแกนบาร์โค้ด (แปลงสัญลักษณ์ตามตั้งค่า "การแปลงสัญลักษณ์จากการ Scan HN")
+                if (hn) {
+                    Row(Modifier.fillMaxWidth().softShadow(26f, Shade(Color(0x1414265A), 6f, 16f)).clip(RoundedCornerShape(26.s))
+                        .background(Brush.verticalGradient(listOf(Color.White, Color(0xFFF4F8FD)))).border(1.s, Color(0xFFDCE7F4), RoundedCornerShape(26.s))
+                        .press { if (!scanned) { digits = "000890314"; scanned = true } }.padding(horizontal = 30.s, vertical = 24.s),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(28.s)) {
+                        BarcodeArt(Modifier.size(150.s, 100.s))
+                        Column {
+                            KText("สแกนบาร์โค้ด HN", 32, weight = FontWeight.Bold, lineHeight = 44f)
+                            KText("ยื่นบาร์โค้ดบนบัตรโรงพยาบาลที่ช่องสแกนใต้จอ", 24, Modifier.padding(top = 4.s), color = K.InkMuted, lineHeight = 36f, softWrap = false, maxLines = 1, minSize = 20)
                         }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.s)) {
+                        Box(Modifier.weight(1f).height(2.s).background(Color(0x1F14265A)))
+                        KText("หรือกรอกเลข HN", 24, weight = FontWeight.Medium, color = K.InkMuted)
+                        Box(Modifier.weight(1f).height(2.s).background(Color(0x1F14265A)))
                     }
                 }
                 // ช่องแสดงตัวเลข
@@ -241,30 +333,52 @@ private val Scope = listOf(
 )
 
 @Composable
-fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit) {
+fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit, onClose: () -> Unit) {
     val scroll = rememberScrollState()
     val u = unitPx()
     // ต้องเลื่อนอ่านจนสุดก่อนจึงติ๊กยินยอมได้
     val readAll by remember { derivedStateOf { scroll.maxValue > 0 && scroll.value >= scroll.maxValue - 24 * u } }
     var agreed by remember { mutableStateOf(false) }
+    val goldLine = Color(0x33BF913A)
 
-    ModalScrim(padV = 130) {
-        Box(Modifier.width(952.s)
-            .softShadow(40f, Shade(Color(0x80061432), 60f, 130f))
-            .clip(RoundedCornerShape(40.s)).background(SheetBg).border(1.s, Color(0x0F14265A), RoundedCornerShape(40.s))) {
+    // ปรับให้เข้ากับ UI ปัจจุบัน: ผิวไข่มุก ขอบทองบาง หัวข้อสีหมึก ปุ่มกรมท่า (ตรงกับ welcome_v2.html #consentOv)
+    Box(Modifier.fillMaxSize().background(K.ScrimLight).swallowTaps().padding(vertical = 120.s, horizontal = 64.s),
+        contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxWidth()
+            .softShadow(40f, Shade(Color(0x59061432), 40f, 100f))
+            .clip(RoundedCornerShape(40.s))
+            .background(Brush.linearGradient(0f to K.PearlTop, .55f to K.PearlMid, 1f to K.PearlBottom))
+            .border(1.s, Color(0x52BF913A), RoundedCornerShape(40.s))) {
             Column {
-                SheetHeader("ความยินยอมให้ส่งข้อมูลสุขภาพ", "กรุณาเลื่อนอ่านให้ครบก่อนตัดสินใจ · ฉบับที่ 1.0 (1 ก.ย. 2569)")
-                Column(Modifier.weight(1f, fill = false).verticalScroll(scroll).padding(horizontal = 44.s, vertical = 26.s),
-                    verticalArrangement = Arrangement.spacedBy(18.s)) {
+                // หัว: วงครีมขอบทอง + ไอคอนเอกสารสีทอง
+                Row(Modifier.fillMaxWidth().drawBehind { drawLine(goldLine, Offset(0f, size.height), Offset(size.width, size.height), 1f) }
+                    .padding(start = 48.s, end = 48.s, top = 48.s, bottom = 28.s),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.s)) {
+                    Box(Modifier.size(88.s).creamDisc(halo = 8f), contentAlignment = Alignment.Center) {
+                        LineIcon(KIcon.Doc, K.GoldIcon, Modifier.size(44.s), 1.9f)
+                    }
+                    Column(Modifier.weight(1f)) {
+                        KText("ความยินยอมให้ส่งข้อมูลสุขภาพ", 40, weight = FontWeight.Bold, lineHeight = 52f, softWrap = false)
+                        KText("กรุณาเลื่อนอ่านให้ครบก่อนตัดสินใจ · ฉบับที่ 1.0 (1 ก.ย. 2569)", 24, color = K.InkMuted, lineHeight = 36f)
+                    }
+                    // ปิด = ยกเลิกทั้งรายการ กลับหน้าแรก (ต่างจาก "ไม่ยินยอม" ที่ยังลงทะเบียนต่อ)
+                    Box(Modifier.size(88.s).clip(CircleShape).background(Color(0x0F14265A)).press(scaleTo = .94f, onClick = onClose),
+                        contentAlignment = Alignment.Center) {
+                        LineIcon(KIcon.Close, K.InkMuted, Modifier.size(40.s), 2.2f)
+                    }
+                }
+                Column(Modifier.weight(1f, fill = false).verticalScroll(scroll).padding(horizontal = 48.s, vertical = 32.s),
+                    verticalArrangement = Arrangement.spacedBy(24.s)) {
                     CsCard(1, "วัตถุประสงค์") {
                         CsText("เพื่อให้บริษัทประกันใช้**รายงานแพทย์ (FMR)** และ**ประวัติสุขภาพส่วนบุคคล (PHR)** ของท่าน ประกอบการแนะนำแบบประกันชีวิต/สุขภาพที่เหมาะกับสุขภาพของท่าน และจัดทำข้อเสนอเบื้องต้น **เฉพาะการตรวจสอบครั้งนี้เท่านั้น**")
                     }
                     CsCard(2, "ผู้รับข้อมูล") {
                         CsText("**บริษัทประกันที่ร่วมโครงการ** ส่งผ่านระบบกลางของ BMS แบบเข้ารหัส ระบบจะแสดงรายชื่อบริษัทที่ได้รับข้อมูลให้ท่านทราบก่อนส่งจริง ท่านจะเป็นผู้เลือก**แบบประกัน**ที่สนใจเองหลังทราบผล")
                     }
+                    // ข้อ 3 คงแนวเดิม: ✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์
                     CsCard(3, "ข้อมูลที่จะถูกส่ง (FMR / PHR)") {
                         Scope.chunked(2).forEach { pair ->
-                            Row(Modifier.fillMaxWidth().padding(bottom = 12.s), horizontalArrangement = Arrangement.spacedBy(24.s)) {
+                            Row(Modifier.fillMaxWidth().padding(bottom = 16.s), horizontalArrangement = Arrangement.spacedBy(32.s)) {
                                 pair.forEach { ScopeRow(it) }
                                 if (pair.size == 1) Spacer(Modifier.weight(1f))
                             }
@@ -276,88 +390,92 @@ fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit) {
                     CsCard(5, "สิทธิของท่าน") {
                         CsText("· ท่าน**ถอนความยินยอม**ได้ทุกเมื่อ ผ่านแอป MyAtlas หรือที่เคาน์เตอร์เวชระเบียน\n· ตู้บริการ**ไม่เก็บ**ข้อมูลสุขภาพของท่านไว้หลังจบรายการ\n· ทุกครั้งที่มีการส่งหรือเปิดดูข้อมูล ระบบบันทึกหลักฐานไว้ให้ตรวจสอบย้อนหลังได้")
                     }
-                    CsNote(KIcon.Info, Color(0xFFEAF3FD), Color(0xFFC6DFF8), Color(0xFFD5E8FB), K.BlueDeep,
-                        "การยินยอมนี้ **ไม่ใช่** การยินยอมให้ตัวแทนติดต่อขายประกัน หากท่านสนใจข้อเสนอ ระบบจะถามยืนยันแยกอีกครั้งหลังทราบผล")
-                    CsNote(KIcon.Warn, Color(0xFFFEF5E7), Color(0xFFF6DCB4), Color(0xFFFBE3BE), Color(0xFF7C3B06),
+                    CsNote(KIcon.Info, Color(0x0F1E7BE0), K.InkMuted,
+                        "การยินยอมนี้ **ไม่ใช่** การยินยอมให้ตัวแทนติดต่อขายประกัน หากท่านสนใจข้อเสนอ ระบบจะถามยืนยันแยกอีกครั้งหลังทราบผล", K.Blue)
+                    CsNote(KIcon.Warn, Color(0xFFFEF5E7), Color(0xFF7A4A0A),
                         "ผลการตรวจสอบเป็น**ข้อเสนอเบื้องต้น ไม่ใช่การอนุมัติกรมธรรม์** การรับประกันขึ้นอยู่กับการพิจารณาของบริษัทประกัน", K.Amber)
                 }
-                // ท้าย: ติ๊กยินยอม + ปุ่ม
-                Column(Modifier.fillMaxWidth().drawBehind {
-                    drawLine(Color(0x1214265A), Offset.Zero, Offset(size.width, 0f), 1f)
-                }.padding(start = 44.s, end = 44.s, top = 24.s, bottom = 28.s), verticalArrangement = Arrangement.spacedBy(18.s)) {
+                // ท้าย: ติ๊กยินยอม + ปุ่ม (ปุ่มรองขาวขอบบาง · ปุ่มหลักกรมท่า สูง 88 เหมือนทั้งแอป)
+                Column(Modifier.fillMaxWidth().drawBehind { drawLine(goldLine, Offset.Zero, Offset(size.width, 0f), 1f) }
+                    .padding(start = 48.s, end = 48.s, top = 28.s, bottom = 40.s), verticalArrangement = Arrangement.spacedBy(24.s)) {
                     AgreeBox(agreed, enabled = readAll) { agreed = !agreed }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.s)) {
-                        GhostButton("ไม่ยินยอม ออกจากบริการ", 92, 26, onDecline)
-                        PrimaryButton("ยินยอม", 92, agreed, onClick = onAccept)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.s)) {
+                        th.go.banlat.kiosk.ui.insurance.SecondaryPill("ไม่ยินยอม, ไปที่ระบบลงทะเบียน", onDecline, Modifier.widthIn(min = 360.s))
+                        Box(Modifier.weight(1f).height(88.s).then(if (agreed) Modifier.softShadow(44f, Shade(Color(0x3814265A), 10f, 24f)) else Modifier)
+                            .clip(RoundedCornerShape(99.s))
+                            .background(if (agreed) Brush.verticalGradient(listOf(Color(0xFF223A7A), K.Ink)) else Brush.verticalGradient(listOf(Color(0xFFD5DCE6), Color(0xFFD5DCE6))))
+                            .press(enabled = agreed, scaleTo = .97f, onClick = onAccept), contentAlignment = Alignment.Center) {
+                            KText("ยินยอม", 30, weight = FontWeight.Bold, color = Color.White, softWrap = false)
+                        }
                     }
                 }
             }
-            if (!readAll) ScrollCue(Modifier.align(Alignment.BottomCenter).padding(bottom = 272.s))
+            if (!readAll) ScrollCue(Modifier.align(Alignment.BottomCenter).padding(bottom = 300.s))
         }
     }
 }
 
 @Composable
 private fun CsCard(n: Int, title: String, body: @Composable () -> Unit) {
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.s)).background(Color(0xFFF8FBFF))
-        .border(1.s, K.Line, RoundedCornerShape(24.s)).padding(horizontal = 28.s, vertical = 24.s)) {
-        Row(Modifier.padding(bottom = 12.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.s)) {
-            Box(Modifier.size(34.s).clip(RoundedCornerShape(9.s)).background(K.Blue050), contentAlignment = Alignment.Center) {
-                KText("$n", 19, weight = FontWeight.Bold, color = K.BlueDeep)
+    Column(Modifier.fillMaxWidth()
+        .softShadow(24f, Shade(Color(0x0D14265A), 6f, 14f))
+        .clip(RoundedCornerShape(24.s)).background(Color.White)
+        .border(1.s, Color(0x47BF913A), RoundedCornerShape(24.s)).padding(horizontal = 32.s, vertical = 28.s)) {
+        Row(Modifier.padding(bottom = 16.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.s)) {
+            Box(Modifier.size(40.s).clip(CircleShape).background(K.GoldTint), contentAlignment = Alignment.Center) {
+                KText("$n", 22, weight = FontWeight.Bold, color = K.GoldText)
             }
-            KText(title, 26, weight = FontWeight.Bold, color = K.BlueDeep)
+            KText(title, 30, weight = FontWeight.Bold, lineHeight = 40f)
         }
         body()
     }
 }
 
 @Composable
-private fun CsText(s: String) = KText(rich(s), 25, lineHeight = 37.5f)
+private fun CsText(s: String) = KText(rich(s), 26, lineHeight = 42f)
 
 @Composable
 private fun RowScope.ScopeRow(it: ScopeItem) {
     Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(12.s)) {
-        Box(Modifier.padding(top = 3.s).size(25.s).clip(CircleShape).background(if (it.sent) K.Green050 else Color(0xFFFBDEDB)),
+        Box(Modifier.padding(top = 2.s).size(32.s).clip(CircleShape).background(if (it.sent) K.Green050 else Color(0xFFFBDEDB)),
             contentAlignment = Alignment.Center) {
-            LineIcon(if (it.sent) KIcon.Check else KIcon.Cross, if (it.sent) K.Green else K.Red, Modifier.size(14.s), 3f)
+            LineIcon(if (it.sent) KIcon.Check else KIcon.Cross, if (it.sent) K.Green else K.Red, Modifier.size(18.s), 3f)
         }
         Column {
-            KText(it.t, 23, color = if (it.sent) K.Ink else K.RedText, lineHeight = 32f)
-            KText(it.s, 19, color = if (it.sent) K.InkSoft else Color(0xFFB07871), lineHeight = 26f)
+            KText(it.t, 25, weight = FontWeight.SemiBold, color = if (it.sent) K.Ink else K.RedText, lineHeight = 36f)
+            KText(it.s, 21, color = if (it.sent) K.InkSoft else Color(0xFFB07871), lineHeight = 30f)
         }
     }
 }
 
 @Composable
-private fun CsNote(icon: KIcon, bg: Color, border: Color, iconBg: Color, fg: Color, text: String, iconColor: Color = fg) {
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.s)).background(bg).border(1.s, border, RoundedCornerShape(20.s))
-        .padding(horizontal = 24.s, vertical = 20.s), horizontalArrangement = Arrangement.spacedBy(16.s)) {
-        Box(Modifier.size(36.s).clip(CircleShape).background(iconBg), contentAlignment = Alignment.Center) {
-            LineIcon(icon, iconColor, Modifier.size(20.s), 1.9f)
-        }
-        KText(rich(text), 24, color = fg, lineHeight = 36f)
+private fun CsNote(icon: KIcon, bg: Color, fg: Color, text: String, iconColor: Color) {
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.s)).background(bg)
+        .padding(horizontal = 32.s, vertical = 24.s), horizontalArrangement = Arrangement.spacedBy(16.s)) {
+        LineIcon(icon, iconColor, Modifier.padding(top = 3.s).size(32.s), 2f)
+        KText(rich(text, K.Ink), 25, color = fg, lineHeight = 38f)
     }
 }
 
 @Composable
 private fun AgreeBox(checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
-    val shape = RoundedCornerShape(20.s)
+    val shape = RoundedCornerShape(24.s)
     Row(Modifier.fillMaxWidth().alpha(if (enabled) 1f else .45f).clip(shape)
-        .background(if (checked) K.Green050 else Color.White).border(2.s, if (checked) K.Green else K.Line, shape)
-        .press(enabled = enabled, scaleTo = .99f, onClick = onToggle).padding(horizontal = 24.s, vertical = 20.s),
-        horizontalArrangement = Arrangement.spacedBy(18.s)) {
-        Box(Modifier.size(40.s).clip(RoundedCornerShape(11.s)).background(if (checked) K.Green else Color.White)
-            .border(2.5.s, if (checked) K.Green else K.Line, RoundedCornerShape(11.s)), contentAlignment = Alignment.Center) {
-            if (checked) LineIcon(KIcon.Check, Color.White, Modifier.size(23.s), 3.2f)
+        .background(if (checked) K.Green050 else Color.White).border(if (checked) 2.s else 1.5.s, if (checked) K.Green else K.Line, shape)
+        .press(enabled = enabled, scaleTo = .99f, onClick = onToggle).padding(horizontal = 28.s, vertical = 24.s),
+        horizontalArrangement = Arrangement.spacedBy(20.s)) {
+        Box(Modifier.size(44.s).clip(RoundedCornerShape(12.s)).background(if (checked) K.Green else Color.White)
+            .border(2.5.s, if (checked) K.Green else K.Line, RoundedCornerShape(12.s)), contentAlignment = Alignment.Center) {
+            if (checked) LineIcon(KIcon.Check, Color.White, Modifier.size(25.s), 3.2f)
         }
         KText(rich("ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ**ยินยอม**ให้ส่งข้อมูลสุขภาพ ตามรายการที่ระบุไปยังบริษัทประกันที่ร่วมโครงการ"),
-            25, lineHeight = 36f)
+            26, lineHeight = 40f)
     }
 }
 
 @Composable
 private fun ScrollCue(modifier: Modifier) {
-    Row(modifier.softShadow(99f, Shade(Color(0x660D5BC6), 10f, 26f)).clip(RoundedCornerShape(99.s)).background(K.BlueDeep)
+    Row(modifier.softShadow(99f, Shade(Color(0x5514265A), 10f, 26f)).clip(RoundedCornerShape(99.s)).background(K.Ink)
         .padding(horizontal = 24.s, vertical = 12.s), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.s)) {
         LineIcon(KIcon.Down, Color.White, Modifier.size(19.s), 2.6f)

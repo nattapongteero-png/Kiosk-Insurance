@@ -21,6 +21,7 @@ object K {
     val Gold = Color(0xFFCC9017)
     val GoldIcon = Color(0xFFA87C2A)
     val GoldText = Color(0xFF8A6420)
+    val GoldGlint = Color(0xFFD9A546)   // สีขอบไล่แบบการ์ดเสียบบัตร
     val GoldRing = Color(0x52BF913A)      // rgba(191,145,58,.32)
     val GoldRingStrong = Color(0x6BBF913A) // rgba(191,145,58,.42)
     val GoldTint = Color(0x1FBF913A)      // rgba(191,145,58,.12)

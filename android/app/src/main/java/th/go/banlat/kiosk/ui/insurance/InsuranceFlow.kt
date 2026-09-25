@@ -1,5 +1,7 @@
 package th.go.banlat.kiosk.ui.insurance
 
+import th.go.banlat.kiosk.ui.common.imgPainter
+import th.go.banlat.kiosk.ui.common.img
 import android.os.Build
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -62,8 +64,7 @@ import th.go.banlat.kiosk.data.RecommendedPlans
 import th.go.banlat.kiosk.data.RequestId
 import th.go.banlat.kiosk.data.ageYMD
 import th.go.banlat.kiosk.data.maskCid
-import th.go.banlat.kiosk.ui.common.BrandBlock
-import th.go.banlat.kiosk.ui.common.ClockBlock
+import th.go.banlat.kiosk.ui.common.HospitalBanner
 import th.go.banlat.kiosk.ui.common.KIcon
 import th.go.banlat.kiosk.ui.common.LineIcon
 import th.go.banlat.kiosk.ui.common.Shade
@@ -77,13 +78,14 @@ import th.go.banlat.kiosk.ui.welcome.swallowTaps
 
 private sealed interface Step {
     data object Select : Step
+    data class Detail(val plan: Plan) : Step
     data class Sending(val plan: Plan) : Step
     data class Sent(val plan: Plan) : Step
     data class Slow(val plan: Plan) : Step
 }
 
 /**
- * flow ประกัน: เลือกแบบประกัน → modal กำลังส่งข้อมูล → สรุป (ส่งสำเร็จ / ส่งนาน รับผลทางแอป)
+ * flow ประกัน: เลือกแบบประกัน → อ่านรายละเอียดเต็ม → modal กำลังส่งข้อมูล → สรุป (ส่งสำเร็จ / ส่งนาน รับผลทางแอป)
  * ต้นแบบ: บริษัทที่ slow = true (AIA) จำลองกรณีส่งนาน · TODO(integration): ใช้ผลตอบกลับจริงจากระบบกลาง BMS
  */
 @Composable
@@ -100,7 +102,9 @@ fun InsuranceFlow(onExit: () -> Unit) {
         val sending = step is Step.Sending
         Box(Modifier.fillMaxSize().then(if (sending && Build.VERSION.SDK_INT >= 31) Modifier.blur(8.s) else Modifier)) {
             when (val s = step) {
-                Step.Select, is Step.Sending -> SelectScreen(onPick = { step = Step.Sending(it) }, onCancel = onExit)
+                Step.Select -> SelectScreen(onPick = { step = Step.Detail(it) }, onCancel = onExit)
+                is Step.Detail -> DetailScreen(s.plan, onBack = { step = Step.Select }, onSend = { step = Step.Sending(s.plan) })
+                is Step.Sending -> DetailScreen(s.plan, onBack = {}, onSend = {})
                 is Step.Sent -> SummaryScreen(s.plan, slow = false, onDone = onExit)
                 is Step.Slow -> SummaryScreen(s.plan, slow = true, onDone = onExit)
             }
@@ -113,27 +117,44 @@ fun InsuranceFlow(onExit: () -> Unit) {
 
 /** พื้นหลัง + หัวจอ + ผู้ยืนยันตัวตน (คงที่ ไม่เลื่อน) + พื้นขาวไล่สีผืนเดียวหลังเนื้อหา */
 @Composable
-private fun PageShell(content: @Composable BoxScope.() -> Unit) {
+internal fun PageShell(fullVeil: Boolean = false, content: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize()) {
-        Image(painterResource(R.drawable.bg_home), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-        Veil(Modifier.offset(y = 208.s).fillMaxSize())
+        Image(imgPainter(R.drawable.bg_home), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+        // ชั้นฟ้าไล่เฉดใต้แบนเนอร์ (ตรงกับ .bannerFade ใน insurance.html / services.html): ฟ้าท้ายแบนเนอร์ → อ่อนลง → จางหาย y196→1000
+        // อยู่ใต้พื้นขาว (veil เริ่ม y262) จึงเห็นเฉพาะช่วงท้ายแบนเนอร์และขอบข้างมุมโค้ง
+        Canvas(Modifier.offset(y = 196.s).fillMaxWidth().height(804.s)) {
+            fun sm(t: Float) = t * t * (3 - 2 * t)
+            fun c(r: Int, g: Int, b: Int, a: Float) = Color(r, g, b, (255 * a).toInt())
+            val keys = listOf(196f to c(178, 238, 244, 1f), 262f to c(190, 240, 247, .96f), 360f to c(214, 241, 249, .9f),
+                480f to c(228, 242, 249, .74f), 640f to c(234, 243, 248, .46f), 820f to c(237, 244, 248, .18f), 1000f to c(238, 244, 248, 0f))
+            fun at(y: Float): Color {
+                for (n in 0 until keys.size - 1) {
+                    val (y0, c0) = keys[n]; val (y1, c1) = keys[n + 1]
+                    if (y in y0..y1) return androidx.compose.ui.graphics.lerp(c0, c1, sm((y - y0) / (y1 - y0)))
+                }
+                return keys.last().second
+            }
+            drawRect(Brush.verticalGradient(*(0..40).map { i -> (i / 40f) to at(196f + i * 804f / 40) }.toTypedArray()))
+        }
+        // หน้าเลือกแบบประกัน: พื้นขาวไล่สีเห็นภาพพื้นหลังช่วงกลาง · หน้าอื่น (รายละเอียด/สรุป): ขาวทั้งหน้าใต้หัวจอ
+        if (fullVeil) Box(Modifier.offset(y = 262.s).fillMaxSize().clip(RoundedCornerShape(topStart = 40.s, topEnd = 40.s)).background(Color.White))
+        else Veil(Modifier.offset(y = 262.s).fillMaxSize())
         // หัวจอตำแหน่งเดียวกับหน้าแรก
-        BrandBlock(Modifier.offset(80.s, 80.s))
-        ClockBlock(Modifier.align(Alignment.TopEnd).padding(top = 80.s, end = 80.s))
+        HospitalBanner(fade = false)   // หัวจอ = แบนเนอร์โรงพยาบาล ชุดเดียวกับหน้าแรก (สูง 262)
         content()
-        PatientBar(Modifier.offset(y = 208.s).fillMaxWidth())
+        PatientBar(Modifier.offset(y = 262.s).fillMaxWidth())
     }
 }
 
-/** พื้นขาว: ทึบที่มุมโค้งบน → ใสที่ +816 → ขาวสนิทที่ +1101 แล้วขาวจนสุดจอ (smoothstep เหมือนต้นแบบ) */
+/** พื้นขาว: ทึบที่มุมโค้งบน → ใสที่ +640 → ขาวสนิทที่ +920 แล้วขาวจนสุดจอ (smoothstep เหมือนต้นแบบ) */
 @Composable
 private fun Veil(modifier: Modifier) {
     val u = unitPx()
     Canvas(modifier.clip(RoundedCornerShape(topStart = 40.s, topEnd = 40.s))) {
         fun sm(t: Float) = t * t * (3 - 2 * t)
         val stops = buildList {
-            for (i in 0..12) add(816f * i / 12 to Color.White.copy(alpha = 1f - sm(i / 12f)))
-            for (i in 1..8) add(816f + 285f * i / 8 to Color.White.copy(alpha = sm(i / 8f)))
+            for (i in 0..12) add(640f * i / 12 to Color.White.copy(alpha = 1f - sm(i / 12f)))
+            for (i in 1..8) add(640f + 280f * i / 8 to Color.White.copy(alpha = sm(i / 8f)))
         }.map { (y, c) -> (y * u / size.height) to c }.toTypedArray()
         drawRect(Brush.verticalGradient(*stops, 1f to Color.White))
     }
@@ -154,7 +175,7 @@ private fun PatientBar(modifier: Modifier) {
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.s)) {
-            listOf("เลขบัตรประชาชน" to maskCid(p.cid), "อายุ" to ageYMD(p.dob), "สิทธิการรักษา" to p.right).forEach { (k, v) ->
+            listOf("เลขบัตรประชาชน" to maskCid(p.cid), "อายุ" to ageYMD(p.dob), "สิทธิการรักษา" to th.go.banlat.kiosk.data.DemoSession.rightLabel).forEach { (k, v) ->
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.s)) {
                     KText(k, 24, color = K.InkSoft, lineHeight = 40f, softWrap = false)
                     KText(v, 28, weight = FontWeight.Bold, lineHeight = 40f, tabular = true, softWrap = false)
@@ -164,16 +185,21 @@ private fun PatientBar(modifier: Modifier) {
     }
 }
 
-/** แถบล่างคงที่: พื้นขาวไล่ขึ้น 40 + ปุ่มกลางจอ ขอบบนปุ่มที่ y1752 */
+/** แถบล่างคงที่ + ปุ่มกลางจอ ขอบบนปุ่มที่ y1752
+ *  พื้นขาวโปร่งไล่เฉด (0 → 90% ใน 80 แรก → 95%) ให้เนื้อหาที่เลื่อนผ่านยังเห็นรางๆ ไม่โดนตัดขาด แต่ปุ่มยังเด่น
+ *  HTML เบลอด้วย backdrop-filter ได้ · Android 7 (ตู้จริง) เบลอสิ่งที่อยู่ข้างหลังไม่ได้ จึงใช้แค่ขาวโปร่ง */
 @Composable
-private fun BoxScope.BottomBar(button: @Composable () -> Unit) {
-    Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(248.s)
-        .background(Brush.verticalGradient(0f to Color.Transparent, 40f / 248f to Color.White))
+internal fun BoxScope.BottomBar(button: @Composable () -> Unit) {
+    // สูง 288: ไล่จางนุ่ม 96 แรก (เนื้อหาค่อยๆ จางหายเข้าหาปุ่ม) → ทึบ 24 เหนือปุ่ม → ปุ่ม 88 → ห่างขอบจอ 80
+    val h = 288f
+    Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(h.s)
+        .background(Brush.verticalGradient(0f to Color.Transparent, 32f / h to Color.White.copy(alpha = .3f), 60f / h to Color.White.copy(alpha = .66f),
+            84f / h to Color.White.copy(alpha = .88f), 96f / h to Color.White.copy(alpha = .93f), 1f to Color.White.copy(alpha = .95f)))
         .padding(bottom = 80.s), contentAlignment = Alignment.BottomCenter) { button() }
 }
 
 @Composable
-private fun Heading(title: String, sub: String, modifier: Modifier = Modifier) {
+internal fun Heading(title: String, sub: String, modifier: Modifier = Modifier) {
     Column(modifier) {
         KText(title, 48, weight = FontWeight.Bold, lineHeight = 68f, softWrap = false)
         KText(sub, 32, weight = FontWeight.Medium, color = K.InkSub, lineHeight = 48f, softWrap = false)
@@ -181,7 +207,7 @@ private fun Heading(title: String, sub: String, modifier: Modifier = Modifier) {
 }
 
 /** สีขอบบนของพื้นที่เลื่อน: ตอนยังไม่เลื่อนจาง 16 · เลื่อนแล้วจางยาว 96 ให้เนื้อหาค่อยๆ หายใต้ข้อมูลผู้ป่วย */
-private fun Modifier.topFade(px16: Float, px96: Float, scrolled: () -> Boolean) = this
+internal fun Modifier.topFade(px16: Float, px96: Float, scrolled: () -> Boolean) = this
     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     .drawWithContent {
         drawContent()
@@ -197,7 +223,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
     val u = unitPx()
     val scroll = rememberScrollState()
     PageShell {
-        Column(Modifier.offset(y = 496.s).fillMaxWidth().height((1920 - 496).s)
+        Column(Modifier.padding(top = 550.s).fillMaxSize()
             .topFade(16f * u, 96f * u) { scroll.value > 4 }
             .verticalScroll(scroll)) {
             // แบบประกันที่แนะนำ (สูง 517: การ์ดจบที่ 469 + ห่างส่วนถัดไป 48)
@@ -214,7 +240,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
                 }
             }
             // แบบประกันอื่น
-            Column(Modifier.padding(start = 80.s, end = 80.s, top = 48.s, bottom = 248.s)) {
+            Column(Modifier.padding(start = 80.s, end = 80.s, top = 48.s, bottom = 336.s)) {
                 Heading("แบบประกันอื่น", "เลือกประกันที่ต้องการ")
                 Spacer(Modifier.height(32.s))
                 OtherPlans.chunked(2).forEachIndexed { i, row ->
@@ -232,7 +258,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
 /** ภาพประกอบคู่สูงอายุ จางลงด้านล่าง (45% → 88%) */
 @Composable
 private fun ArtCouple(modifier: Modifier) {
-    Image(painterResource(R.drawable.ins_couple), null, modifier
+    Image(imgPainter(R.drawable.ins_couple, 2), null, modifier
         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         .drawWithContent {
             drawContent()
@@ -279,12 +305,23 @@ internal fun GoldSpinner(modifier: Modifier, thickness: Float) {
 
 // ---------------- หน้าสรุป (ส่งสำเร็จ / ส่งนาน) ----------------
 @Composable
-private fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
-    PageShell {
-        Column(Modifier.offset(y = 504.s).fillMaxWidth().padding(horizontal = 80.s), verticalArrangement = Arrangement.spacedBy(32.s)) {
-            if (slow) Heading("การส่งข้อมูลใช้เวลานานกว่าปกติ", "ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป")
-            else Heading("ส่งข้อมูลให้บริษัทประกันแล้ว", "ท่านจะได้รับผลผ่านแอปด้านล่าง")
-            Column(verticalArrangement = Arrangement.spacedBy(24.s)) {
+internal fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
+    PageShell(fullVeil = true) {
+        // จัดกึ่งกลาง ไม่กระจุกบนซ้าย: ผู้ใช้ยืนมองระดับสายตา (กลาง–ล่างจอ) ได้โดยไม่ต้องเงยหน้า
+        // ไอคอนสถานะ 160 → หัวข้อกลาง → การ์ด → รหัสรายการ · ทั้งก้อนอยู่กลางระหว่างข้อมูลผู้ป่วย (y504) กับแถบปุ่ม (ล่าง 248)
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 558.s, bottom = 328.s),
+            verticalArrangement = Arrangement.spacedBy(48.s, Alignment.CenterVertically)) {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.padding(bottom = 32.s).size(160.s).creamDisc(ring = 2f, halo = 14f), contentAlignment = Alignment.Center) {
+                    if (slow) LineIcon(KIcon.Clock, K.GoldIcon, Modifier.size(80.s), 1.8f)
+                    else LineIcon(KIcon.BigCheck, K.Green, Modifier.size(80.s), 2.4f)
+                }
+                KText(if (slow) "การส่งข้อมูลใช้เวลานานกว่าปกติ" else "ส่งข้อมูลให้บริษัทประกันแล้ว",
+                    48, weight = FontWeight.Bold, lineHeight = 68f, align = TextAlign.Center)
+                KText(if (slow) "ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป" else "ท่านจะได้รับผลผ่านแอปด้านล่าง",
+                    32, weight = FontWeight.Medium, color = K.InkSub, lineHeight = 48f, align = TextAlign.Center)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(24.s), horizontalAlignment = Alignment.CenterHorizontally) {
                 PlanSummary(plan, Modifier.fillMaxWidth()) {
                     if (slow) StatusPill(StatusKind.Wait, "กำลังดำเนินการ") else StatusPill(StatusKind.Done, "บริษัทได้รับแล้ว")
                 }
@@ -297,15 +334,10 @@ private fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
                         AppRow("แอปหมอพร้อม", "ดูรายละเอียดได้ที่การแจ้งเตือน", done = true)
                     }
                 }
-                if (slow) Row(horizontalArrangement = Arrangement.spacedBy(16.s)) {
-                    LineIcon(KIcon.Shield, K.InkSoft, Modifier.size(32.s))
-                    KText("การแจ้งเตือนจะไม่แสดงข้อมูลสุขภาพ ท่านต้องยืนยันตัวตนในแอปก่อนจึงจะเห็นรายละเอียด",
-                        22, color = K.InkMuted, lineHeight = 32f)
-                }
                 RefId()
             }
         }
-        BottomBar { PrimaryPill("เข้าใจแล้ว, ไปที่ระบบลงทะเบียน", onDone) }
+        BottomBar { PrimaryPill("เข้าใจแล้ว, ไปที่ระบบลงทะเบียน", onDone, Modifier.padding(horizontal = 80.s).fillMaxWidth()) }   // ปุ่มหลักเดี่ยว = เต็มความกว้าง
     }
 }
 

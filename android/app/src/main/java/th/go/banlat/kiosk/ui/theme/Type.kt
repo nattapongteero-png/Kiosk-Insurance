@@ -61,9 +61,11 @@ fun KText(
     maxLines: Int = Int.MAX_VALUE,
     softWrap: Boolean = true,
     minSize: Int = 0,   // > 0 = ย่อตัวอักษรลงได้ถึงขนาดนี้เมื่อพื้นที่ไม่พอ (ฟอนต์บน Android กว้างกว่า Chrome เล็กน้อย)
+    inline: Map<String, androidx.compose.foundation.text.InlineTextContent> = emptyMap(),   // รูปแทรกกลางข้อความ (appendInlineContent)
 ) {
     BasicText(
         text = text,
+        inlineContent = inline,
         modifier = modifier,
         style = TextStyle(
             fontFamily = NotoSansThai,
