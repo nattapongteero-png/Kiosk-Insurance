@@ -220,7 +220,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 /* แบบประกันที่แนะนำ */
 /* หัวจอ fix ไว้ 0–208 (ใต้โลโก้ 40 + ส่วนแนะนำเว้นบน 40 = ห่างเนื้อหา 80 เท่าขอบข้าง) · เนื้อหาใต้หัวจอเลื่อนขึ้น-ลงได้ ขอบบนจาง 32px เนื้อหาจึงไม่ถูกตัดเป็นเส้นแข็งใต้หัวจอ */
-.pp .scroll{position:absolute;left:0;right:0;top:550px;bottom:0;overflow-y:auto;overflow-x:hidden;
+.pp .scroll{position:absolute;left:0;right:0;top:586px;bottom:0;overflow-y:auto;overflow-x:hidden;
   scrollbar-width:none;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16px);mask-image:linear-gradient(180deg,transparent 0,#000 16px)}
 .pp .scroll::-webkit-scrollbar{display:none}
@@ -231,7 +231,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
    แถว 1: ตรา 88 + ชื่อ/HN (44+44) · แถว 2: 3 คอลัมน์เท่ากันห่าง 24 ป้าย 40 + ค่า 40 (ห่าง 8)
    คงที่ใต้หัวจอ (y208–504) · เลขบัตรปิดไว้เหลือ 3 หลักท้าย เพราะจอตู้อยู่ในที่สาธารณะ */
 .pp .who{position:absolute;left:0;right:0;top:262px;z-index:3;
-  display:flex;flex-direction:column;gap:24px;padding:48px var(--gutter)}
+  display:flex;flex-direction:column;gap:12px;padding:24px var(--gutter) 24px}   /* 3 แถว (ชื่อ · เลขบัตร/อายุ · สิทธิ) จบที่ y550 → เนื้อหาเริ่ม y586/594 (เลื่อนลง 36) */
 /* พื้นคงที่ผืนเดียวหลังเนื้อหา (ไม่เลื่อน — เลื่อนเฉพาะ content): y208 → ล่างสุดจอ
    ขาวทึบที่มุมโค้งบน → จางจนใสที่ y1024 → กลับเป็นขาวสนิทที่ y1309 แล้วขาวจนสุดจอ */
 /* ทุกหน้าข้างใน: พื้นขาวไล่จางต่ำสุด 65% (ช่วงกลาง y640) ให้เห็นลายพื้นหลังรางๆ ไม่ชัดเกิน */
@@ -246,8 +246,9 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .who .nm{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
 .pp .who .hn{font-size:28px;font-weight:500;color:var(--ink-muted);height:44px;line-height:44px;white-space:nowrap}
 .pp .who .kv{display:flex;gap:24px}
-.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:40px;line-height:40px;white-space:nowrap}
+.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:32px;line-height:32px;white-space:nowrap}
+.pp .who .rgt b{overflow:hidden;text-overflow:ellipsis}
 .pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pp .rec{position:relative;width:1080px;height:517px;overflow:visible;}   /* การ์ดจบที่ 469 + ห่างส่วนถัดไป 48 */
 .pp .hd{position:absolute;left:var(--gutter)}
@@ -316,7 +317,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .plan .top .tag{align-self:center}
 
 /* ---------- หน้าส่งข้อมูล / ส่งสำเร็จ / ส่งนาน (ใต้แถบผู้ยืนยันตัวตน y504) ---------- */
-.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:654px;bottom:288px;z-index:1;
+.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:690px;bottom:288px;z-index:1;
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
 .pp .pane h2{font-size:48px;font-weight:700;line-height:64px}
 .pp .pane p{font-size:28px;line-height:44px;color:var(--ink-muted)}
@@ -356,7 +357,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 
 /* ---------- หน้าสรุปหลังส่งข้อมูล: หัวข้อ + เนื้อหาชิดซ้าย ---------- */
-.pp .pg{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter);
+.pp .pg{position:absolute;left:0;right:0;top:594px;bottom:288px;z-index:1;padding:0 var(--gutter);
   display:flex;flex-direction:column;gap:32px}   /* หัวข้อ → เนื้อหา 32 เท่าหน้าเลือกแบบประกัน */
 .pp .pgb{display:flex;flex-direction:column;gap:24px}
 .pp .psum{display:flex;align-items:center;gap:24px;padding:32px;border-radius:24px;
@@ -494,8 +495,8 @@ body.bleed .screen{border-radius:0;box-shadow:none}
    ต่อจาก flow ประกัน (ยินยอมหรือไม่ก็ได้) · ข้อมูลผู้ป่วยคงที่บนสุด · เนื้อหาเลื่อนได้ใต้ y496
    ลำดับ: บริการที่ใช้บ่อยที่สุด (ตรวจโรคทั่วไป) เป็นการ์ดเต็มกว้าง → คลินิกเฉพาะทาง 2 คอลัมน์ → มาตามนัด
    ระยะ: หัวข้อ → การ์ด 24 · ส่วนห่างกัน 48 · การ์ดห่างกัน 24 · ขอบข้าง 80 */
-.sv{padding:8px var(--gutter) 336px;   /* เลื่อนสุดแล้วเว้นจากปุ่มล่าง 48 */display:flex;flex-direction:column;gap:48px}
-.sv .hd{position:static}
+.sv{padding:40px var(--gutter) 336px;   /* เลื่อนสุดแล้วเว้นจากปุ่มล่าง 48 */display:flex;flex-direction:column;gap:48px}
+.sv .hd{position:static;margin-bottom:-24px}   /* หัวข้อชิดรายการใต้ตัวเอง (24) มากกว่าชิดข้อมูลผู้ป่วยด้านบน (40) — จัดกลุ่มตามความใกล้ */
 .sv .sec h3{font-size:32px;font-weight:700;line-height:44px;color:var(--ink-muted);margin-bottom:24px;letter-spacing:.5px}
 .svc{border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink);border-radius:24px;position:relative;
   display:flex;align-items:center;gap:24px;padding:32px;
@@ -549,7 +550,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 /* ================= บัตรคิว (หลังเลือกลักษณะการมา) — ข้อมูลชุดเดียวกับสลิปใบนำทางผู้ป่วยนอก =================
    จัดกึ่งกลางแบบหน้าสรุปผล: ไอคอนสถานะ → หัวข้อ → บัตรคิว → หมายเหตุ · ผู้ใช้ยืนมองระดับสายตาได้ไม่ต้องเงย
    บัตร: ส่วนบน = คิวเรียกคนไข้ (ตัวใหญ่สุด) + QN · รอยปรุ · ส่วนล่าง = รายละเอียด + QR */
-.tk{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter) 12px;
+.tk{position:absolute;left:0;right:0;top:594px;bottom:288px;z-index:1;padding:0 var(--gutter) 12px;
   display:flex;flex-direction:column;justify-content:center;gap:40px}
 .tk .phd{display:flex;flex-direction:column;align-items:center;text-align:center}
 .tk .phd .bigic{margin-bottom:24px;width:128px;height:128px}
@@ -650,7 +651,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 /* ================= การ์ดรับบัตรคิว v2 — ตัวเครื่องเดียวกับการ์ดเสียบบัตรหน้าแรก =================
    ขนาด มุม พื้น ลาย และตัวเครื่อง (มุม/องศา/ช่อง) เหมือนหน้าแรกทุกพิกัด → เล่าเรื่องต่อกัน: เสียบบัตร → บัตรคิวพิมพ์ออกมา
    บัตรคิวออกจากช่องเดิมในแนวเดียวกับบัตรประชาชน (เมทริกซ์เดียวกัน) · ข้อความบนบัตรคิวเรียงขนานปากช่องแบบใบเสร็จ
-   แอนิเมชันวนรอบละ 7.5 วิ: พิมพ์ออกจนสุดใบ (ไฟเขียว) → ค้างให้อ่าน → หลุดเลื่อนออกนอกการ์ด → พิมพ์ใหม่ */
+   แอนิเมชันเล่นครั้งเดียว: พิมพ์ออกจนสุดใบ (ไฟเขียว) → หยุดค้างที่สถานะพิมพ์เสร็จ ไม่วนซ้ำ */
 .pcard{height:704px}
 .pcard .wm{-webkit-mask-image:linear-gradient(180deg,transparent 206px,#000 358px);mask-image:linear-gradient(180deg,transparent 206px,#000 358px)}
 .pcard .wm img{top:100px}
@@ -856,8 +857,9 @@ const ppHead = (full = false) => `
       <div class="kv">
         <div><span>เลขบัตรประชาชน</span><b>${maskCid(PATIENT.cid)}</b></div>
         <div><span>อายุ</span><b>${ageYMD(PATIENT.dob)}</b></div>
-        <div><span>สิทธิการรักษา</span><b>${PATIENT.right}</b></div>
       </div>
+      <!-- สิทธิการรักษาแถวเต็มความกว้าง (ชื่อสิทธิบางรายการยาวมาก) · ป้ายกำกับอยู่บนค่าเหมือนช่องอื่น -->
+      <div class="kv rgt"><div><span>สิทธิการรักษา</span><b>${PATIENT.rightFull || PATIENT.right}</b></div></div>
     </div>
 `;
 
@@ -1016,9 +1018,9 @@ const slipSvg = (sv, ar) => {
             </g>`;
 };
 
-/* ขับแอนิเมชันทุกเฟรม — รอบละ 7.5 วิ (สูตรเดียวกับ PrinterIllustration ใน Kotlin)
+/* ขับแอนิเมชันทุกเฟรม — เล่นครั้งเดียวแล้วค้างที่ SLIP.hold (สูตรเดียวกับ PrinterIllustration ใน Kotlin)
    บัตรคิวออกจากช่องพิมพ์ (แยกจากช่องเสียบบัตร อยู่ใต้กัน) · 0.3–3.9 พิมพ์จนสุดใบ (ไฟเขียว) · 3.9–5.6 ค้าง · 5.6–6.7 หลุดออกนอกการ์ด · 6.7–7.5 ว่าง */
-const SLIP = {cycle: 7.5, k: 0.00056, t0: .3};   /* t0 = เวลาเริ่มพิมพ์ในรอบ */   /* กระดาษยาว 940 → ความโค้งรวมเท่าเดิม (~30°) */
+const SLIP = {cycle: 7.5, hold: 4.6, k: 0.00056, t0: .3};   /* hold = วินาทีที่หยุดค้างหลังพิมพ์เสร็จ (ใบออกครบ ไฟดับ) */   /* t0 = เวลาเริ่มพิมพ์ในรอบ */   /* กระดาษยาว 940 → ความโค้งรวมเท่าเดิม (~30°) */
 function slipPose(t){
   const ez = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
   const pr = Math.min(1, Math.max(0, t / 3.6));
@@ -1036,7 +1038,7 @@ function driveSlip(idle = false){   /* idle = รอยืนยัน: เค�
   const frame = now => {
     if (!document.getElementById('sg0')) return;
 
-    const T = idle ? 0 : window.SLIP_T ?? ((now - t0) / 1000) % SLIP.cycle, t = T - SLIP.t0, {s, k, exit, light} = slipPose(t);
+    const T = idle ? 0 : window.SLIP_T ?? Math.min((now - t0) / 1000, SLIP.hold),   /* เล่นครั้งเดียว แล้วค้างที่พิมพ์เสร็จ ไม่วน (วนแล้วผู้ใช้จะคิดว่ายังพิมพ์ไม่เสร็จ) */ t = T - SLIP.t0, {s, k, exit, light} = slipPose(t);
    /* SLIP_T = ล็อกเวลาไว้ตรวจภาพ */
     document.getElementById('slipExit').style.display = s < .5 ? 'none' : '';   /* ยังไม่พิมพ์ = ไม่มีกระดาษโผล่ */
     const va = SLIP_L - s, h = s / SLIP_N;                                 // ส่วนเนื้อหา v ∈ [va, 480] อยู่นอกเครื่อง
@@ -1266,6 +1268,7 @@ const RIGHTS = RIGHTS_OK
   : {main:'สิทธิประกันสังคม', sub:'เบิกกองทุนประกันสังคม (ผู้ประกันตน)', hosp:'โรงพยาบาลขอนแก่น', hosp2:'—'};
 let STEP = 'rights';   /* rights → svc → (เลือกบริการ + ลักษณะการมา) → ยืนยันการมารับบริการ → บัตรคิว */
 let CONFIRM = null;    /* {svc, arrive} รอผู้ป่วยกดยืนยันก่อนพิมพ์บัตรคิว (ตาม flow ตู้เดิม) */
+PATIENT.rightFull = RIGHTS.main;   /* แถบผู้ป่วยแสดงชื่อสิทธิเต็ม · บนบัตรคิวใช้ชื่อสั้น (PATIENT.right) */
 if (!RIGHTS_OK) PATIENT.right = 'ประกันสังคม';
 const rrow = (k, v, cls = '') => `<div class="r ${cls}"><span>${k}</span><b class="${v === '—' ? 'dim' : ''}">${v}</b></div>`;
 const rightsScreen = () => `
@@ -1294,7 +1297,7 @@ ${ppHead(true)}
 
 function render(){
   document.getElementById('screen').innerHTML = TICKET ? ticketScreen() : CONFIRM ? ticketScreen(CONFIRM, true) : STEP === 'rights' ? rightsScreen() : screen();
-  document.querySelectorAll('[data-next]').forEach(el => el.onclick = () => { if (!RIGHTS_OK) PATIENT.right = 'ชำระเงินเอง'; STEP = 'svc'; render(); });
+  document.querySelectorAll('[data-next]').forEach(el => el.onclick = () => { if (!RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง'; STEP = 'svc'; render(); });
   const scr = document.getElementById('screen');
   scr.querySelectorAll('[data-svc]').forEach(el => el.onclick = () => { PICK = el.dataset.svc; render(); });
   scr.querySelectorAll('[data-close]').forEach(el => el.onclick = () => { PICK = null; render(); });

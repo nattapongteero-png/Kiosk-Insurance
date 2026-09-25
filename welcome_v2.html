@@ -930,6 +930,8 @@ function showBye(k){
 }
 function cancelFlow(k){ resetFlow(); rdErr.hidden = true; showBye(k); }
 document.getElementById('csClose').onclick = () => cancelFlow('cancel');
+/* ปุ่มเฟือง → หน้าตั้งค่าตู้ · TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า */
+document.querySelector('.sysBtn').onclick = () => { location.href = 'settings.html'; };
 /* ตัวจับเวลาไม่มีการแตะ (idle.js): หน้าแรกนับเฉพาะตอนมีชั้นซ้อนเปิดอยู่ */
 window.IDLE_BUSY = () => !ov.hidden || !kpOv.hidden || !rdErr.hidden;
 window.IDLE_HOME = k => cancelFlow(k);

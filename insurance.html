@@ -220,7 +220,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 /* แบบประกันที่แนะนำ */
 /* หัวจอ fix ไว้ 0–208 (ใต้โลโก้ 40 + ส่วนแนะนำเว้นบน 40 = ห่างเนื้อหา 80 เท่าขอบข้าง) · เนื้อหาใต้หัวจอเลื่อนขึ้น-ลงได้ ขอบบนจาง 32px เนื้อหาจึงไม่ถูกตัดเป็นเส้นแข็งใต้หัวจอ */
-.pp .scroll{position:absolute;left:0;right:0;top:550px;bottom:0;overflow-y:auto;overflow-x:hidden;
+.pp .scroll{position:absolute;left:0;right:0;top:586px;bottom:0;overflow-y:auto;overflow-x:hidden;
   scrollbar-width:none;overscroll-behavior:contain;
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16px);mask-image:linear-gradient(180deg,transparent 0,#000 16px)}
 .pp .scroll::-webkit-scrollbar{display:none}
@@ -231,7 +231,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
    แถว 1: ตรา 88 + ชื่อ/HN (44+44) · แถว 2: 3 คอลัมน์เท่ากันห่าง 24 ป้าย 40 + ค่า 40 (ห่าง 8)
    คงที่ใต้หัวจอ (y208–504) · เลขบัตรปิดไว้เหลือ 3 หลักท้าย เพราะจอตู้อยู่ในที่สาธารณะ */
 .pp .who{position:absolute;left:0;right:0;top:262px;z-index:3;
-  display:flex;flex-direction:column;gap:24px;padding:48px var(--gutter)}
+  display:flex;flex-direction:column;gap:12px;padding:24px var(--gutter) 24px}   /* 3 แถว (ชื่อ · เลขบัตร/อายุ · สิทธิ) จบที่ y550 → เนื้อหาเริ่ม y586/594 (เลื่อนลง 36) */
 /* พื้นคงที่ผืนเดียวหลังเนื้อหา (ไม่เลื่อน — เลื่อนเฉพาะ content): y208 → ล่างสุดจอ
    ขาวทึบที่มุมโค้งบน → จางจนใสที่ y1024 → กลับเป็นขาวสนิทที่ y1309 แล้วขาวจนสุดจอ */
 /* ทุกหน้าข้างใน: พื้นขาวไล่จางต่ำสุด 65% (ช่วงกลาง y640) ให้เห็นลายพื้นหลังรางๆ ไม่ชัดเกิน */
@@ -246,8 +246,9 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .who .nm{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
 .pp .who .hn{font-size:28px;font-weight:500;color:var(--ink-muted);height:44px;line-height:44px;white-space:nowrap}
 .pp .who .kv{display:flex;gap:24px}
-.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:40px;line-height:40px;white-space:nowrap}
+.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:32px;line-height:32px;white-space:nowrap}
+.pp .who .rgt b{overflow:hidden;text-overflow:ellipsis}
 .pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pp .rec{position:relative;width:1080px;height:517px;overflow:visible;}   /* การ์ดจบที่ 469 + ห่างส่วนถัดไป 48 */
 .pp .hd{position:absolute;left:var(--gutter)}
@@ -316,7 +317,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 .pp .plan .top .tag{align-self:center}
 
 /* ---------- หน้าส่งข้อมูล / ส่งสำเร็จ / ส่งนาน (ใต้แถบผู้ยืนยันตัวตน y504) ---------- */
-.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:654px;bottom:288px;z-index:1;
+.pp .pane{position:absolute;left:var(--gutter);right:var(--gutter);top:690px;bottom:288px;z-index:1;
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
 .pp .pane h2{font-size:48px;font-weight:700;line-height:64px}
 .pp .pane p{font-size:28px;line-height:44px;color:var(--ink-muted)}
@@ -355,7 +356,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
 
 
 /* ---------- หน้าสรุปหลังส่งข้อมูล: หัวข้อ + เนื้อหาชิดซ้าย ---------- */
-.pp .pg{position:absolute;left:0;right:0;top:558px;bottom:288px;z-index:1;padding:0 var(--gutter);
+.pp .pg{position:absolute;left:0;right:0;top:594px;bottom:288px;z-index:1;padding:0 var(--gutter);
   display:flex;flex-direction:column;gap:32px}   /* หัวข้อ → เนื้อหา 32 เท่าหน้าเลือกแบบประกัน */
 .pp .pgb{display:flex;flex-direction:column;gap:24px}
 .pp .psum{display:flex;align-items:center;gap:24px;padding:32px;border-radius:24px;
@@ -548,7 +549,8 @@ const svg = (k, w=1.9) => `<svg viewBox="0 0 24 24" fill="none" stroke-width="${
 /* เลือกแบบประกันก่อน แล้วจึงส่งข้อมูลสุขภาพไปให้บริษัทของแบบนั้นพิจารณา
    เลย์เอาต์ตาม Figma node 50:101 · แตะการ์ดเพื่อเลือกแล้วไปขั้นส่งข้อมูล */
 /* ผู้ยืนยันตัวตน — ข้อมูลสมมติ ตอนต่อระบบจริงรับจากการอ่านบัตร/HIS */
-const PATIENT = {name:'ฐากูร ทดสอบ', cid:'1103700123123', dob:'2000-06-11', hn:'000890314', right:'บัตรทอง (UC)'};
+const PATIENT = {name:'ฐากูร ทดสอบ', cid:'1103700123123', dob:'2000-06-11', hn:'000890314', right:'บัตรทอง (UC)',
+  rightFull: new URLSearchParams(location.search).get('r') === 'fail' ? 'สิทธิประกันสังคม' : 'สิทธิหลักประกันสุขภาพแห่งชาติ (UC)'};
 /* อายุเป็น ปี เดือน วัน: นับเดือนเต็มก่อน แล้วนับวันที่เหลือจาก "วันครบเดือน" ล่าสุด
    วันเกิดวันที่ 29–31 ในเดือนที่สั้นกว่า ถือวันสุดท้ายของเดือนนั้นเป็นวันครบเดือน */
 function ageYMD(dob, now = new Date()){
@@ -620,8 +622,9 @@ const ppHead = (full = false) => `
       <div class="kv">
         <div><span>เลขบัตรประชาชน</span><b>${maskCid(PATIENT.cid)}</b></div>
         <div><span>อายุ</span><b>${ageYMD(PATIENT.dob)}</b></div>
-        <div><span>สิทธิการรักษา</span><b>${PATIENT.right}</b></div>
       </div>
+      <!-- สิทธิการรักษาแถวเต็มความกว้าง (ชื่อสิทธิบางรายการยาวมาก) · ป้ายกำกับอยู่บนค่าเหมือนช่องอื่น -->
+      <div class="kv rgt"><div><span>สิทธิการรักษา</span><b>${PATIENT.rightFull || PATIENT.right}</b></div></div>
     </div>
 `;
 
