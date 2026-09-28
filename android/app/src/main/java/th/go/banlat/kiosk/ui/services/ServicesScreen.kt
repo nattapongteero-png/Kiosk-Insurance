@@ -138,9 +138,12 @@ private val Clinics = listOf(
     Service("psy", KIcon.Mind, "จิตเวช", "ปรึกษาสุขภาพใจ", "เลือกบริการ", 0xFFEAE6FA, 0xFF6D28D9, art = R.drawable.art_psy, bullets = listOf("ปรึกษาสุขภาพใจ", "นอนไม่หลับ / เครียด"), fit = ArtFit(-2.82f, -0.38f, 1.875f, -1.169f)),
 )
 private val Appointments = listOf(
-    Service("lab", KIcon.Flask, "LAB มาก่อนนัด", "เจาะเลือด / ตรวจแล็บ ก่อนพบแพทย์", "เลือกบริการ", 0xFFFDF0D9, 0xFFB45309, art = R.drawable.ins_couple, bullets = listOf("เจาะเลือด", "ตรวจแล็บก่อนพบแพทย์"), title = "LAB\nมาก่อนนัด"),
-    Service("xray", KIcon.Xray, "X-RAY มาก่อนนัด", "เอกซเรย์ ก่อนพบแพทย์", "เลือกบริการ", 0xFFE3E8F6, 0xFF3730A3, art = R.drawable.ins_couple, bullets = listOf("เอกซเรย์", "ก่อนพบแพทย์ตามนัด"), title = "X-RAY\nมาก่อนนัด"),
+    Service("lab", KIcon.Flask, "LAB มาก่อนนัด", "เจาะเลือด / ตรวจแล็บ ก่อนพบแพทย์", "เลือกบริการ", 0xFFFDF0D9, 0xFFB45309, art = R.drawable.art_lab, fit = ArtFit(-1.03f, -.10f, 1.24f, -9f),   /* Figma 130:12 · ไม่ตัดขอบซ้าย เห็นคนไข้เต็มตัว · เริ่มหลังชื่อ */ bullets = listOf("เจาะเลือด", "ตรวจแล็บก่อนพบแพทย์"), title = "LAB\nมาก่อนนัด"),
+    Service("xray", KIcon.Xray, "X-RAY มาก่อนนัด", "เอกซเรย์ ก่อนพบแพทย์", "เลือกบริการ", 0xFFE3E8F6, 0xFF3730A3, art = R.drawable.art_xray, fit = ArtFit(-1.13f, -.10f, 1.24f, -1.19f),   /* Figma 130:7 · คนไข้ + จอฟิล์ม */ bullets = listOf("เอกซเรย์", "ก่อนพบแพทย์ตามนัด"), title = "X-RAY\nมาก่อนนัด"),
 )
+/** ชื่อบนการ์ดภาษาอังกฤษ: ตัดบรรทัดเอง (ไม่เกิน 3 บรรทัด) ไม่ทับภาพประกอบ — ตรงกับ EN_TTL ใน services.html */
+private val EnCardTitle = mapOf("opd" to "General\nCheckup", "wound" to "Injection /\nWound\nCare", "med" to "Internal\nMedicine", "dent" to "Dental", "physio" to "Physical\nTherapy", "thai" to "Thai\nMedicine", "psy" to "Mental\nHealth", "lab" to "LAB\nBefore\nappt.", "xray" to "X-RAY\nBefore\nappt.")
+
 private data class Arrive(val id: String, val icon: KIcon, val name: String)
 private val Arrivals = listOf(
     Arrive("walk", KIcon.Walk, "เดินมาเอง"), Arrive("wheel", KIcon.Wheelchair, "รถเข็น / รถนั่ง"),
@@ -154,6 +157,7 @@ fun ServicesScreen(onExit: () -> Unit, onQueued: (service: String, arrive: Strin
     var ticket by remember { mutableStateOf<Pair<Service, String>?>(null) }
     var confirm by remember { mutableStateOf<Pair<Service, String>?>(null) }   // รอกดยืนยันการมารับบริการก่อนพิมพ์บัตรคิว (ตาม flow ตู้เดิม)
     var rightsDone by remember { mutableStateOf(false) }
+    th.go.banlat.kiosk.ui.voice.Speak(when { !rightsDone -> if (DemoSession.rightsOk) "rightsok" else "rightsbad"; ticket != null -> "printing"; confirm != null -> "confirm"; pick != null -> "arrive"; else -> "services" })
     if (!rightsDone) { RightsScreen(onCancel = onExit, onNext = { if (!DemoSession.rightsOk) DemoSession.selfPay = true; rightsDone = true }); return }
     // หน้าเดียว 2 สถานะ: รอยืนยัน (เครื่องพิมพ์ว่าง) → กดยืนยัน → พิมพ์บัตรคิวบนการ์ดเดิม ไม่เปลี่ยนหน้า
     (ticket ?: confirm)?.let { (sv, ar) ->
@@ -395,6 +399,10 @@ private fun PrintCard(sv: Service, arrive: String, now: LocalDateTime, wait: Boo
         } else Column(Modifier.offset(64.s, 64.s).width(420.s)) {
             // สถานะตามจังหวะพิมพ์ (สูตรเดียวกับ services.html) · TODO(integration): เปลี่ยนตามสัญญาณเครื่องพิมพ์จริง (กำลังพิมพ์ / เสร็จ / ขัดข้อง)
             val printing by remember { derivedStateOf { (sec.value % SlipCycle) - .3f < 3.6f } }
+            // พิมพ์เสร็จ: บอกเลขคิว (สะกดทีละตัว) และห้องที่ต้องไป
+            if (!printing) th.go.banlat.kiosk.ui.voice.Speak("printed", slip.queue) {
+                mapOf("q" to slip.queue, "room" to sv.id)
+            }
             val shape = RoundedCornerShape(99.s)
             Row(Modifier.clip(shape).background(if (printing) K.Blue050 else K.Green050).padding(start = 12.s, end = 18.s, top = 6.s, bottom = 6.s),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.s)) {
@@ -516,8 +524,10 @@ private fun ServiceCard(s: Service, main: Boolean, modifier: Modifier, onClick: 
             }
         }
         // ชื่อบริการ (วางทับภาพได้ ตำแหน่งเดียวกับในแผง)
-        KText(s.title, if (main) 52 else 32, Modifier.offset(48.s, (if (main) 108 else 84).s),
-            weight = FontWeight.Bold, lineHeight = if (main) 64f else 42f, softWrap = false)
+        // ภาษาอังกฤษคำยาวกว่า: จำกัดกว้าง 200 ให้ขึ้นบรรทัดเองไม่ทับภาพประกอบ (ชื่อไทยสั้นกว่านี้อยู่แล้ว)
+        val title = if (th.go.banlat.kiosk.ui.i18n.I18n.lang == th.go.banlat.kiosk.ui.i18n.Lang.EN) EnCardTitle[s.id] ?: s.title else s.title
+        KText(title, if (main) 52 else 32, Modifier.offset(48.s, (if (main) 108 else 84).s).widthIn(max = 200.s),
+            weight = FontWeight.Bold, lineHeight = if (main) 64f else 42f)
         // ป้ายหมึกเข้ม คร่อมขอบบนแผง
         Box(Modifier.offset(48.s, 24.s).height(40.s)
             .softShadow(22f, Shade(Color(0x2E14265A), 4f, 10f))

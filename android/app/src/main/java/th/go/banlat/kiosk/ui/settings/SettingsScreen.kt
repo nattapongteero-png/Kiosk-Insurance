@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,7 +68,11 @@ import androidx.compose.ui.layout.ContentScale
  * TODO(integration): อ่าน/เขียนตาราง setting_kiosk · เข้าหน้านี้ต้องผ่านรหัสผ่านตั้งค่าก่อน
  */
 @Composable
-fun SettingsScreen(onExit: () -> Unit) {
+fun SettingsScreen(onExit: () -> Unit) = androidx.compose.runtime.CompositionLocalProvider(th.go.banlat.kiosk.ui.i18n.LocalNoTranslate provides true) { SettingsBody(onExit) }
+
+/** หน้าตั้งค่าเป็นของเจ้าหน้าที่ — ไม่แปลภาษา */
+@Composable
+private fun SettingsBody(onExit: () -> Unit) {
     var open by remember { mutableStateOf<SettingGroup?>(null) }
     var q by remember { mutableStateOf("") }
     val toggles = remember { mutableStateMapOf<SettingItem, Boolean>() }
@@ -96,7 +101,7 @@ fun SettingsScreen(onExit: () -> Unit) {
         // เนื้อหา (เลื่อนได้) เริ่มใต้หัว y340
         val scroll = rememberScrollState()
         LaunchedEffect(open, q.isNotEmpty()) { scroll.scrollTo(0) }
-        Column(Modifier.padding(top = 340.s).fillMaxSize().verticalScroll(scroll).padding(start = 80.s, end = 80.s, top = 24.s, bottom = 120.s)) {
+        Column(Modifier.padding(top = 340.s).fillMaxSize().verticalScroll(scroll).padding(start = 80.s, end = 80.s, top = 24.s, bottom = 336.s)) {   // ล่างเผื่อแถบปุ่ม 288 + 48
             val query = q.trim()
             val g = open
             when {
@@ -110,13 +115,7 @@ fun SettingsScreen(onExit: () -> Unit) {
                         SettingRow(i, n > 0, "${gr.name} › ${sc.title}", query, toggles, values, ::isOn) { toast = it } } }
                 }
                 g != null -> {
-                    Row(Modifier.height(64.s).clip(RoundedCornerShape(99.s)).background(Color.White).border(1.5.s, K.Line, RoundedCornerShape(99.s))
-                        .press { open = null }.padding(start = 20.s, end = 28.s), verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.s)) {
-                        LineIcon(KIcon.Back, K.InkMuted, Modifier.size(28.s), 2.2f)
-                        KText("หมวดทั้งหมด", 24, weight = FontWeight.SemiBold, color = K.InkMuted)
-                    }
-                    Row(Modifier.padding(top = 28.s, bottom = 8.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.s)) {
+                    Row(Modifier.padding(top = 8.s, bottom = 8.s), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.s)) {
                         Box(Modifier.size(88.s).creamDisc(), contentAlignment = Alignment.Center) { PathIcon(g.icon, K.GoldIcon, Modifier.size(44.s), 1.9f) }
                         Column {
                             KText(g.name, 44, weight = FontWeight.Bold, lineHeight = 56f)
@@ -166,9 +165,6 @@ fun SettingsScreen(onExit: () -> Unit) {
                     KText("ตั้งค่าตู้", 48, weight = FontWeight.Bold, lineHeight = 60f)
                     KText("V.24.09.69 · แก้ไขแล้วบันทึกทันที", 24, color = K.InkMuted, lineHeight = 34f)
                 }
-                Box(Modifier.size(88.s).clip(CircleShape).background(Color(0x0F14265A)).press(scaleTo = .94f, onClick = onExit), contentAlignment = Alignment.Center) {
-                    LineIcon(KIcon.Close, K.InkMuted, Modifier.size(40.s), 2.2f)
-                }
             }
             Row(Modifier.padding(top = 40.s).fillMaxWidth().height(96.s)
                 .softShadow(99f, Shade(Color(0x1414265A), 10f, 24f))
@@ -183,6 +179,27 @@ fun SettingsScreen(onExit: () -> Unit) {
                 if (q.isNotEmpty()) Box(Modifier.size(56.s).clip(CircleShape).background(Color(0x0F14265A)).press { q = "" }, contentAlignment = Alignment.Center) {
                     LineIcon(KIcon.Close, K.InkMuted, Modifier.size(28.s), 2.4f)
                 }
+            }
+        }
+
+        // แถบปุ่มล่าง (แบบเดียวกับหน้าผู้ป่วย): ปุ่มออก/ย้อนกลับอยู่ล่างที่เดียว เอื้อมถึงง่ายบนจอสูง 1920
+        val h = 288f
+        Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(h.s)
+            .background(Brush.verticalGradient(0f to Color.Transparent, 32f / h to Color.White.copy(alpha = .3f), 60f / h to Color.White.copy(alpha = .66f),
+                84f / h to Color.White.copy(alpha = .88f), 110f / h to Color.White.copy(alpha = .95f), 1f to Color.White.copy(alpha = .95f)))
+            .padding(start = 80.s, end = 80.s, bottom = 80.s),
+            verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(24.s)) {
+            if (open != null && q.isBlank()) Row(Modifier.height(88.s).widthIn(min = 280.s).softShadow(99f, Shade(Color(0x1414265A), 8f, 20f))
+                .clip(RoundedCornerShape(99.s)).background(Color.White).border(1.5.s, K.Line, RoundedCornerShape(99.s))
+                .press { open = null }.padding(horizontal = 40.s),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.s, Alignment.CenterHorizontally)) {
+                LineIcon(KIcon.Back, K.InkMuted, Modifier.size(30.s), 2.2f)
+                KText("หมวดทั้งหมด", 28, weight = FontWeight.Bold, color = K.InkMuted, softWrap = false)
+            }
+            Box(Modifier.weight(1f).height(88.s).softShadow(99f, Shade(Color(0x3814265A), 10f, 24f)).clip(RoundedCornerShape(99.s))
+                .background(Brush.linearGradient(listOf(Color(0xFF223A7A), K.Ink))).press(scaleTo = .97f, onClick = onExit),
+                contentAlignment = Alignment.Center) {
+                KText("ปิด, กลับหน้าแรก", 28, weight = FontWeight.Bold, color = Color.White, softWrap = false)
             }
         }
 

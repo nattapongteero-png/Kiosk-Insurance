@@ -63,8 +63,10 @@ fun KText(
     minSize: Int = 0,   // > 0 = ย่อตัวอักษรลงได้ถึงขนาดนี้เมื่อพื้นที่ไม่พอ (ฟอนต์บน Android กว้างกว่า Chrome เล็กน้อย)
     inline: Map<String, androidx.compose.foundation.text.InlineTextContent> = emptyMap(),   // รูปแทรกกลางข้อความ (appendInlineContent)
 ) {
+    // สลับภาษา: แปลที่นี่จุดเดียว (ปิดได้ด้วย LocalNoTranslate เช่นหน้าตั้งค่า)
+    val shown = if (th.go.banlat.kiosk.ui.i18n.LocalNoTranslate.current) text else th.go.banlat.kiosk.ui.i18n.tr(text)
     BasicText(
-        text = text,
+        text = shown,
         inlineContent = inline,
         modifier = modifier,
         style = TextStyle(

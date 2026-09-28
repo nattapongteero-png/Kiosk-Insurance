@@ -49,6 +49,8 @@ fun KioskApp() {
 
     // TODO(integration): ล้างข้อมูลผู้ป่วยที่อ่านจากบัตร / session
     fun goHome(reason: String) { warn = false; route = Route.Welcome; homeKey++; bye = reason; lastTouch = SystemClock.uptimeMillis() }
+    // กลับหน้าแรก (จบรายการ / ยกเลิก / หมดเวลา) = กลับเป็นภาษาไทยเสมอ คนถัดไปไม่เจอภาษาค้าง
+    LaunchedEffect(route, homeKey) { if (route == Route.Welcome) th.go.banlat.kiosk.ui.i18n.I18n.lang = th.go.banlat.kiosk.ui.i18n.Lang.TH }
 
     val active = route != Route.Welcome || homeBusy
     LaunchedEffect(active) {
@@ -78,6 +80,7 @@ fun KioskApp() {
                 // TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า
                 Route.Settings -> th.go.banlat.kiosk.ui.settings.SettingsScreen(onExit = { route = Route.Welcome })
             }
+            if (warn) th.go.banlat.kiosk.ui.voice.Speak("idle")
             if (warn) IdleWarning(onContinue = { warn = false; lastTouch = SystemClock.uptimeMillis() }, onHome = { goHome("idle") })
         }
     }

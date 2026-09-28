@@ -99,6 +99,8 @@ fun InsuranceFlow(onExit: () -> Unit) {
             step = if (s.plan.co.slow) Step.Slow(s.plan) else Step.Sent(s.plan)
         }
     }
+    when (step) { Step.Select -> "insselect"; is Step.Sent -> "inssent"; is Step.Slow -> "insslow"; else -> null }
+        ?.let { th.go.banlat.kiosk.ui.voice.Speak(it) }
     Box(Modifier.fillMaxSize()) {
         val sending = step is Step.Sending
         Box(Modifier.fillMaxSize().then(if (sending && Build.VERSION.SDK_INT >= 31) Modifier.blur(8.s) else Modifier)) {

@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+        th.go.banlat.kiosk.ui.voice.Voice.init(this)   // เสียงแนะนำ (TextToSpeech)
         setContent { KioskApp() }
     }
 }

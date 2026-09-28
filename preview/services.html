@@ -723,6 +723,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 .sc .scArt img{position:absolute;width:auto;height:calc(var(--P) * var(--ah));
   left:calc(var(--P) * (var(--ax) - var(--cl)));top:calc(44px + var(--P) * var(--ay))}
 .sc .scTtl{z-index:2}
+
 .sc .scTag{z-index:3}
 .sc .scList{list-style:none;margin:20px 8px 0;display:flex;flex-direction:column;gap:4px;min-height:108px}
 .sc .scList li{display:flex;gap:12px;font-size:24px;line-height:34px;color:var(--ink-muted)}
@@ -882,8 +883,8 @@ const CLINICS = [
   {id:'psy',    ic:'mind',    name:'จิตเวช',          sub:'ปรึกษาสุขภาพใจ',             tag:'เลือกบริการ', tint:'#EAE6FA', deep:'#6D28D9', bl:['ปรึกษาสุขภาพใจ','นอนไม่หลับ / เครียด'], art:'art_psy.png', af:[-2.82,-0.38,1.875,-1.169]},
 ];
 const APPT = [
-  {id:'lab', ttl:'LAB<br>มาก่อนนัด',  ic:'flask', name:'LAB มาก่อนนัด',   sub:'เจาะเลือด / ตรวจแล็บ ก่อนพบแพทย์', tag:'เลือกบริการ', tint:'#FDF0D9', deep:'#B45309', bl:['เจาะเลือด','ตรวจแล็บก่อนพบแพทย์']},
-  {id:'xray', ttl:'X-RAY<br>มาก่อนนัด', ic:'xray',  name:'X-RAY มาก่อนนัด', sub:'เอกซเรย์ ก่อนพบแพทย์',             tag:'เลือกบริการ', tint:'#E3E8F6', deep:'#3730A3', bl:['เอกซเรย์','ก่อนพบแพทย์ตามนัด']},
+  {id:'lab', ttl:'LAB<br>มาก่อนนัด',  ic:'flask', name:'LAB มาก่อนนัด',   sub:'เจาะเลือด / ตรวจแล็บ ก่อนพบแพทย์', tag:'เลือกบริการ', tint:'#FDF0D9', deep:'#B45309', bl:['เจาะเลือด','ตรวจแล็บก่อนพบแพทย์'], art:'art_lab.png', af:[-1.03,-0.10,1.24,-9]}   /* Figma 130:12 · ไม่ตัดขอบซ้าย เห็นคนไข้เต็มตัว · เริ่มหลังชื่อ ไม่ทับข้อความ */,
+  {id:'xray', ttl:'X-RAY<br>มาก่อนนัด', ic:'xray',  name:'X-RAY มาก่อนนัด', sub:'เอกซเรย์ ก่อนพบแพทย์',             tag:'เลือกบริการ', tint:'#E3E8F6', deep:'#3730A3', bl:['เอกซเรย์','ก่อนพบแพทย์ตามนัด'], art:'art_xray.png', af:[-1.13,-0.10,1.24,-1.19]}   /* Figma 130:7 · เห็นคนไข้ + จอฟิล์มเอกซเรย์ ตัดแพทย์ออก (แนวเดียวกับภาพทันตกรรม) */,
 ];
 const ARRIVE = [
   {id:'walk',  ic:'walk',      name:'เดินมาเอง'},
@@ -893,11 +894,13 @@ const ARRIVE = [
   {id:'proxy', ic:'family',    name:'ญาติมาแทน', wide:true},
 ];
 let PICK = null;
+/* ชื่อบนการ์ดภาษาอังกฤษ: ตัดบรรทัดเอง (ไม่เกิน 3 บรรทัด) ให้ไม่ทับภาพประกอบ · i18n.js สลับตาม data-en */
+const EN_TTL = {"opd": "General<br>Checkup", "wound": "Injection /<br>Wound<br>Care", "med": "Internal<br>Medicine", "dent": "Dental", "physio": "Physical<br>Therapy", "thai": "Thai<br>Medicine", "psy": "Mental<br>Health", "lab": "LAB<br>Before<br>appt.", "xray": "X-RAY<br>Before<br>appt."};
 /* การ์ดบริการแบบการ์ดคอร์ส: การ์ดขาวชั้นนอก → แผงสีขอบเข้ม (ป้ายดำคร่อมขอบบนซ้าย · ชื่อตัวใหญ่ · ภาพประกอบล้นขอบบน-ขวา) → รายการใต้แผง */
 const svcBtn = (s, cls='') => `<button class="sc ${cls}" data-svc="${s.id}" style="--tint:${s.tint};--deep:${s.deep}">
     <span class="scPanel"></span>
     <span class="scArt"><span class="scClip" style="--cl:${(s.af || AF)[3]}"><img src="${s.art || ART}" alt="" style="--ax:${(s.af || AF)[0]};--ay:${(s.af || AF)[1]};--ah:${(s.af || AF)[2]}"></span></span>
-    <b class="scTtl">${s.ttl || s.name}</b>
+    <b class="scTtl" data-en="${EN_TTL[s.id] || ''}">${s.ttl || s.name}</b>
     <span class="scTag">${s.tag}</span>
     <ul class="scList">${s.bl.map(x => `<li>${x}</li>`).join('')}</ul></button>`;
 
@@ -1295,6 +1298,16 @@ ${ppHead(true)}
     </div>
   </div>`;
 
+/* เสียงแนะนำ (voice.js) · พิมพ์เสร็จ = บอกเลขคิว (สะกดทีละตัว) และห้องที่ต้องไป */
+window.VOICE_STATE = () => {
+  if (TICKET){ const t = document.getElementById('pTag');
+    if (!t || t.classList.contains('busy')) return ['printing'];
+    return ['printed', {q: PREFIX[TICKET.svc] + '003', room: TICKET.svc}]; }
+  if (CONFIRM) return ['confirm'];
+  if (PICK) return ['arrive'];
+  if (STEP === 'rights') return [RIGHTS_OK ? 'rightsok' : 'rightsbad'];
+  return ['services'];
+};
 function render(){
   document.getElementById('screen').innerHTML = TICKET ? ticketScreen() : CONFIRM ? ticketScreen(CONFIRM, true) : STEP === 'rights' ? rightsScreen() : screen();
   document.querySelectorAll('[data-next]').forEach(el => el.onclick = () => { if (!RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง'; STEP = 'svc'; render(); });
@@ -1354,6 +1367,9 @@ if (['localhost','127.0.0.1'].includes(location.hostname)) {
   }, 1000);
 }
 </script>
+<script src="i18n_dict.js"></script>
+<script src="i18n.js"></script>
+<script src="voice.js"></script>
 <script src="idle.js"></script>
 </body>
 </html>

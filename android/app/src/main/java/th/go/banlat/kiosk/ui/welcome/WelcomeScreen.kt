@@ -68,6 +68,8 @@ import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.delay
 import th.go.banlat.kiosk.R
 import th.go.banlat.kiosk.data.DemoSession
+import th.go.banlat.kiosk.ui.i18n.I18n
+import th.go.banlat.kiosk.ui.i18n.Lang
 import th.go.banlat.kiosk.ui.common.HospitalBanner
 import th.go.banlat.kiosk.ui.common.KIcon
 import th.go.banlat.kiosk.ui.common.LineIcon
@@ -183,6 +185,14 @@ fun WelcomeScreen(
             }
         }
 
+        // เสียงแนะนำตามชั้นที่เปิด (หน้าแรกเปล่า = ชวนเสียบบัตร · ป้ายยกเลิก/หมดเวลา = ให้รับบัตรคืน)
+        th.go.banlat.kiosk.ui.voice.Speak(when (val o = overlay) {
+            is WelcomeOverlay.Reading -> when { o.title.contains("สแกนใบหน้า") -> "face"; o.title.contains("ตรวจสอบ") -> "checking"; else -> "reading" }
+            is WelcomeOverlay.ReadError -> if (o.fail) "readfail" else "nocard"
+            is WelcomeOverlay.Keypad -> if (o.hn) "kphn" else "kpcid"
+            WelcomeOverlay.Consent -> "consent"
+            WelcomeOverlay.None -> if (bye != null) "bye" else "home"
+        })
         when (val o = overlay) {
             is WelcomeOverlay.Reading -> ReadingOverlay(o.title, o.sub)
             is WelcomeOverlay.ReadError -> ReadErrorModal(o.fail,
@@ -302,16 +312,16 @@ private fun RowScope.OptionButton(icon: KIcon, title: String, sub: String, onCli
 }
 
 /** สลับภาษา EN / ไทย — ใช้รูปปุ่มตามแบบ (lang_th / lang_en) · แตะครึ่งซ้าย = EN ครึ่งขวา = ไทย
- *  TODO(integration): ผูกกับไฟล์คำแปล */
+ *  เปลี่ยนภาษาทั้งแอปผ่าน I18n.lang (ui/i18n) · กลับหน้าแรก = ไทย */
 @Composable
 private fun LangToggle(modifier: Modifier) {
-    var th by remember { mutableStateOf(true) }
+    val th = I18n.lang == Lang.TH
     Box(modifier.size(310.s, 81.s)) {
         Image(imgPainter(if (th) R.drawable.lang_th else R.drawable.lang_en),
             if (th) "ภาษา: ไทย" else "Language: English", Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
         Row(Modifier.fillMaxSize()) {
             listOf(false, true).forEach { isTh ->
-                Box(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(99.s)).press(scaleTo = .97f) { th = isTh })
+                Box(Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(99.s)).press(scaleTo = .97f) { I18n.lang = if (isTh) Lang.TH else Lang.EN })
             }
         }
     }
