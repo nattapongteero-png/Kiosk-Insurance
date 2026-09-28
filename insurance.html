@@ -789,6 +789,8 @@ const VIEW = {
 };
 
 /* ---------- ตัวควบคุม ---------- */
+/* เสียงแนะนำ (voice.js) */
+window.VOICE_STATE = () => { const id = (SCREENS[idx] || {}).id; return {select:['insselect'], sent:['inssent'], slow:['insslow']}[id] || null; };
 function render(id){
   const at = SCREENS.findIndex(s => s.id === id);
   if (at >= 0) idx = at;
@@ -933,6 +935,9 @@ if (['localhost','127.0.0.1'].includes(location.hostname)) {
   }, 1000);
 }
 </script>
+<script src="i18n_dict.js"></script>
+<script src="i18n.js"></script>
+<script src="voice.js"></script>
 <script src="idle.js"></script>
 </body>
 </html>

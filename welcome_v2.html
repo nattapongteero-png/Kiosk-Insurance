@@ -877,8 +877,11 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 const TH_MON = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                 'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 /* หน้าแรกไม่มีวันที่/เวลา (แบนเนอร์แทนหัวจอ) */
-document.querySelector('.lang .en').onclick = () => { langImg.src = 'lang_en.png'; };
-document.querySelector('.lang .th').onclick = () => { langImg.src = 'lang_th.png'; };
+/* สลับภาษาทั้งตู้ (i18n.js) · หน้าแรกโหลดใหม่ / กลับหน้าแรก = ไทยเสมอ (คนถัดไปไม่เจอภาษาค้าง) · ?lang=en ไว้ทดสอบ */
+function setLang(l){ langImg.src = l === 'en' ? 'lang_en.png' : 'lang_th.png'; if (window.I18N) I18N.set(l); }
+document.querySelector('.lang .en').onclick = () => setLang('en');
+document.querySelector('.lang .th').onclick = () => setLang('th');
+addEventListener('load', () => setLang(new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'th'));
 
 /* ---------- จำลอง flow: เสียบบัตร → อ่านบัตร → เด้ง consent ---------- */
 const reading = document.getElementById('reading');
@@ -899,7 +902,7 @@ function resetFlow(){
 }
 function insertCard(){
   resetFlow(); RIGHTS_Q = '';
-  reading.hidden = false;
+  reading.dataset.k = 'reading'; reading.hidden = false;
   setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 1800);
 }
 function checkScroll(){
@@ -928,10 +931,13 @@ function showBye(k){
   document.getElementById('byeT').textContent = BYE[k];
   b.hidden = false; clearTimeout(window._byeT); window._byeT = setTimeout(() => { b.hidden = true; }, 4000);
 }
-function cancelFlow(k){ resetFlow(); rdErr.hidden = true; showBye(k); }
+function cancelFlow(k){ resetFlow(); rdErr.hidden = true; setLang('th'); showBye(k); }
 document.getElementById('csClose').onclick = () => cancelFlow('cancel');
 /* ปุ่มเฟือง → หน้าตั้งค่าตู้ · TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า */
 document.querySelector('.sysBtn').onclick = () => { location.href = 'settings.html'; };
+/* เสียงแนะนำ (voice.js): คีย์ตามชั้นที่เปิดอยู่ */
+window.VOICE_STATE = () => !rdErr.hidden ? [rdErr.dataset.k || 'nocard'] : !reading.hidden ? [reading.dataset.k || 'reading']
+  : !kpOv.hidden ? [KP.mode === 'hn' ? 'kphn' : 'kpcid'] : !ov.hidden ? ['consent'] : !document.getElementById('bye').hidden ? ['bye'] : ['home'];
 /* ตัวจับเวลาไม่มีการแตะ (idle.js): หน้าแรกนับเฉพาะตอนมีชั้นซ้อนเปิดอยู่ */
 window.IDLE_BUSY = () => !ov.hidden || !kpOv.hidden || !rdErr.hidden;
 window.IDLE_HOME = k => cancelFlow(k);
@@ -993,7 +999,7 @@ document.getElementById('kpOk').onclick = () => {
   kpClose();
   document.getElementById('readTitle').textContent = 'กำลังตรวจสอบข้อมูล';
   document.getElementById('readSub').textContent = 'ระบบกำลังค้นหาข้อมูลผู้ป่วยจากเลขที่ท่านกรอก';
-  reading.hidden = false;
+  reading.dataset.k = 'checking'; reading.hidden = false;
   setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 1600);
 };
 
@@ -1005,7 +1011,7 @@ document.querySelector('.opt.scan').onclick = () => {
   resetFlow();
   document.getElementById('readTitle').textContent = 'กำลังสแกนใบหน้า';
   document.getElementById('readSub').textContent = 'กรุณามองตรงมาที่กล้องด้านบนของตู้';
-  reading.hidden = false;
+  reading.dataset.k = 'face'; reading.hidden = false;
   setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 2000);
 };
 /* ---------- ปุ่มอ่านบัตร + แจ้งเตือนอ่านไม่ได้ ----------
@@ -1021,7 +1027,7 @@ function readCard(){
   resetFlow(); rdErr.hidden = true;
   const r = ['nocard', 'fail', 'ok'][readN % 3]; readN++;
   if (r === 'ok'){ insertCard(); return; }
-  reading.hidden = false;
+  reading.dataset.k = 'reading'; reading.hidden = false; rdErr.dataset.k = r === 'fail' ? 'readfail' : 'nocard';
   setTimeout(() => {
     reading.hidden = true;
     const e = RD_ERR[r];
@@ -1074,6 +1080,9 @@ if (['localhost','127.0.0.1'].includes(location.hostname)) {
   }, 1000);
 }
 </script>
+<script src="i18n_dict.js"></script>
+<script src="i18n.js"></script>
+<script src="voice.js"></script>
 <script src="idle.js"></script>
 </body>
 </html>
