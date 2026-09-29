@@ -27,7 +27,7 @@
     try {
       const ac = new AbortController(); setTimeout(() => ac.abort(), 3500);
       const r = await fetch(VOX, {method:'POST', headers:{'Content-Type':'application/json'}, signal: ac.signal,
-        body: JSON.stringify({model:'voxcpm-thai', input:text, voice:VOX_VOICE, response_format:'wav'})});
+        body: JSON.stringify({model:'voxcpm-thai', input:text + ' ...',   /* เติมจุดท้าย: VoxCPM มักตัดพยางค์สุดท้าย */ voice:VOX_VOICE, response_format:'wav'})});
       if (!r.ok) throw new Error(r.status);
       const blob = await r.blob(); if (my !== tok) return;
       cur = new Audio(URL.createObjectURL(blob)); cur.play().catch(() => {}); return;
