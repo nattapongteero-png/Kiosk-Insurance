@@ -96,7 +96,8 @@ object Voice {
         val c = URL(VOX_URL).openConnection() as HttpURLConnection
         c.connectTimeout = 2000; c.readTimeout = 3500; c.requestMethod = "POST"; c.doOutput = true
         c.setRequestProperty("Content-Type", "application/json")
-        val body = org.json.JSONObject().put("model", "voxcpm-thai").put("input", text).put("voice", VOX_VOICE).put("response_format", "wav").toString()
+        // เติม " ..." ท้ายข้อความ: VoxCPM มักตัดพยางค์สุดท้ายของประโยคที่ไม่มีจุดจบ
+        val body = org.json.JSONObject().put("model", "voxcpm-thai").put("input", "$text ...").put("voice", VOX_VOICE).put("response_format", "wav").toString()
         c.outputStream.use { it.write(body.toByteArray()) }
         check(c.responseCode == 200) { "HTTP ${c.responseCode}" }
         return c.inputStream.use { it.readBytes() }.also { check(it.size > 2000) }
