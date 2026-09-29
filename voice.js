@@ -28,25 +28,52 @@
     if (mute) return; stop(); const my = tok, en = l === 'en';
     const spelled = [...q.toLowerCase()].map(c => /\d/.test(c) ? (en ? enD : thD)[+c] : (en ? c.toUpperCase() : (thL[c] || c))).join(en ? ', ' : ' ');
     const text = LINE[l].replace('{q}', spelled).replace('{room}', (ROOM[room] || ['', ''])[en ? 1 : 0]);
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
     try {
+      /* VoxCPM จำกัดความยาวเสียงตามความยาวข้อความ → คำท้ายโดนตัด: ต่อคำท้ายให้ประโยคจริงพูดครบ แล้วตัดทิ้ง (dropTail) · ตัดไม่ได้ = ใช้ชิ้นในเครื่อง */
       const ac = new AbortController(); setTimeout(() => ac.abort(), 3500);
       const r = await fetch(VOX, {method:'POST', headers:{'Content-Type':'application/json'}, signal: ac.signal,
-        body: JSON.stringify({model:'voxcpm-thai', input:text + ' ...',   /* เติมจุดท้าย: VoxCPM มักตัดพยางค์สุดท้าย */ voice:VOX_VOICE, response_format:'wav'})});
+        body: JSON.stringify({model:'voxcpm-thai', input:text + (en ? ', hello.' : ', สวัสดี'), voice:VOX_VOICE, response_format:'wav'})});
       if (!r.ok) throw new Error(r.status);
-      const blob = await r.blob(); if (my !== tok) return;
-      cur = new Audio(URL.createObjectURL(blob)); cur.onended = finished; cur.play().catch(() => {}); return;
+      const buf = await ctx.decodeAudioData(await r.arrayBuffer()); if (my !== tok) return;
+      const y = dropTail(buf.getChannelData(0), buf.sampleRate);
+      if (!y) throw new Error('tail word not found');
+      playBuf(y, buf.sampleRate); return;
     } catch (e) { console.info('[voice] online voice unavailable → joined clips', e.message || e); }
     if (my !== tok) return;
-    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
     const parts = [[l + '_printed1', 220]];
     [...q.toLowerCase()].forEach((c, i, a) => parts.push([l + (/\d/.test(c) ? '_d' : '_l') + c, i === a.length - 1 ? 260 : 90]));
     parts.push([l + '_printed2', 80]); if (room) parts.push([l + '_room_' + room, 0]);
     const bufs = await Promise.all(parts.map(([n]) => fetch('voice/' + n + '.wav').then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b))));
     if (my !== tok) return;
-    const rate = bufs[0].sampleRate, lead = Math.round(rate * .15), len = lead + bufs.reduce((t, b, i) => t + b.length + Math.round(rate * parts[i][1] / 1000), 0);   /* เงียบนำ 150 ms */
-    const all = ctx.createBuffer(1, len, rate), d = all.getChannelData(0); let at = lead;
+    const rate = bufs[0].sampleRate, len = bufs.reduce((t, b, i) => t + b.length + Math.round(rate * parts[i][1] / 1000), 0);
+    const d = new Float32Array(len); let at = 0;
     bufs.forEach((b, i) => { d.set(b.getChannelData(0), at); at += b.length + Math.round(rate * parts[i][1] / 1000); });
+    playBuf(d, rate);
+  }
+  /* เล่นก้อนเดียว · เงียบนำ 150 ms (ลำโพงตื่นก่อนพยางค์แรก) ท้าย 250 ms */
+  function playBuf(y, rate){
+    const lead = Math.round(rate * .15), all = ctx.createBuffer(1, lead + y.length + Math.round(rate * .25), rate);
+    all.getChannelData(0).set(y, lead);
     src = ctx.createBufferSource(); src.buffer = all; src.connect(ctx.destination); srcOn = true; src.onended = () => { srcOn = false; finished(); }; src.start();
+  }
+  /* ตัดคำต่อท้าย: ช่วงเงียบ ≥120 ms สุดท้าย ที่เสียงหลังช่วงนั้นยาว 0.25–1.2 วิ → ตัดหลังคำจริง 60 ms (ตรงกับ Voice.kt dropTailWord) */
+  function dropTail(x, rate){
+    const win = rate / 100 | 0, nw = x.length / win | 0, env = new Float32Array(nw);
+    for (let w = 0; w < nw; w++){ let m = 0; for (let k = w * win; k < (w + 1) * win; k++) m = Math.max(m, Math.abs(x[k])); env[w] = m; }
+    const pk = Math.max(...env), loud = [...env].map(v => v > pk * .04), end = loud.lastIndexOf(true), start = loud.indexOf(true);
+    for (let w = end; w > start;){
+      if (loud[w]){ w--; continue; }
+      let j = w; while (j > start && !loud[j]) j--;
+      if (w - j >= 12){
+        const tail = (end - w) / 100; if (tail < .25 || tail > 1.2) return null;
+        const cut = (j + 1 + 6) * win, y = x.slice(0, cut), f = rate / 50 | 0;
+        for (let k = 0; k < f; k++) y[cut - 1 - k] *= k / f;
+        return y;
+      }
+      w = j;
+    }
+    return null;
   }
   function next(){
     const n = seq.shift(); if (!n){ cur = null; finished(); return; }
