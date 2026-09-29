@@ -70,6 +70,7 @@ import th.go.banlat.kiosk.ui.common.KIcon
 import th.go.banlat.kiosk.ui.common.LineIcon
 import th.go.banlat.kiosk.ui.common.Shade
 import th.go.banlat.kiosk.ui.common.creamDisc
+import th.go.banlat.kiosk.ui.common.pearl
 import th.go.banlat.kiosk.ui.common.softShadow
 import th.go.banlat.kiosk.ui.theme.K
 import th.go.banlat.kiosk.ui.theme.KText
@@ -78,41 +79,73 @@ import th.go.banlat.kiosk.ui.theme.unitPx
 import th.go.banlat.kiosk.ui.welcome.swallowTaps
 
 private sealed interface Step {
+    data object Consent : Step
+    data object Gateway : Step
     data object Select : Step
     data class Detail(val plan: Plan) : Step
-    data class Sending(val plan: Plan) : Step
-    data class Sent(val plan: Plan) : Step
+    data class Done(val plan: Plan) : Step
     data class Slow(val plan: Plan) : Step
 }
 
 /**
- * flow ประกัน: เลือกแบบประกัน → อ่านรายละเอียดเต็ม → modal กำลังส่งข้อมูล → สรุป (ส่งสำเร็จ / ส่งนาน รับผลทางแอป)
- * ต้นแบบ: บริษัทที่ slow = true (AIA) จำลองกรณีส่งนาน · TODO(integration): ใช้ผลตอบกลับจริงจากระบบกลาง BMS
+ * flow ประกันแบบใหม่ (ถามหลังสร้าง Visit/VN แล้ว) — ตรงกับ insurance.html
+ * ความยินยอม + เลือกข้อมูลที่เปิดเผย → Insurance Gateway ส่งให้ทุกบริษัท → ข้อเสนอจากบริษัท → รายละเอียด → สนใจแผนนี้ (บริษัทติดต่อกลับ)
+ * แผนของบริษัทที่ยังพิจารณา (slow) → แจ้งผลทางแอป MyAtlas / หมอพร้อม · ไม่ยินยอม/ไม่สนใจ/จบ → onExit = กลับไปพิมพ์ VN Slip
+ * ต้นแบบ: บริษัทที่ slow = true (AIA) ยังพิจารณาอยู่ · TODO(integration): ผลจริงจาก Insurance Gateway ของ BMS
  */
 @Composable
 fun InsuranceFlow(onExit: () -> Unit) {
-    var step by remember { mutableStateOf<Step>(Step.Select) }
-    LaunchedEffect(step) {
-        val s = step
-        if (s is Step.Sending) {
-            delay(if (s.plan.co.slow) 5200 else 2800)
-            step = if (s.plan.co.slow) Step.Slow(s.plan) else Step.Sent(s.plan)
-        }
-    }
-    when (step) { Step.Select -> "insselect"; is Step.Sent -> "inssent"; is Step.Slow -> "insslow"; else -> null }
+    var step by remember { mutableStateOf<Step>(Step.Consent) }
+    when (step) { Step.Consent -> "consent"; Step.Gateway -> "insgw"; Step.Select -> "insselect"; is Step.Done -> "insdone"; is Step.Slow -> "insslow"; else -> null }
         ?.let { th.go.banlat.kiosk.ui.voice.Speak(it) }
-    Box(Modifier.fillMaxSize()) {
-        val sending = step is Step.Sending
-        Box(Modifier.fillMaxSize().then(if (sending && Build.VERSION.SDK_INT >= 31) Modifier.blur(8.s) else Modifier)) {
-            when (val s = step) {
-                Step.Select -> SelectScreen(onPick = { step = Step.Detail(it) }, onCancel = onExit)
-                is Step.Detail -> DetailScreen(s.plan, onBack = { step = Step.Select }, onSend = { step = Step.Sending(s.plan) })
-                is Step.Sending -> DetailScreen(s.plan, onBack = {}, onSend = {})
-                is Step.Sent -> SummaryScreen(s.plan, slow = false, onDone = onExit)
-                is Step.Slow -> SummaryScreen(s.plan, slow = true, onDone = onExit)
+    when (val s = step) {
+        Step.Consent -> Box(Modifier.fillMaxSize()) {
+            PageShell {}
+            th.go.banlat.kiosk.ui.welcome.ConsentModal(onDecline = onExit, onAccept = { step = Step.Gateway })
+        }
+        Step.Gateway -> GatewayScreen(onDone = { step = Step.Select })
+        Step.Select -> SelectScreen(onPick = { step = if (it.co.slow) Step.Slow(it) else Step.Detail(it) }, onCancel = onExit)
+        is Step.Detail -> DetailScreen(s.plan, onBack = { step = Step.Select }, onSend = { step = Step.Done(s.plan) })
+        is Step.Done -> SummaryScreen(s.plan, slow = false, onDone = onExit)
+        is Step.Slow -> SummaryScreen(s.plan, slow = true, onDone = onExit)
+    }
+}
+
+// ---------------- Insurance Gateway: ส่งให้ทุกบริษัทพร้อมกัน แล้วรอข้อเสนอ ----------------
+@Composable
+private fun GatewayScreen(onDone: () -> Unit) {
+    val cos = listOf(th.go.banlat.kiosk.data.InsurerA, th.go.banlat.kiosk.data.InsurerB, th.go.banlat.kiosk.data.InsurerC)
+    var answered by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) { delay(1300); answered = 1; delay(800); answered = 2; delay(700); answered = 3; delay(1000); onDone() }
+    PageShell {
+        Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
+            verticalArrangement = Arrangement.spacedBy(40.s, Alignment.CenterVertically)) {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.size(156.s), contentAlignment = Alignment.Center) {
+                    GoldSpinner(Modifier.fillMaxSize(), thickness = 3f)
+                    Box(Modifier.size(128.s).creamDisc(ring = 2f, halo = 14f), contentAlignment = Alignment.Center) {
+                        LineIcon(KIcon.Shield, K.GoldIcon, Modifier.size(60.s), 1.8f)
+                    }
+                }
+                KText("กำลังส่งข้อมูลให้บริษัทประกัน", 48, Modifier.padding(top = 24.s), weight = FontWeight.Bold, lineHeight = 64f, align = TextAlign.Center)
+                KText("ผ่าน Insurance Gateway แบบเข้ารหัส · กรุณารอสักครู่", 28, color = K.InkMuted, lineHeight = 42f, align = TextAlign.Center)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(16.s), horizontalAlignment = Alignment.CenterHorizontally) {
+                cos.forEachIndexed { i, co ->
+                    Row(Modifier.fillMaxWidth().pearl(24f, gradientRing = false).padding(horizontal = 28.s, vertical = 22.s),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.s)) {
+                        InsurerLogo(co, 64, 8)
+                        KText(co.name, 26, Modifier.weight(1f), weight = FontWeight.SemiBold, lineHeight = 36f, softWrap = false, maxLines = 1, minSize = 20)
+                        when {
+                            answered <= i -> StatusPill(StatusKind.Busy, "กำลังส่ง")
+                            co.slow -> StatusPill(StatusKind.Wait, "กำลังพิจารณา")
+                            else -> StatusPill(StatusKind.Done, "ได้รับข้อเสนอแล้ว")
+                        }
+                    }
+                }
+                RefId()
             }
         }
-        (step as? Step.Sending)?.let { SendModal(it.plan) }
     }
 }
 
@@ -235,7 +268,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
             .verticalScroll(scroll)) {
             // แบบประกันที่แนะนำ (สูง 517: การ์ดจบที่ 469 + ห่างส่วนถัดไป 48)
             Box(Modifier.fillMaxWidth().height(517.s)) {
-                Heading("แบบประกันที่แนะนำ", "เลือกประกันที่ต้องการ", Modifier.offset(80.s, 8.s))
+                Heading("ข้อเสนอแนะนำ", "แตะเพื่อดูรายละเอียด", Modifier.offset(80.s, 8.s))
                 ArtCouple(Modifier.offset(0.s, 154.s).size(615.s, 410.s))
                 // แถบการ์ดปัดซ้าย-ขวา: เผื่อพื้นที่ให้เงา บน 40 ซ้าย 40 ล่าง 72 · ปัดแล้วการ์ดหายเข้าหลังภาพที่ x475
                 val rail = rememberLazyListState()
@@ -248,7 +281,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
             }
             // แบบประกันอื่น
             Column(Modifier.padding(start = 80.s, end = 80.s, top = 48.s, bottom = 336.s)) {
-                Heading("แบบประกันอื่น", "เลือกประกันที่ต้องการ")
+                Heading("ข้อเสนออื่น", "แตะเพื่อดูรายละเอียด")
                 Spacer(Modifier.height(32.s))
                 OtherPlans.chunked(2).forEachIndexed { i, row ->
                     if (i > 0) Spacer(Modifier.height(48.s))
@@ -258,7 +291,7 @@ private fun SelectScreen(onPick: (Plan) -> Unit, onCancel: () -> Unit) {
                 }
             }
         }
-        BottomBar { SecondaryPill("ยังไม่สนใจ, ไปที่ระบบลงทะเบียน", onCancel) }
+        BottomBar { SecondaryPill("ไม่สนใจ, พิมพ์บัตรคิว", onCancel) }
     }
 }
 
@@ -273,26 +306,6 @@ private fun ArtCouple(modifier: Modifier) {
             val stops = (0..8).map { i -> (.45f + .43f * i / 8f) to Color.Black.copy(alpha = 1f - sm(i / 8f)) }.toTypedArray()
             drawRect(Brush.verticalGradient(0f to Color.Black, *stops), blendMode = BlendMode.DstIn)
         }, contentScale = ContentScale.Crop)
-}
-
-// ---------------- modal กำลังส่งข้อมูล ----------------
-@Composable
-private fun SendModal(plan: Plan) {
-    Box(Modifier.fillMaxSize().background(K.ScrimLight).swallowTaps().padding(horizontal = 80.s), contentAlignment = Alignment.Center) {
-        Column(Modifier.fillMaxWidth()
-            .softShadow(40f, Shade(Color(0x59061432), 40f, 100f))
-            .clip(RoundedCornerShape(40.s))
-            .background(Brush.linearGradient(0f to K.PearlTop, .55f to K.PearlMid, 1f to K.PearlBottom))
-            .padding(start = 56.s, end = 56.s, top = 64.s, bottom = 56.s),
-            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.s)) {
-            GoldSpinner(Modifier.padding(bottom = 8.s).size(160.s), thickness = 13f)
-            KText("กำลังส่งข้อมูลให้บริษัทประกัน", 44, weight = FontWeight.Bold, lineHeight = 60f, align = TextAlign.Center)
-            KText("ระบบกำลังส่งข้อมูลสุขภาพตามที่ท่านยินยอม\nผ่านระบบกลางของ BMS แบบเข้ารหัส กรุณารอสักครู่",
-                26, color = K.InkMuted, lineHeight = 40f, align = TextAlign.Center)
-            PlanSummary(plan, Modifier.padding(top = 8.s).fillMaxWidth()) { StatusPill(StatusKind.Busy, "กำลังส่ง") }
-            RefId()
-        }
-    }
 }
 
 @Composable
@@ -323,14 +336,14 @@ internal fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
                     if (slow) LineIcon(KIcon.Clock, K.GoldIcon, Modifier.size(80.s), 1.8f)
                     else LineIcon(KIcon.BigCheck, K.Green, Modifier.size(80.s), 2.4f)
                 }
-                KText(if (slow) "การส่งข้อมูลใช้เวลานานกว่าปกติ" else "ส่งข้อมูลให้บริษัทประกันแล้ว",
+                KText(if (slow) "บริษัทยังพิจารณาข้อเสนออยู่" else "บันทึกความสนใจแล้ว",
                     48, weight = FontWeight.Bold, lineHeight = 68f, align = TextAlign.Center)
-                KText(if (slow) "ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป" else "ท่านจะได้รับผลผ่านแอปด้านล่าง",
+                KText(if (slow) "ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป" else "บริษัทประกันจะติดต่อกลับเพื่อให้ข้อมูลเพิ่มเติม",
                     32, weight = FontWeight.Medium, color = K.InkSub, lineHeight = 48f, align = TextAlign.Center)
             }
             Column(verticalArrangement = Arrangement.spacedBy(24.s), horizontalAlignment = Alignment.CenterHorizontally) {
                 PlanSummary(plan, Modifier.fillMaxWidth()) {
-                    if (slow) StatusPill(StatusKind.Wait, "กำลังดำเนินการ") else StatusPill(StatusKind.Done, "บริษัทได้รับแล้ว")
+                    if (slow) StatusPill(StatusKind.Wait, "กำลังดำเนินการ") else StatusPill(StatusKind.Done, "สนใจแผนนี้")
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(16.s)) {
                     if (slow) {
@@ -344,7 +357,7 @@ internal fun SummaryScreen(plan: Plan, slow: Boolean, onDone: () -> Unit) {
                 RefId()
             }
         }
-        BottomBar { PrimaryPill("เข้าใจแล้ว, ไปที่ระบบลงทะเบียน", onDone, Modifier.padding(horizontal = 80.s).fillMaxWidth()) }   // ปุ่มหลักเดี่ยว = เต็มความกว้าง
+        BottomBar { PrimaryPill("พิมพ์บัตรคิว", onDone, Modifier.padding(horizontal = 80.s).fillMaxWidth()) }   // จบเรื่องประกัน → กลับไปพิมพ์ VN Slip
     }
 }
 

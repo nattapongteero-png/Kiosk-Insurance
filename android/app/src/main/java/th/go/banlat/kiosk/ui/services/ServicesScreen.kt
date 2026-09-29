@@ -152,17 +152,24 @@ private val Arrivals = listOf(
 private val Proxy = Arrive("proxy", KIcon.Family, "ญาติมาแทน")
 
 @Composable
-fun ServicesScreen(onExit: () -> Unit, onQueued: (service: String, arrive: String) -> Unit = { _, _ -> }) {
+fun ServicesScreen(onExit: () -> Unit, printVisit: Pair<String, String>? = null, onInsurance: (Pair<String, String>) -> Unit = {},
+                   onQueued: (service: String, arrive: String) -> Unit = { _, _ -> }) {
+    val all = listOf(Main) + Clinics + Appointments
     var pick by remember { mutableStateOf<Service?>(null) }
-    var ticket by remember { mutableStateOf<Pair<Service, String>?>(null) }
-    var confirm by remember { mutableStateOf<Pair<Service, String>?>(null) }   // รอกดยืนยันการมารับบริการก่อนพิมพ์บัตรคิว (ตาม flow ตู้เดิม)
-    var rightsDone by remember { mutableStateOf(false) }
-    th.go.banlat.kiosk.ui.voice.Speak(when { !rightsDone -> if (DemoSession.rightsOk) "rightsok" else "rightsbad"; ticket != null -> "printing"; confirm != null -> "confirm"; pick != null -> "arrive"; else -> "services" })
+    // กลับจากเรื่องประกัน (printVisit) → เริ่มพิมพ์บัตรคิวทันที
+    var ticket by remember { mutableStateOf(printVisit?.let { (id, ar) -> all.first { it.id == id } to ar }) }
+    var confirm by remember { mutableStateOf<Pair<Service, String>?>(null) }   // รอกดยืนยันการรับบริการ
+    var visit by remember { mutableStateOf<Pair<Service, String>?>(null) }     // สร้าง Visit/VN แล้ว → สรุปสุขภาพ + ถามเรื่องประกัน
+    var rightsDone by remember { mutableStateOf(printVisit != null) }
+    th.go.banlat.kiosk.ui.voice.Speak(when { !rightsDone -> if (DemoSession.rightsOk) "rightsok" else "rightsbad"; ticket != null -> "printing"; visit != null -> "askins"; confirm != null -> "confirm"; pick != null -> "arrive"; else -> "services" })
     if (!rightsDone) { RightsScreen(onCancel = onExit, onNext = { if (!DemoSession.rightsOk) DemoSession.selfPay = true; rightsDone = true }); return }
-    // หน้าเดียว 2 สถานะ: รอยืนยัน (เครื่องพิมพ์ว่าง) → กดยืนยัน → พิมพ์บัตรคิวบนการ์ดเดิม ไม่เปลี่ยนหน้า
+    if (ticket == null) visit?.let { v ->
+        VisitSummaryScreen(v.first, Arrivals.plus(Proxy).first { it.id == v.second }.name, onPrint = { ticket = v; onQueued(v.first.id, v.second) }, onInsurance = { onInsurance(v.first.id to v.second) }); return
+    }
+    // หน้าเดียว 2 สถานะ: รอยืนยัน (เครื่องพิมพ์ว่าง) → ยืนยัน = สร้าง Visit (ไปหน้าสรุปสุขภาพ) · กลับมาพิมพ์ = พิมพ์บัตรคิวบนการ์ดเดิม
     (ticket ?: confirm)?.let { (sv, ar) ->
         TicketScreen(sv, Arrivals.plus(Proxy).first { it.id == ar }.name, wait = ticket == null, onCancel = onExit,
-            onConfirm = { ticket = sv to ar; onQueued(sv.id, ar) }, onDone = onExit); return
+            onConfirm = { visit = sv to ar; confirm = null }, onDone = onExit); return
     }
     val u = unitPx()
     val scroll = rememberScrollState()
@@ -541,6 +548,101 @@ private fun ServiceCard(s: Service, main: Boolean, modifier: Modifier, onClick: 
  * ผลตรวจสอบสิทธิ (ก่อนเลือกบริการ) — เลย์เอาต์เดียวกับหน้าสรุปผลประกัน · ตรงกับ services.html rightsScreen
  * มีสิทธิ: ✓ เขียว + Authen Code → "ถัดไป, เลือกบริการ" · ไม่มีสิทธิ: ⚠ ส้ม → "ยืนยันใช้สิทธิชำระเงินเอง"
  */
+/* ---------- สร้าง Visit แล้ว: AI Health Summary + ถามสนใจตรวจสอบแผนประกัน (ตรงกับ services.html summaryScreen) ----------
+ * สรุปสุขภาพเพื่อการบริการในโรงพยาบาล ยังไม่ส่งบริษัทประกัน · ไม่สนใจ → พิมพ์ VN Slip · สนใจ → ความยินยอม/ประกัน แล้วกลับมาพิมพ์
+ * TODO(integration): VN จาก HIS · สรุปจากระบบ AI ของ BMS บน PHR/HIS */
+private const val DemoVn = "690929-0142"
+private val AiSummary = listOf("โรคประจำตัว" to "ความดันโลหิตสูง", "แพ้ยา" to "ไม่มีประวัติแพ้ยา",
+    "สัญญาณชีพล่าสุด" to "ความดัน 128/82 · BMI 23.4", "มารับบริการล่าสุด" to "12 ส.ค. 2569 · อายุรกรรม")
+
+/** หน้าหลัง = ลงทะเบียนสำเร็จ (VN · บริการ · ลักษณะการมา · สิทธิ) · คำถามประกันเป็น modal ให้อ่านสรุปก่อนตัดสินใจ */
+@Composable
+private fun VisitSummaryScreen(sv: Service, arrive: String, onPrint: () -> Unit, onInsurance: () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
+        PageShell {
+            Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
+                verticalArrangement = Arrangement.spacedBy(40.s, Alignment.CenterVertically)) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.padding(bottom = 24.s).size(160.s).creamDisc(ring = 2f, halo = 14f), contentAlignment = Alignment.Center) {
+                        LineIcon(KIcon.BigCheck, K.Green, Modifier.size(80.s), 2.4f)
+                    }
+                    KText("ลงทะเบียนรับบริการแล้ว", 48, weight = FontWeight.Bold, lineHeight = 68f, align = TextAlign.Center)
+                    KText(buildAnnotatedString {
+                        append("VN "); withStyle(SpanStyle(color = K.Ink, fontWeight = FontWeight.Bold)) { append(DemoVn) }; append(" · "); append(sv.name)
+                    }, 32, weight = FontWeight.Medium, color = K.InkSub, lineHeight = 48f, align = TextAlign.Center)
+                }
+                val right = if (DemoSession.rightsOk) DemoSession.rights.main else "ชำระเงินเอง"
+                SummaryRows(listOf("บริการ" to sv.name, "ลักษณะการมา" to arrive, "สิทธิการรักษาที่จะใช้" to right), useLast = true)
+            }
+        }
+        InsAskModal(onPrint, onInsurance)
+    }
+}
+
+/** การ์ดไข่มุก แถวคีย์–ค่า คั่นเส้นบาง (แถวสุดท้ายเน้นน้ำเงินเมื่อ useLast) */
+@Composable
+private fun SummaryRows(rows: List<Pair<String, String>>, useLast: Boolean = false, header: (@Composable () -> Unit)? = null) {
+    Column(Modifier.fillMaxWidth().pearl(24f, gradientRing = false).padding(horizontal = 40.s, vertical = 8.s)) {
+        header?.invoke()
+        rows.forEachIndexed { i, (k, v) ->
+            if (i > 0 || header != null) Box(Modifier.fillMaxWidth().height(1.s).background(Color(0x1414265A)))
+            val use = useLast && i == rows.lastIndex
+            Row(Modifier.fillMaxWidth().padding(vertical = 18.s), verticalAlignment = Alignment.CenterVertically) {
+                KText(k, 26, color = K.InkSoft, lineHeight = 36f, softWrap = false)
+                Spacer(Modifier.weight(1f).widthIn(min = 32.s))
+                KText(v, if (use) 32 else 28, weight = FontWeight.Bold, color = if (use) K.BlueDeep else K.Ink, lineHeight = 40f, align = TextAlign.End)
+            }
+        }
+    }
+}
+
+/**
+ * modal ถามสนใจตรวจสอบแผนประกัน (ตรงกับ services.html insAskModal) — ผู้ป่วยต้องอ่านสรุปสุขภาพก่อนตัดสินใจ
+ * เด้งหลังหน้าลงทะเบียนสำเร็จ 0.8 วิ ให้เห็นว่าสำเร็จก่อน · ไม่มีปุ่มปิด/แตะพื้นหลังไม่ปิด: ทั้งสองทางจบที่การพิมพ์บัตรคิว
+ * ปุ่มหลักบนเต็มความกว้าง · ปุ่มรองใต้ (ข้อความยาวทั้งคู่ วางคู่กันไม่พอ)
+ */
+@Composable
+private fun InsAskModal(onPrint: () -> Unit, onInsurance: () -> Unit) {
+    val u = unitPx()
+    val show = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { kotlinx.coroutines.delay(800); show.animateTo(1f, tween(400, easing = CubicBezierEasing(.2f, .8f, .2f, 1f))) }
+    Box(Modifier.fillMaxSize().graphicsLayer { alpha = show.value }.background(K.ScrimLight).swallowTaps().padding(horizontal = 80.s),
+        contentAlignment = Alignment.Center) {
+        Column(Modifier.fillMaxWidth()
+            .graphicsLayer { translationY = (1f - show.value) * 24f * u; val sc = .97f + .03f * show.value; scaleX = sc; scaleY = sc }
+            .softShadow(40f, Shade(Color(0x59061432), 40f, 100f))
+            .clip(RoundedCornerShape(40.s))
+            .background(Brush.linearGradient(0f to K.PearlTop, .55f to K.PearlMid, 1f to K.PearlBottom))
+            .padding(56.s), verticalArrangement = Arrangement.spacedBy(32.s)) {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.padding(bottom = 24.s).size(112.s).creamDisc(halo = 12f), contentAlignment = Alignment.Center) {
+                    LineIcon(KIcon.Shield, K.GoldIcon, Modifier.size(56.s), 2f)
+                }
+                KText("สนใจตรวจสอบแผนประกัน\nที่เหมาะกับความต้องการไหม?", 44, weight = FontWeight.Bold, lineHeight = 60f, align = TextAlign.Center)
+                KText("ใช้เวลาประมาณ 2–3 นาที · ส่งเฉพาะข้อมูลที่ท่านเลือกและยินยอมเท่านั้น", 26, Modifier.padding(top = 8.s),
+                    color = K.InkMuted, lineHeight = 40f, align = TextAlign.Center)
+            }
+            SummaryRows(AiSummary) {
+                Row(Modifier.fillMaxWidth().padding(top = 22.s, bottom = 14.s), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.s)) {
+                    KText("AI", 18, Modifier.clip(RoundedCornerShape(8.s)).background(Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3A7BFF))))
+                        .padding(horizontal = 10.s, vertical = 2.s), weight = FontWeight.Bold, color = Color.White)
+                    KText("สรุปข้อมูลสุขภาพ", 28, Modifier.weight(1f), weight = FontWeight.Bold, softWrap = false)
+                    Row(Modifier.clip(RoundedCornerShape(99.s)).background(K.Green050).padding(horizontal = 16.s, vertical = 6.s),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.s)) {
+                        LineIcon(KIcon.Shield, K.GreenDeep, Modifier.size(22.s), 2f)
+                        KText("ยังไม่ส่งบริษัทประกัน", 20, weight = FontWeight.SemiBold, color = K.GreenDeep, softWrap = false)
+                    }
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(20.s)) {
+                PrimaryPill("สนใจ, ตรวจสอบแผนประกัน", onInsurance, Modifier.fillMaxWidth())
+                SecondaryPill("ไม่สนใจ, พิมพ์บัตรคิว", onPrint, Modifier.fillMaxWidth())
+            }
+        }
+    }
+}
+
 @Composable
 private fun RightsScreen(onCancel: () -> Unit, onNext: () -> Unit) {
     val ok = DemoSession.rightsOk; val r = DemoSession.rights

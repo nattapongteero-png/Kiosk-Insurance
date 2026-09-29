@@ -45,10 +45,12 @@ fun KioskApp() {
     var homeBusy by remember { mutableStateOf(false) }        // หน้าแรกมีชั้นซ้อนเปิดอยู่
     var lastTouch by remember { mutableLongStateOf(SystemClock.uptimeMillis()) }
     var warn by remember { mutableStateOf(false) }
+    var visit by remember { mutableStateOf<Pair<String, String>?>(null) }        // (บริการ, ลักษณะการมา) ของ Visit ที่สร้างแล้ว
+    var printVisit by remember { mutableStateOf<Pair<String, String>?>(null) }   // กลับจากเรื่องประกัน → พิมพ์บัตรคิว
     var now by remember { mutableLongStateOf(SystemClock.uptimeMillis()) }   // เวลาปัจจุบัน (อัปเดตทุก 250 มิลลิวินาที)
 
     // TODO(integration): ล้างข้อมูลผู้ป่วยที่อ่านจากบัตร / session
-    fun goHome(reason: String) { warn = false; route = Route.Welcome; homeKey++; bye = reason; lastTouch = SystemClock.uptimeMillis() }
+    fun goHome(reason: String) { warn = false; visit = null; printVisit = null; route = Route.Welcome; homeKey++; bye = reason; lastTouch = SystemClock.uptimeMillis() }
     // กลับหน้าแรก (จบรายการ / ยกเลิก / หมดเวลา) = กลับเป็นภาษาไทยเสมอ คนถัดไปไม่เจอภาษาค้าง
     LaunchedEffect(route, homeKey) { if (route == Route.Welcome) th.go.banlat.kiosk.ui.i18n.I18n.lang = th.go.banlat.kiosk.ui.i18n.Lang.TH }
 
@@ -70,13 +72,15 @@ fun KioskApp() {
         }) {
             when (route) {
                 Route.Welcome -> key(homeKey) {
-                    WelcomeScreen(onConsentAccepted = { route = Route.Insurance }, onConsentDeclined = { route = Route.Services },
+                    WelcomeScreen(onVerified = { visit = null; printVisit = null; route = Route.Services },
                         bye = bye, onByeShown = { bye = null }, onBusy = { homeBusy = it }, onCancel = { goHome("cancel") },
                         onSettings = { route = Route.Settings })
                 }
-                Route.Insurance -> InsuranceFlow(onExit = { route = Route.Services })
-                // หลังเลือกลักษณะการมา หน้าเลือกบริการแสดงบัตรคิวเอง · TODO(integration): onQueued → ส่ง HIS แล้วสั่งพิมพ์บัตรคิว
-                Route.Services -> ServicesScreen(onExit = { route = Route.Welcome })
+                // flow ใหม่: ลงทะเบียน/ส่งตรวจ → สร้าง Visit → ถามสนใจประกัน → (สนใจ) ประกัน → กลับมาพิมพ์บัตรคิว
+                Route.Insurance -> InsuranceFlow(onExit = { printVisit = visit; route = Route.Services })
+                Route.Services -> key(printVisit) {
+                    ServicesScreen(onExit = { route = Route.Welcome }, printVisit = printVisit, onInsurance = { visit = it; route = Route.Insurance })
+                }
                 // TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า
                 Route.Settings -> th.go.banlat.kiosk.ui.settings.SettingsScreen(onExit = { route = Route.Welcome })
             }

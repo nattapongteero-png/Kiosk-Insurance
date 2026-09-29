@@ -15,7 +15,7 @@ import th.go.banlat.kiosk.ui.welcome.WelcomeScreen
 private const val KIOSK_32 = "spec:width=1080px,height=1920px,dpi=160,orientation=portrait"
 
 @Preview(name = "1 หน้าแรก", device = KIOSK_32, group = "ตู้ 32 นิ้ว")
-@Composable private fun PreviewWelcome() = KioskFrame { WelcomeScreen(onConsentAccepted = {}) }
+@Composable private fun PreviewWelcome() = KioskFrame { WelcomeScreen(onVerified = {}) }
 
 @Preview(name = "2 เลือกแบบประกัน", device = KIOSK_32, group = "ตู้ 32 นิ้ว")
 @Composable private fun PreviewSelect() = KioskFrame { InsuranceFlow(onExit = {}) }
@@ -31,13 +31,13 @@ private const val KIOSK_32 = "spec:width=1080px,height=1920px,dpi=160,orientatio
 
 /* ---------- ตรวจ responsive: จอสัดส่วนอื่น ---------- */
 @Preview(name = "มือถือ 9:20 · หน้าแรก", device = "spec:width=1080px,height=2400px,dpi=420", group = "Responsive")
-@Composable private fun PreviewTallWelcome() = KioskFrame { WelcomeScreen(onConsentAccepted = {}) }
+@Composable private fun PreviewTallWelcome() = KioskFrame { WelcomeScreen(onVerified = {}) }
 
 @Preview(name = "แท็บเล็ต 10:16 · เลือกแบบประกัน", device = "spec:width=1200px,height=1920px,dpi=240", group = "Responsive")
 @Composable private fun PreviewTabletSelect() = KioskFrame { InsuranceFlow(onExit = {}) }
 
 @Preview(name = "แท็บเล็ต 10:16 · หน้าแรก", device = "spec:width=1200px,height=1920px,dpi=240", group = "Responsive")
-@Composable private fun PreviewTabletWelcome() = KioskFrame { WelcomeScreen(onConsentAccepted = {}) }
+@Composable private fun PreviewTabletWelcome() = KioskFrame { WelcomeScreen(onVerified = {}) }
 
 @Preview(name = "5 เลือกบริการ (ระบบลงทะเบียน)", device = KIOSK_32, group = "ตู้ 32 นิ้ว")
 @Composable private fun PreviewServices() = KioskFrame { th.go.banlat.kiosk.ui.services.ServicesScreen(onExit = {}) }

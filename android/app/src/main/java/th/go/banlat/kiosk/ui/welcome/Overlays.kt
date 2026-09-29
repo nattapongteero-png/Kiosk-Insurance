@@ -315,11 +315,14 @@ private fun RowScope.PadKey(k: String, onTap: () -> Unit) {
     }
 }
 
-// ================= ความยินยอมให้ส่งข้อมูลสุขภาพ (เด้งหลังยืนยันตัวตนสำเร็จ) =================
-private data class ScopeItem(val t: String, val s: String, val sent: Boolean)
+// ================= ความเป็นส่วนตัวและความยินยอม (flow ใหม่: หลังสร้าง Visit และผู้ป่วยกดสนใจประกัน) =================
+// ข้อ 3 ผู้ป่วยเลือกข้อมูลที่ยินยอมให้เปิดเผย (แตะเพื่อเลือก/ไม่เลือก) · ข้อมูลพื้นฐานจำเป็น (ล็อก) · ตรงกับ insurance.html SHARE/NEVER
+// TODO(integration): รายการ/ค่าเริ่มต้นจาก Insurance Gateway · บันทึกหลักฐานความยินยอมพร้อมรายการที่เลือก
+private data class ScopeItem(val t: String, val s: String, val sent: Boolean, val lock: Boolean = false)
 
 private val Scope = listOf(
-    ScopeItem("ข้อมูลพื้นฐาน", "เพศ อายุ รหัสอ้างอิงผู้ป่วย", true),
+    ScopeItem("ข้อมูลพื้นฐาน", "เพศ อายุ รหัสอ้างอิงผู้ป่วย · จำเป็น", true, lock = true),
+    ScopeItem("สรุปข้อมูลสุขภาพ (AI)", "โรคประจำตัว แพ้ยา สัญญาณชีพ", true),
     ScopeItem("ประวัติการรับบริการ", "วันที่ แผนก ย้อนหลัง 3 ปี", true),
     ScopeItem("การวินิจฉัยโรค", "รหัส ICD ตามขอบเขต", true),
     ScopeItem("ประวัติการใช้ยา", "รายการยาที่เกี่ยวข้อง", true),
@@ -333,7 +336,8 @@ private val Scope = listOf(
 )
 
 @Composable
-fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit, onClose: () -> Unit) {
+fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit) {
+    val picked = remember { androidx.compose.runtime.mutableStateListOf(*Scope.map { it.sent }.toTypedArray()) }
     val scroll = rememberScrollState()
     val u = unitPx()
     // ต้องเลื่อนอ่านจนสุดก่อนจึงติ๊กยินยอมได้
@@ -358,26 +362,38 @@ fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit, onClose: () -> Uni
                         LineIcon(KIcon.Doc, K.GoldIcon, Modifier.size(44.s), 1.9f)
                     }
                     Column(Modifier.weight(1f)) {
-                        KText("ความยินยอมให้ส่งข้อมูลสุขภาพ", 40, weight = FontWeight.Bold, lineHeight = 52f, softWrap = false)
+                        KText("ความเป็นส่วนตัวและความยินยอม", 40, weight = FontWeight.Bold, lineHeight = 52f, softWrap = false)
                         KText("กรุณาเลื่อนอ่านให้ครบก่อนตัดสินใจ · ฉบับที่ 1.0 (1 ก.ย. 2569)", 24, color = K.InkMuted, lineHeight = 36f)
-                    }
-                    // ปิด = ยกเลิกทั้งรายการ กลับหน้าแรก (ต่างจาก "ไม่ยินยอม" ที่ยังลงทะเบียนต่อ)
-                    Box(Modifier.size(88.s).clip(CircleShape).background(Color(0x0F14265A)).press(scaleTo = .94f, onClick = onClose),
-                        contentAlignment = Alignment.Center) {
-                        LineIcon(KIcon.Close, K.InkMuted, Modifier.size(40.s), 2.2f)
                     }
                 }
                 Column(Modifier.weight(1f, fill = false).verticalScroll(scroll).padding(horizontal = 48.s, vertical = 32.s),
                     verticalArrangement = Arrangement.spacedBy(24.s)) {
                     CsCard(1, "วัตถุประสงค์") {
-                        CsText("เพื่อให้บริษัทประกันใช้**รายงานแพทย์ (FMR)** และ**ประวัติสุขภาพส่วนบุคคล (PHR)** ของท่าน ประกอบการแนะนำแบบประกันชีวิต/สุขภาพที่เหมาะกับสุขภาพของท่าน และจัดทำข้อเสนอเบื้องต้น **เฉพาะการตรวจสอบครั้งนี้เท่านั้น**")
+                        CsText("เพื่อส่งข้อมูลสุขภาพ**เฉพาะที่ท่านเลือก**ให้บริษัทประกันที่ร่วมโครงการ ใช้เสนอ**แผนประกันที่เหมาะกับความต้องการของท่าน** **เฉพาะครั้งนี้เท่านั้น**")
                     }
                     CsCard(2, "ผู้รับข้อมูล") {
-                        CsText("**บริษัทประกันที่ร่วมโครงการ** ส่งผ่านระบบกลางของ BMS แบบเข้ารหัส ระบบจะแสดงรายชื่อบริษัทที่ได้รับข้อมูลให้ท่านทราบก่อนส่งจริง ท่านจะเป็นผู้เลือก**แบบประกัน**ที่สนใจเองหลังทราบผล")
+                        CsText("ส่งผ่าน**Insurance Gateway** ของ BMS แบบเข้ารหัส ไปยังบริษัทประกันที่ร่วมโครงการ")
+                        Column(Modifier.padding(top = 16.s), verticalArrangement = Arrangement.spacedBy(12.s)) {
+                            listOf(th.go.banlat.kiosk.data.InsurerA, th.go.banlat.kiosk.data.InsurerB, th.go.banlat.kiosk.data.InsurerC).forEach { co ->
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.s)) {
+                                    th.go.banlat.kiosk.ui.insurance.InsurerLogo(co, 48, 7)
+                                    KText(co.name, 22, weight = FontWeight.SemiBold, softWrap = false)
+                                }
+                            }
+                        }
                     }
-                    // ข้อ 3 คงแนวเดิม: ✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์
-                    CsCard(3, "ข้อมูลที่จะถูกส่ง (FMR / PHR)") {
-                        Scope.chunked(2).forEach { pair ->
+                    // ข้อ 3: ผู้ป่วยเลือกข้อมูลที่ยินยอมให้เปิดเผย (✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์ · แตะสลับ) + รายการที่ไม่ถูกส่งออกไม่ว่ากรณีใด
+                    CsCard(3, "เลือกข้อมูลที่ยินยอมให้เปิดเผย") {
+                        KText("แตะรายการเพื่อเลือก / ไม่เลือก · ส่งเฉพาะรายการที่มีเครื่องหมาย ✓", 22, Modifier.padding(bottom = 16.s), color = K.InkMuted, lineHeight = 32f)
+                        val choose = Scope.withIndex().filter { it.value.sent }
+                        choose.chunked(2).forEach { pair ->
+                            Row(Modifier.fillMaxWidth().padding(bottom = 16.s), horizontalArrangement = Arrangement.spacedBy(32.s)) {
+                                pair.forEach { (i, it) -> ScopeRow(it.copy(sent = picked[i]), onToggle = if (it.lock) null else ({ picked[i] = !picked[i] })) }
+                                if (pair.size == 1) Spacer(Modifier.weight(1f))
+                            }
+                        }
+                        KText("ไม่ถูกส่งออกไม่ว่ากรณีใด", 22, Modifier.padding(top = 8.s, bottom = 16.s), weight = FontWeight.SemiBold, color = K.InkSoft)
+                        Scope.filter { !it.sent }.chunked(2).forEach { pair ->
                             Row(Modifier.fillMaxWidth().padding(bottom = 16.s), horizontalArrangement = Arrangement.spacedBy(32.s)) {
                                 pair.forEach { ScopeRow(it) }
                                 if (pair.size == 1) Spacer(Modifier.weight(1f))
@@ -400,12 +416,12 @@ fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit, onClose: () -> Uni
                     .padding(start = 48.s, end = 48.s, top = 28.s, bottom = 40.s), verticalArrangement = Arrangement.spacedBy(24.s)) {
                     AgreeBox(agreed, enabled = readAll) { agreed = !agreed }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.s)) {
-                        th.go.banlat.kiosk.ui.insurance.SecondaryPill("ไม่ยินยอม, ไปที่ระบบลงทะเบียน", onDecline, Modifier.widthIn(min = 360.s))
+                        th.go.banlat.kiosk.ui.insurance.SecondaryPill("ไม่ยินยอม, พิมพ์บัตรคิว", onDecline, Modifier.widthIn(min = 360.s))
                         Box(Modifier.weight(1f).height(88.s).then(if (agreed) Modifier.softShadow(44f, Shade(Color(0x3814265A), 10f, 24f)) else Modifier)
                             .clip(RoundedCornerShape(99.s))
                             .background(if (agreed) Brush.verticalGradient(listOf(Color(0xFF223A7A), K.Ink)) else Brush.verticalGradient(listOf(Color(0xFFD5DCE6), Color(0xFFD5DCE6))))
                             .press(enabled = agreed, scaleTo = .97f, onClick = onAccept), contentAlignment = Alignment.Center) {
-                            KText("ยินยอม", 30, weight = FontWeight.Bold, color = Color.White, softWrap = false)
+                            KText("ยินยอมและส่งข้อมูล", 30, weight = FontWeight.Bold, color = Color.White, softWrap = false)
                         }
                     }
                 }
@@ -435,8 +451,9 @@ private fun CsCard(n: Int, title: String, body: @Composable () -> Unit) {
 private fun CsText(s: String) = KText(rich(s), 26, lineHeight = 42f)
 
 @Composable
-private fun RowScope.ScopeRow(it: ScopeItem) {
-    Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(12.s)) {
+private fun RowScope.ScopeRow(it: ScopeItem, onToggle: (() -> Unit)? = null) {
+    Row(Modifier.weight(1f).then(if (onToggle != null) Modifier.clip(RoundedCornerShape(16.s)).press(scaleTo = .98f, onClick = onToggle) else Modifier),
+        horizontalArrangement = Arrangement.spacedBy(12.s)) {
         Box(Modifier.padding(top = 2.s).size(32.s).clip(CircleShape).background(if (it.sent) K.Green050 else Color(0xFFFBDEDB)),
             contentAlignment = Alignment.Center) {
             LineIcon(if (it.sent) KIcon.Check else KIcon.Cross, if (it.sent) K.Green else K.Red, Modifier.size(18.s), 3f)
@@ -468,7 +485,7 @@ private fun AgreeBox(checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
             .border(2.5.s, if (checked) K.Green else K.Line, RoundedCornerShape(12.s)), contentAlignment = Alignment.Center) {
             if (checked) LineIcon(KIcon.Check, Color.White, Modifier.size(25.s), 3.2f)
         }
-        KText(rich("ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ**ยินยอม**ให้ส่งข้อมูลสุขภาพ ตามรายการที่ระบุไปยังบริษัทประกันที่ร่วมโครงการ"),
+        KText(rich("ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ**ยินยอม**ให้ส่งข้อมูลสุขภาพ ตามรายการที่เลือกไปยังบริษัทประกันที่ร่วมโครงการ"),
             26, lineHeight = 40f)
     }
 }

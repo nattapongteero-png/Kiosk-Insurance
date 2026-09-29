@@ -78,17 +78,17 @@ internal fun DetailScreen(plan: Plan, onBack: () -> Unit, onSend: () -> Unit) {
                 .padding(horizontal = 32.s, vertical = 24.s), horizontalArrangement = Arrangement.spacedBy(16.s)) {
                 LineIcon(KIcon.Info, brd, Modifier.padding(top = 2.s).size(32.s), 2f)
                 KText(buildAnnotatedString {
-                    append("ข้อมูลนี้เป็น"); withStyle(SpanStyle(color = K.Ink, fontWeight = FontWeight.Bold)) { append("สรุปเบื้องต้น") }
-                    append(" เงื่อนไขจริงเป็นไปตามกรมธรรม์ เมื่อกดส่ง ระบบจะส่งข้อมูลสุขภาพตามที่ท่านยินยอมให้ ")
+                    append("ข้อมูลนี้เป็น"); withStyle(SpanStyle(color = K.Ink, fontWeight = FontWeight.Bold)) { append("ข้อเสนอเบื้องต้น") }
+                    append(" เงื่อนไขจริงเป็นไปตามกรมธรรม์ หากสนใจ ")
                     withStyle(SpanStyle(color = K.Ink, fontWeight = FontWeight.Bold)) { append(plan.co.name) }
-                    append(" เท่านั้น เพื่อพิจารณาเบี้ยและการรับประกัน")
+                    append(" จะติดต่อกลับเพื่อให้ข้อมูลเพิ่มเติม")
                 }, 24, color = K.InkMuted, lineHeight = 36f)
             }
         }
         BottomBar {
             Row(Modifier.fillMaxWidth().padding(horizontal = 80.s), horizontalArrangement = Arrangement.spacedBy(24.s)) {
                 SecondaryPill("ย้อนกลับ", onBack, Modifier.widthIn(min = 280.s))
-                PrimaryPill("ส่งข้อมูลเพื่อขอพิจารณา", onSend, Modifier.weight(1f))   // ปุ่มใช้สีของแอป ไม่เปลี่ยนตามบริษัท
+                PrimaryPill("สนใจแผนนี้", onSend, Modifier.weight(1f))   // ปุ่มใช้สีของแอป ไม่เปลี่ยนตามบริษัท
             }
         }
     }

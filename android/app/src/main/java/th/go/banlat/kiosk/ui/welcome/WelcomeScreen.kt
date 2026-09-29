@@ -87,21 +87,22 @@ import th.go.banlat.kiosk.ui.theme.unitPx
 /** ชั้นที่ซ้อนบนหน้าแรก */
 sealed interface WelcomeOverlay {
     data object None : WelcomeOverlay
-    data class Reading(val title: String, val sub: String, val then: WelcomeOverlay = Consent) : WelcomeOverlay
+    data class Reading(val title: String, val sub: String, val then: WelcomeOverlay = Verified) : WelcomeOverlay
     /** กดอ่านบัตรแล้วอ่านไม่ได้ · fail=false ไม่พบบัตร · fail=true อ่านบัตรไม่สำเร็จ */
     data class ReadError(val fail: Boolean) : WelcomeOverlay
     /** hn = false กรอกเลขบัตรประชาชน · true สแกนบาร์โค้ด / กรอก HN */
     data class Keypad(val hn: Boolean) : WelcomeOverlay
-    data object Consent : WelcomeOverlay
+    /** ยืนยันตัวตนสำเร็จ → ไปตรวจสอบสิทธิ/ส่งตรวจทันที (flow ใหม่: ถามเรื่องประกันหลังสร้าง Visit แล้ว) */
+    data object Verified : WelcomeOverlay
 }
 
 /**
  * หน้าแรกของตู้ (Figma 26:38) — เสียบบัตร / กรอก HN หรือเลขบัตร / สแกนหน้า
- * ยืนยันตัวตนสำเร็จ → เด้ง modal ความยินยอม → ยินยอม → onConsentAccepted
+ * ยืนยันตัวตนสำเร็จ → onVerified (ไปตรวจสอบสิทธิ/ส่งตรวจ) · ความยินยอมเรื่องประกันย้ายไปหลังสร้าง Visit
  */
 @Composable
 fun WelcomeScreen(
-    onConsentAccepted: () -> Unit, onConsentDeclined: () -> Unit = {},
+    onVerified: () -> Unit,
     bye: String? = null, onByeShown: () -> Unit = {},      // แจ้งผลตอนกลับหน้าแรก: "cancel" ยกเลิก / "idle" หมดเวลา
     onBusy: (Boolean) -> Unit = {}, onCancel: () -> Unit = {}, onSettings: () -> Unit = {},
 ) {
@@ -117,7 +118,7 @@ fun WelcomeScreen(
     // TODO(integration): เปลี่ยนเป็น callback จากเครื่องอ่านบัตร / ระบบค้นหา HN / กล้องสแกนหน้า
     fun verify(title: String, sub: String, ms: Long) { overlay = WelcomeOverlay.Reading(title, sub); next = ms }
     LaunchedEffect(overlay, next) {
-        (overlay as? WelcomeOverlay.Reading)?.let { delay(next); overlay = it.then }
+        (overlay as? WelcomeOverlay.Reading)?.let { delay(next); if (it.then == WelcomeOverlay.Verified) { overlay = WelcomeOverlay.None; onVerified() } else overlay = it.then }
     }
 
     // ปุ่มอ่านบัตร — ต้นแบบวนผล: ครั้งที่ 1 ไม่พบบัตร · 2 อ่านไม่สำเร็จ · 3 สำเร็จ → consent (ตรงกับ welcome_v2.html)
@@ -190,7 +191,7 @@ fun WelcomeScreen(
             is WelcomeOverlay.Reading -> when { o.title.contains("สแกนใบหน้า") -> "face"; o.title.contains("ตรวจสอบ") -> "checking"; else -> "reading" }
             is WelcomeOverlay.ReadError -> if (o.fail) "readfail" else "nocard"
             is WelcomeOverlay.Keypad -> if (o.hn) "kphn" else "kpcid"
-            WelcomeOverlay.Consent -> "consent"
+            WelcomeOverlay.Verified -> "home"
             WelcomeOverlay.None -> if (bye != null) "bye" else "home"
         })
         when (val o = overlay) {
@@ -202,11 +203,7 @@ fun WelcomeScreen(
                 onCancel = { overlay = WelcomeOverlay.None },
                 onConfirm = { DemoSession.rightsOk = false; DemoSession.selfPay = false; verify("กำลังตรวจสอบข้อมูล", "ระบบกำลังค้นหาข้อมูลผู้ป่วยจากเลขที่ท่านกรอก", 1600) },
             )
-            WelcomeOverlay.Consent -> ConsentModal(
-                onDecline = { overlay = WelcomeOverlay.None; onConsentDeclined() },   // ไม่ยินยอม → ระบบลงทะเบียน
-                onAccept = { overlay = WelcomeOverlay.None; onConsentAccepted() },
-                onClose = onCancel,   // ยกเลิกทั้งรายการ → กลับหน้าแรก ล้างข้อมูล
-            )
+            WelcomeOverlay.Verified -> Unit
             WelcomeOverlay.None -> Unit
         }
         // ป้ายแจ้งผลใต้แบนเนอร์ (ตรงกับ welcome_v2.html .bye) · หายเองใน 4 วิ
