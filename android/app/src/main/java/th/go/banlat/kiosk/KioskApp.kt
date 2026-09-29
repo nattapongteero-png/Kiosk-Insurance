@@ -68,7 +68,7 @@ fun KioskApp() {
     KioskFrame {
         // ทุกการแตะ (ดักก่อนถึงปุ่ม ไม่กินเหตุการณ์) = รีเซ็ตเวลา
         Box(Modifier.fillMaxSize().pointerInput(Unit) {
-            awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); if (!warn) lastTouch = SystemClock.uptimeMillis() } }
+            awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); th.go.banlat.kiosk.ui.voice.Voice.touched(); if (!warn) lastTouch = SystemClock.uptimeMillis() } }
         }) {
             when (route) {
                 Route.Welcome -> key(homeKey) {

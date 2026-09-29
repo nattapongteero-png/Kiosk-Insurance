@@ -22,7 +22,8 @@ import th.go.banlat.kiosk.ui.i18n.Lang
  * ไฟล์: v_{th|en}_{คีย์} · เลขคิว = v_*_l{อักษร} + v_*_d{ตัวเลข} · ห้อง = v_*_room_{รหัสบริการ}
  * ประโยคเลขคิว (printed): ออนไลน์ = ขอประโยคเต็มจาก VoxCPM (จังหวะพูดเลขต่อเนื่องเป็นธรรมชาติ · รอไม่เกิน 3.5 วิ)
  *   ออฟไลน์/ช้า = ต่อชิ้นเสียง WAV (ตัดเงียบ + ปรับความดังเท่ากันไว้แล้ว) เป็นก้อนเดียว เว้นช่วงคงที่ แล้วเล่นทีเดียว ไม่มีช่องว่างของตัวเล่น
- * ประโยคใหม่ตัดประโยคเก่าทันที · เปิดเสมอเหมือนตู้เดิม (ตั้งค่าเดิมไม่มีตัวเลือกเสียง) · ระดับเสียงใช้ปุ่มเสียงของเครื่อง
+ * ประโยคใหม่ตัดประโยคเก่าทันทีเมื่อผู้ใช้แตะจอระหว่างพูด · หน้าจอเปลี่ยนเอง (อ่านบัตร/สแกนหน้า/ส่งข้อมูล) = พูดประโยคเดิมให้จบก่อนแล้วต่อประโยคใหม่
+ * เปิดเสมอเหมือนตู้เดิม (ตั้งค่าเดิมไม่มีตัวเลือกเสียง) · ระดับเสียงใช้ปุ่มเสียงของเครื่อง
  */
 object Voice {
     private lateinit var app: Context
@@ -30,6 +31,10 @@ object Voice {
     private var queue = ArrayDeque<Int>()
     private var track: AudioTrack? = null
     private var token = 0          // ประโยคล่าสุด · งานที่ค้าง (เช่น ขอเสียงออนไลน์) ของประโยคเก่าจะถูกทิ้ง
+    @Volatile private var lastTouch = 0L      // แตะจอล่าสุด (KioskApp แจ้ง)
+    private var startedAt = 0L                // ประโยคปัจจุบันเริ่มพูด
+    private var pending: Pair<String, Map<String, String>>? = null   // ประโยครอพูดต่อ (หน้าจอเปลี่ยนเองระหว่างพูด)
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
 
     private const val VOX_URL = "https://vox-cpm.bmscloud.in.th/v1/audio/speech"   // TODO(integration): ตั้งค่าได้ในหน้าตั้งค่า
     private const val VOX_VOICE = "female_alma"
@@ -43,10 +48,20 @@ object Voice {
 
     fun init(context: Context) { app = context.applicationContext }
 
+    /** เรียกทุกครั้งที่ผู้ใช้แตะจอ */
+    fun touched() { lastTouch = android.os.SystemClock.uptimeMillis() }
+    private fun playing() = player?.let { runCatching { it.isPlaying }.getOrDefault(false) } == true || queue.isNotEmpty()
+    /** จบประโยค: มีประโยครอ → พูดต่อ */
+    private fun finished() { pending?.let { (k, v) -> pending = null; main.post { say(k, v) } } }
+
     /** พูดประโยคตามคีย์ · printed ใช้ vars q = เลขคิว (เช่น A003) และ room = รหัสบริการ (เช่น opd) */
     fun say(key: String, vars: Map<String, String> = emptyMap()) {
         if (!::app.isInitialized) return
         val l = if (I18n.lang == Lang.EN) "en" else "th"
+        // หน้าจอเปลี่ยนเอง (ไม่ได้แตะจอตั้งแต่ประโยคนี้เริ่ม) → รอให้จบก่อน ไม่ตัดกลางประโยค
+        if (playing() && lastTouch < startedAt) { pending = key to vars; Log.d("KioskVoice", "wait $key"); return }
+        Log.d("KioskVoice", "say $key")
+        startedAt = android.os.SystemClock.uptimeMillis()
         if (key == "printed") { sayPrinted(l, vars["q"].orEmpty(), vars["room"]); return }
         val names = if (key == "printed") buildList {
             add("${l}_printed1")
@@ -64,7 +79,7 @@ object Voice {
     }
 
     fun stop() {
-        token++
+        token++; pending = null
         track?.run { runCatching { stop() }; release() }; track = null
         queue.clear()
         player?.run { runCatching { stop() }; release() }
@@ -87,7 +102,7 @@ object Voice {
                 val f = File(app.cacheDir, "voice_printed.wav").apply { writeBytes(wav) }
                 val mp = MediaPlayer().apply { setDataSource(f.path); prepare() }
                 if (my != token) { mp.release(); return@thread }
-                player = mp.apply { setOnCompletionListener { it.release(); if (player === it) player = null }; start() }
+                player = mp.apply { setOnCompletionListener { it.release(); if (player === it) player = null; finished() }; start() }
             } else playJoined(l, q, room, my)
         }
     }
@@ -112,6 +127,7 @@ object Voice {
         }
         fun gap(ms: Int) = ByteArray(rate * ms / 1000 * 2)
         val out = java.io.ByteArrayOutputStream()
+        out.write(gap(150))   // เงียบนำ 150 ms ให้ลำโพงตื่นก่อน ไม่กินพยางค์แรก
         pcm("${l}_printed1")?.let { out.write(it) }; out.write(gap(220))
         q.lowercase().forEachIndexed { i, c -> if (i > 0) out.write(gap(90)); pcm(if (c.isDigit()) "${l}_d$c" else "${l}_l$c")?.let { out.write(it) } }
         out.write(gap(260)); pcm("${l}_printed2")?.let { out.write(it) }
@@ -126,7 +142,7 @@ object Voice {
     private fun playNext() {
         val id = queue.removeFirstOrNull() ?: return
         player = MediaPlayer.create(app, id)?.apply {
-            setOnCompletionListener { mp -> mp.release(); if (player === mp) player = null; playNext() }
+            setOnCompletionListener { mp -> mp.release(); if (player === mp) player = null; if (queue.isEmpty()) finished() else playNext() }
             start()
         }
     }
