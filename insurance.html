@@ -503,6 +503,181 @@ body.bleed .screen{border-radius:0;box-shadow:none}
   -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px);mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px)}
 .pp .banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:3;display:block;pointer-events:none}   /* ทึบถึงใต้ตัวหนังสือ แล้วจางจนโปร่งที่ขอบล่าง (อบในไฟล์) */
 .pp .rail img{-webkit-user-drag:none;pointer-events:none}
+
+/* ================= ความยินยอม (Privacy Notice + Consent) — ย้ายมาจากหน้าแรก (flow ใหม่: ถามหลังสร้าง Visit แล้ว) ================= */
+/* ================= Modal ความยินยอม (เด้งหลังอ่านบัตรสำเร็จ) ================= */
+/* attribute hidden ต้องชนะกฎ display ของคลาสด้านล่าง ไม่งั้น modal โผล่ตั้งแต่โหลดหน้า */
+[hidden]{display:none!important}
+:root{--cs-ink:#14265A;--cs-muted:#5B6B8A;--cs-soft:#8494AE;--cs-blue:#1E7BE0;--cs-deep:#0D5BC6;
+  --cs-050:#EAF3FD;--cs-green:#1E9C78;--cs-g050:#E8F7F2;--cs-amber:#B45309;--cs-a050:#FEF5E7;
+  --cs-red:#D92D20;--cs-r050:#FEF3F2;--cs-line:#D7E4F2}
+
+/* ชั้นอ่านบัตร: ขึ้นทับจอสั้นๆ ก่อนเด้ง modal */
+.reading{position:absolute;inset:0;z-index:5;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;color:var(--cs-ink)}
+.reading .ring{width:170px;height:170px;border-radius:50%;border:10px solid var(--cs-050);
+  border-top-color:var(--cs-blue);animation:csspin 1.1s linear infinite}
+@keyframes csspin{to{transform:rotate(360deg)}}
+.reading b{font-size:46px;font-weight:700}
+.reading span{font-size:28px;color:var(--cs-muted)}
+
+.ov{position:absolute;inset:0;z-index:6;background:rgba(10,25,60,.52);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:130px 60px;color:var(--cs-ink)}
+.sheet{width:952px;max-height:100%;border-radius:40px;display:flex;flex-direction:column;position:relative;
+  overflow:hidden;
+  background:linear-gradient(170deg,#FFFFFF 0%,#FAFCFF 42%,#F3F8FE 100%);
+  box-shadow:0 60px 130px rgba(6,20,50,.50), 0 0 0 1px rgba(20,38,90,.06),
+             inset 0 2px 0 rgba(255,255,255,.95)}
+.sheet .sh{padding:40px 44px 22px;border-bottom:1px solid rgba(20,38,90,.07);flex:none;display:flex;gap:20px;align-items:flex-start}
+.sheet .sh .ic{width:64px;height:64px;border-radius:20px;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 30%, #FFFFFF 0%, #E9F3FD 60%, #DCEBFA 100%);
+  border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 0 0 6px rgba(30,123,224,.05), 0 8px 18px rgba(30,123,224,.15)}
+.sheet .sh .ic svg{width:34px;height:34px;stroke:var(--cs-deep)}
+.sheet .sh h2{font-size:38px;font-weight:700;line-height:1.2}
+.sheet .sh p{font-size:23px;color:var(--cs-muted);margin-top:6px}
+.sheet .sb{flex:1;min-height:0;overflow-y:auto;padding:26px 44px;display:flex;flex-direction:column;gap:18px}
+.sheet .sf{flex:none;border-top:1px solid rgba(20,38,90,.07);padding:24px 44px 28px;display:flex;flex-direction:column;gap:18px}
+.sheet .sf .row{display:flex;gap:16px}
+
+.csCard{background:#F8FBFF;border:1px solid var(--cs-line);border-radius:24px;padding:24px 28px}
+.csCard h3{font-size:26px;font-weight:700;color:var(--cs-deep);display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.csCard h3 .n{width:34px;height:34px;border-radius:9px;background:var(--cs-050);display:grid;place-items:center;
+  font-size:19px;color:var(--cs-deep);flex:none}
+.csCard p{font-size:25px;line-height:1.5}
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px}
+.scope li{list-style:none;display:flex;gap:12px;align-items:flex-start;font-size:23px;line-height:1.4}
+.scope li i{width:25px;height:25px;border-radius:50%;background:var(--cs-g050);flex:none;margin-top:3px;
+  display:grid;place-items:center}
+.scope li i svg{width:14px;height:14px;stroke:var(--cs-green)}
+.scope li small{display:block;font-size:19px;color:var(--cs-soft);margin-top:1px}
+.scope li.no{color:#98211A}
+.scope li.no i{background:#FBDEDB}
+.scope li.no i svg{stroke:var(--cs-red)}
+.scope li.no small{color:#B07871}
+.csNote{border-radius:20px;padding:20px 24px;font-size:24px;line-height:1.5;display:flex;gap:16px}
+.csNote i{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center}
+.csNote i svg{width:20px;height:20px}
+.csNote.blue{background:var(--cs-050);border:1px solid #C6DFF8;color:var(--cs-deep)}
+.csNote.blue i{background:#D5E8FB} .csNote.blue i svg{stroke:var(--cs-deep)}
+.csNote.amber{background:var(--cs-a050);border:1px solid #F6DCB4;color:#7C3B06}
+.csNote.amber i{background:#FBE3BE} .csNote.amber i svg{stroke:var(--cs-amber)}
+
+.agree{display:flex;gap:18px;align-items:flex-start;background:#fff;border:2px solid var(--cs-line);
+  border-radius:20px;padding:20px 24px;cursor:pointer;font:inherit;text-align:left;width:100%;color:var(--cs-ink)}
+.agree[aria-checked="true"]{border-color:var(--cs-green);background:var(--cs-g050)}
+.agree .bx{width:40px;height:40px;border-radius:11px;border:2.5px solid var(--cs-line);flex:none;
+  display:grid;place-items:center;background:#fff}
+.agree[aria-checked="true"] .bx{border-color:var(--cs-green);background:var(--cs-green)}
+.agree .bx svg{width:23px;height:23px;stroke:#fff;opacity:0}
+.agree[aria-checked="true"] .bx svg{opacity:1}
+.agree .tx{font-size:25px;line-height:1.45}
+.agree.locked{opacity:.45;pointer-events:none}
+
+.csBtn{font:inherit;border:0;border-radius:99px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:14px;font-weight:700;white-space:nowrap;flex:1}
+.csBtn svg{width:26px;height:26px}
+.csBtn.ghost{background:#fff;border:2px solid var(--cs-line);color:var(--cs-muted);font-size:26px;padding:22px 30px}
+.csBtn.primary{background:linear-gradient(135deg,#5FB2FF,var(--cs-blue) 45%,var(--cs-deep));color:#fff;
+  font-size:32px;padding:24px 40px;box-shadow:0 10px 26px rgba(30,123,224,.32)}
+.csBtn.primary svg{stroke:#fff}
+.csBtn.primary[disabled]{background:#C9D6E6;box-shadow:none;cursor:not-allowed}
+
+.scrollcue{position:absolute;left:50%;transform:translateX(-50%);bottom:272px;z-index:7;
+  background:var(--cs-deep);color:#fff;font-size:21px;font-weight:600;border-radius:99px;
+  padding:12px 24px;display:flex;align-items:center;gap:9px;box-shadow:0 10px 26px rgba(13,91,198,.4)}
+.scrollcue svg{width:19px;height:19px;stroke:#fff}
+.scrollcue.hide{display:none}
+/* ================= Modal ความยินยอม — ปรับให้เข้ากับ UI ปัจจุบัน (ผิวไข่มุก · ขอบทองบาง · ปุ่มกรมท่า) =================
+   ข้อ 3 คงแนวเดิม: รายการ ✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์ เปลี่ยนแค่ผิวการ์ดและระยะ */
+#consentOv{background:rgba(10,25,60,.42);backdrop-filter:blur(8px);padding:120px 64px}
+#consentOv .sheet{width:100%;border-radius:40px;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
+  box-shadow:0 0 0 1px rgba(191,145,58,.32),0 40px 100px rgba(6,20,50,.35)}
+#consentOv .sh{padding:48px 136px 28px 48px;gap:24px;align-items:center;border-bottom:1px solid rgba(191,145,58,.2)}
+#consentOv .sh .ic{width:88px;height:88px;border-radius:50%;border:0;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
+  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
+#consentOv .sh .ic svg{width:44px;height:44px;stroke:#A87C2A}
+#consentOv .csClose{position:absolute;top:32px;right:32px;z-index:2;width:88px;height:88px;border-radius:50%;border:0;cursor:pointer;
+  display:grid;place-items:center;background:rgba(20,38,90,.06);transition:transform .15s}
+#consentOv .csClose:active{transform:scale(.94)}
+#consentOv .csClose svg{width:40px;height:40px;stroke:var(--ink-muted)}
+#consentOv .sh h2{font-size:40px;line-height:52px;color:var(--ink)}
+#consentOv .sh p{font-size:24px;line-height:36px;color:var(--ink-muted);margin-top:2px}
+#consentOv .sb{padding:32px 48px;gap:24px}
+#consentOv .csCard{border:0;border-radius:24px;padding:28px 32px;background:#fff;
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.28),0 6px 14px rgba(20,38,90,.05)}
+#consentOv .csCard h3{font-size:30px;line-height:40px;color:var(--ink);gap:16px;margin-bottom:16px}
+#consentOv .csCard h3 .n{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;
+  color:#8A6420;background:rgba(191,145,58,.14)}
+#consentOv .csCard p{font-size:26px;line-height:42px;color:var(--ink)}
+#consentOv .csCard p b{color:var(--ink)}
+/* ข้อ 3: ✓/✗ คงเดิม */
+#consentOv .scope{gap:16px 32px}
+#consentOv .scope li{font-size:25px;line-height:36px;color:var(--ink);font-weight:600}
+#consentOv .scope li i{width:32px;height:32px;margin-top:2px}
+#consentOv .scope li i svg{width:18px;height:18px}
+#consentOv .scope li small{font-size:21px;line-height:30px;color:var(--ink-soft);font-weight:400}
+#consentOv .scope li.no{color:#98211A}
+#consentOv .scope li.no small{color:#B07871}
+#consentOv .csNote{border:0;border-radius:24px;padding:24px 32px;font-size:25px;line-height:38px;gap:16px}
+#consentOv .csNote.blue{background:rgba(30,123,224,.06);color:var(--ink-muted)}
+#consentOv .csNote.blue b{color:var(--ink)}
+#consentOv .csNote.amber{background:var(--amber-050,#FEF5E7);color:#7A4A0A}
+#consentOv .csNote i{width:40px;height:40px;background:transparent!important}
+#consentOv .csNote i svg{width:32px;height:32px}
+#consentOv .sf{padding:28px 48px 40px;gap:24px;border-top:1px solid rgba(191,145,58,.2)}
+#consentOv .agree{border:0;border-radius:24px;padding:24px 28px;gap:20px;background:#fff;
+  box-shadow:0 0 0 1.5px var(--line,#D7E4F2)}
+#consentOv .agree[aria-checked="true"]{background:#E8F7F2;box-shadow:0 0 0 2px #1E9C78}
+#consentOv .agree .bx{width:44px;height:44px;border-radius:12px}
+#consentOv .agree .tx{font-size:26px;line-height:40px}
+#consentOv .sf .row{gap:24px}
+#consentOv .csBtn{height:88px;padding:0 40px;border-radius:99px}
+#consentOv .csBtn.ghost{flex:none;min-width:360px;border:0;background:#fff;color:var(--ink-muted);font-size:26px;font-weight:600;
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line,#D7E4F2),0 8px 20px rgba(20,38,90,.08)}
+#consentOv .csBtn.primary{background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);font-size:30px;
+  box-shadow:0 10px 24px rgba(20,38,90,.22)}
+#consentOv .csBtn.primary[disabled]{background:#D5DCE6;color:#fff;box-shadow:none}
+#consentOv .scrollcue{background:var(--ink)}
+/* ข้อ 3: ผู้ป่วยเลือกข้อมูลที่ยินยอมให้เปิดเผย — แตะเพื่อเลือก/ไม่เลือก (ไม่เลือก = รูปแบบ ✗) · ข้อมูลพื้นฐานจำเป็น (ล็อก) */
+#consentOv .scope li.pick{cursor:pointer;border-radius:16px;padding:8px 10px;margin:-8px -10px;transition:background .15s}
+#consentOv .scope li.pick:active{background:rgba(20,38,90,.05)}
+#consentOv .scope li.lock{opacity:.9}
+#consentOv .scope li.lock small::after{content:" · จำเป็น"}
+#consentOv .pickHint{font-size:22px;line-height:32px;color:var(--ink-muted);margin:-4px 0 16px}
+#consentOv .neverTtl{grid-column:1 / -1;font-size:22px;font-weight:600;color:var(--ink-soft);margin-top:8px}
+#consentOv .coList{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+#consentOv .coList span{display:inline-flex;align-items:center;gap:10px;padding:8px 18px 8px 8px;border-radius:99px;background:#fff;box-shadow:0 0 0 1.5px rgba(191,145,58,.35);font-size:22px;font-weight:600}
+#consentOv .coList img{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff}
+
+/* ================= Insurance Gateway: ส่งข้อมูลให้หลายบริษัทพร้อมกัน แล้วรอข้อเสนอ ================= */
+.gw{position:absolute;left:0;right:0;top:594px;bottom:288px;z-index:1;padding:0 var(--gutter);display:flex;flex-direction:column;justify-content:center;gap:40px}
+.gw .phd{display:flex;flex-direction:column;align-items:center;text-align:center}
+.gw .phd h2{font-size:48px;font-weight:700;line-height:64px;margin-top:24px}
+.gw .phd p{font-size:28px;line-height:42px;color:var(--ink-muted)}
+.gw .hub{width:128px;height:128px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 50% 28%,#fff,#FEFBF5 55%,#F7F1E4);box-shadow:0 0 0 2px rgba(191,145,58,.45),0 0 0 14px rgba(191,145,58,.07)}
+.gw .hub svg{width:60px;height:60px;stroke:#A87C2A}
+.gw .hub::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px solid transparent;border-top-color:#D9A546;animation:spin 1.1s linear infinite}
+.gw .cos{display:flex;flex-direction:column;gap:16px}
+.gw .co{display:flex;align-items:center;gap:20px;padding:22px 28px;border-radius:24px;background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055)}
+.gw .co .lg{width:64px;height:64px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px rgba(191,145,58,.42);display:grid;place-items:center;overflow:hidden;flex:none}
+.gw .co .lg img{width:48px;height:48px;object-fit:contain}
+.gw .co .lg img.cover{width:64px;height:64px;object-fit:cover}
+.gw .co b{flex:1;font-size:26px;font-weight:600;line-height:36px}
+.gw .co .st{flex:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;font-size:22px;font-weight:600;padding:8px 16px;border-radius:99px}
+.gw .co .st svg{width:22px;height:22px}
+.gw .co .st.done{color:#0F6B51;background:var(--green-050)} .gw .co .st.done svg{stroke:var(--green)}
+.gw .co .st.wait{color:#8A6420;background:rgba(191,145,58,.12)} .gw .co .st.wait svg{stroke:#A87C2A}
+.gw .co .st.busy{color:var(--ink-muted);background:rgba(20,38,90,.05)}
+.gw .rid{text-align:center;font-size:22px;color:var(--ink-soft)}
+/* การ์ดแผนที่บริษัทยังพิจารณาอยู่: ไม่มีราคา แสดงสถานะรอผล */
+.pp .plan .wait{margin-top:auto;display:inline-flex;align-items:center;gap:10px;font-size:22px;font-weight:600;color:#8A6420}
+.pp .plan .wait svg{width:26px;height:26px;stroke:#A87C2A}
+.pp .plan.pending{opacity:.92}
 </style>
 </head>
 <body>
@@ -518,11 +693,12 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 
 let idx = 0;
 const SCREENS = [
-  {id:'select', nav:'2 · เลือกแบบประกัน'},
-  {id:'detail', nav:'2.1 · รายละเอียดแบบประกัน'},
-  {id:'submit', nav:'3 · กำลังส่งข้อมูล'},
-  {id:'sent',   nav:'4 · ส่งสำเร็จ'},
-  {id:'slow',   nav:'4 · ส่งนาน รับผลทางแอป'},
+  {id:'consent', nav:'1 · ความยินยอม + เลือกข้อมูล'},
+  {id:'gateway', nav:'2 · ส่งผ่าน Insurance Gateway'},
+  {id:'select',  nav:'3 · ข้อเสนอจากบริษัท'},
+  {id:'detail',  nav:'3.1 · รายละเอียด Package'},
+  {id:'done',    nav:'4 · สนใจแผนนี้'},
+  {id:'slow',    nav:'4 · รอผลพิจารณา (แจ้งทางแอป)'},
 ];
 
 const ICON = {
@@ -600,12 +776,13 @@ const planInfo = () => { const p = [...PLANS_REC, ...PLANS_MORE].find(x => x.nam
   return {plan:p, co:INSURERS[p.co]}; };
 
 /* การ์ดแบบประกัน: โลโก้บริษัท + ป้ายประเภทอยู่แถวบน (ใช้โครงเดียวกันทั้งส่วนแนะนำและแบบประกันอื่น) */
+/* บริษัทที่ยังพิจารณาอยู่ (slow) → การ์ดไม่มีราคา แสดง "รอผลพิจารณา" · แตะ = ไปหน้ารอผล (แจ้งทางแอป) */
 const planCard = p => `
-  <button class="plan" data-go="detail" data-plan="${p.name}">
+  <button class="plan${INSURERS[p.co].slow ? ' pending' : ''}" data-go="${INSURERS[p.co].slow ? 'slow' : 'detail'}" data-plan="${p.name}">
     <div class="top"><span class="ic lg" title="${INSURERS[p.co].name}"><b>${INSURERS[p.co].short}</b><img class="${INSURERS[p.co].fit}" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"></span><span class="tag">${p.tag}</span></div>
     <b>${p.name}</b>
     <span class="cov">${p.cov}</span>
-    <span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>
+    ${INSURERS[p.co].slow ? `<span class="wait">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>`}
   </button>`;
 
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
@@ -633,19 +810,19 @@ const selectScreen = () => `
 ${ppHead()}
     <div class="scroll"><div class="stack">
     <section class="rec">
-      <div class="hd"><h2>แบบประกันที่แนะนำ</h2><p>เลือกประกันที่ต้องการ</p></div>
+      <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>แตะเพื่อดูรายละเอียด</p></div>
       <img class="art" src="ins_couple.png" alt="">
       <div class="rail">${PLANS_REC.map(planCard).join('')}</div>
     </section>
 
     <section class="more">
-      <div class="hd"><h2>แบบประกันอื่น</h2><p>เลือกประกันที่ต้องการ</p></div>
+      <div class="hd"><h2>ข้อเสนออื่น</h2><p>แตะเพื่อดูรายละเอียด</p></div>
       <div class="grid">${PLANS_MORE.map(planCard).join('')}</div>
     </section>
     </div></div>
 
     <!-- กดยินยอมมาโดยไม่ได้ตั้งใจ → ออกจากขั้นตอนประกันได้ทันที ข้อมูลยังไม่ถูกส่ง (ส่งหลังเลือกแบบประกันเท่านั้น) -->
-    <div class="foot"><button class="cancel" data-home>ยังไม่สนใจ, ไปที่ระบบลงทะเบียน</button></div>
+    <div class="foot"><button class="cancel" data-home>ไม่สนใจ, พิมพ์บัตรคิว</button></div>
   </div>`;
 
 /* ---------- หลังเลือกแบบประกัน: ส่งข้อมูล → ส่งสำเร็จ หรือ ส่งนาน ----------
@@ -653,7 +830,7 @@ ${ppHead()}
    ส่งใช้เวลานาน → แจ้งให้รับข่าวสารผลทางแอปหมอพร้อม และ MyAtlas (ไม่ต้องรอที่ตู้)
    ต้นแบบ: บริษัทที่ตั้ง slow:true (AIA) จำลองกรณีส่งนาน บริษัทอื่นจำลองกรณีส่งเร็ว */
 const REQ_ID = 'INS-2569-000123';
-const ppFoot = () => `<div class="foot"><button class="finish" data-home>เข้าใจแล้ว, ไปที่ระบบลงทะเบียน</button></div>`;
+const ppFoot = () => `<div class="foot"><button class="finish" data-home>พิมพ์บัตรคิว</button></div>`;   /* จบเรื่องประกัน → กลับไปพิมพ์ VN Slip */
 
 /* การ์ดสรุปแบบประกันที่เลือก ใช้ร่วมทุกหน้าหลังเลือก */
 const planSum = (plan, co, status) => `<div class="psum">
@@ -700,7 +877,7 @@ const slowScreen = () => { const {plan, co} = planInfo(); return `
   <div class="pp">
 ${ppHead(true)}
     <div class="pg" data-screen="slow">
-      <div class="phd"><span class="bigic wait">${svg('clock',1.8)}</span><h2>การส่งข้อมูลใช้เวลานานกว่าปกติ</h2><p>ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป</p></div>
+      <div class="phd"><span class="bigic wait">${svg('clock',1.8)}</span><h2>บริษัทยังพิจารณาข้อเสนออยู่</h2><p>ท่านไม่ต้องรอที่ตู้ ระบบจะแจ้งผลผ่านแอป</p></div>
       <div class="pgb">
         ${planSum(plan, co, `<span class="st wait">${svg('clock',2)} กำลังดำเนินการ</span>`)}
         <div class="apps">
@@ -771,26 +948,149 @@ ${ppHead(true)}
         <ul class="card bul">${t.ex.map(x => `<li>${x}</li>`).join('')}</ul>
       </section>
 
-      <div class="dnote">${svg('info',2)}<span>ข้อมูลนี้เป็น<b>สรุปเบื้องต้น</b> เงื่อนไขจริงเป็นไปตามกรมธรรม์ เมื่อกดส่ง ระบบจะส่งข้อมูลสุขภาพตามที่ท่านยินยอมให้ <b>${co.name}</b> เท่านั้น เพื่อพิจารณาเบี้ยและการรับประกัน</span></div>
+      <div class="dnote">${svg('info',2)}<span>ข้อมูลนี้เป็น<b>ข้อเสนอเบื้องต้น</b> เงื่อนไขจริงเป็นไปตามกรมธรรม์ หากสนใจ <b>${co.name}</b> จะติดต่อกลับเพื่อให้ข้อมูลเพิ่มเติม</span></div>
     </div></div>
 
-    <div class="foot two"><button class="cancel" data-go="select">ย้อนกลับ</button><button class="finish" data-go="submit">ส่งข้อมูลเพื่อขอพิจารณา</button></div>
+    <div class="foot two"><button class="cancel" data-go="select">ย้อนกลับ</button><button class="finish" data-go="done">สนใจแผนนี้</button></div>
+  </div>`; };
+
+/* ---------- ความยินยอม (Privacy Notice + Consent) + ผู้ป่วยเลือกข้อมูลที่เปิดเผย ----------
+   flow ใหม่: มาหลังสร้าง Visit/VN และผู้ป่วยกด "สนใจตรวจสอบแผนประกัน" · ไม่ยินยอม = กลับไปพิมพ์บัตรคิว
+   TODO(integration): รายการข้อมูล/ค่าเริ่มต้นจาก Insurance Gateway · บันทึกหลักฐานความยินยอม */
+const SHARE = [
+  {t:'ข้อมูลพื้นฐาน', s:'เพศ อายุ รหัสอ้างอิงผู้ป่วย', on:true, lock:true},
+  {t:'สรุปข้อมูลสุขภาพ (AI)', s:'โรคประจำตัว แพ้ยา สัญญาณชีพ', on:true},
+  {t:'ประวัติการรับบริการ', s:'วันที่ แผนก ย้อนหลัง 3 ปี', on:true},
+  {t:'การวินิจฉัยโรค', s:'รหัส ICD ตามขอบเขต', on:true},
+  {t:'ประวัติการใช้ยา', s:'รายการยาที่เกี่ยวข้อง', on:true},
+  {t:'ผลตรวจห้องปฏิบัติการ', s:'เฉพาะชุดที่บริษัทร้องขอ', on:true},
+  {t:'สัญญาณชีพ', s:'ความดันโลหิต ดัชนีมวลกาย', on:true},
+  {t:'รายงานแพทย์ (FMR)', s:'สรุปโดยแพทย์ผู้รักษา', on:true},
+];
+const NEVER = [['เลขบัตรประชาชน','เลข 13 หลักไม่ถูกส่งออก'], ['ที่อยู่','ตามทะเบียนบ้านและที่ติดต่อ'], ['เบอร์โทรศัพท์','ช่องทางติดต่อส่วนตัว'], ['เวชระเบียนส่วนที่เหลือ','ส่วนที่ไม่เกี่ยวกับการพิจารณา']];
+const consentScreen = () => `
+  <div class="pp">
+${ppHead(true)}
+  <div class="ov" id="consentOv">
+    <div class="sheet">
+
+      <div class="sh">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h6M10 16h6"/></svg></div>
+        <div>
+          <h2>ความเป็นส่วนตัวและความยินยอม</h2>
+          <p>กรุณาเลื่อนอ่านให้ครบก่อนตัดสินใจ · ฉบับที่ 1.0 (1 ก.ย. 2569)</p>
+        </div>
+      </div>
+
+      <div class="sb" id="consentBody">
+        <div class="csCard">
+          <h3><span class="n">1</span> วัตถุประสงค์</h3>
+          <p>เพื่อส่งข้อมูลสุขภาพ<b>เฉพาะที่ท่านเลือก</b>ให้บริษัทประกันที่ร่วมโครงการ ใช้เสนอ<b>แผนประกันที่เหมาะกับความต้องการของท่าน</b>
+            <b>เฉพาะครั้งนี้เท่านั้น</b></p>
+        </div>
+
+        <div class="csCard">
+          <h3><span class="n">2</span> ผู้รับข้อมูล</h3>
+          <p>ส่งผ่าน<b>Insurance Gateway</b> ของ BMS แบบเข้ารหัส ไปยังบริษัทประกันที่ร่วมโครงการ</p>
+          <div class="coList">${Object.values(INSURERS).map(c => `<span><img src="${c.logo}" alt="">${c.name}</span>`).join('')}</div>
+        </div>
+
+        <div class="csCard">
+          <h3><span class="n">3</span> เลือกข้อมูลที่ยินยอมให้เปิดเผย</h3>
+          <p class="pickHint">แตะรายการเพื่อเลือก / ไม่เลือก · ส่งเฉพาะรายการที่มีเครื่องหมาย ✓</p>
+          <ul class="scope">${SHARE.map((d, i) => `<li class="pick${d.lock ? ' lock' : ''}${d.on ? '' : ' no'}" data-share="${i}" role="checkbox" aria-checked="${d.on}"><i>${svg(d.on ? 'check' : 'close', 3)}</i><span>${d.t}<small>${d.s}</small></span></li>`).join('')}
+            <li class="neverTtl">ไม่ถูกส่งออกไม่ว่ากรณีใด</li>
+            ${NEVER.map(([t, sub]) => `<li class="no"><i>${svg('close',3)}</i><span>${t}<small>${sub}</small></span></li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="csCard">
+          <h3><span class="n">4</span> การรับผล</h3>
+          <p>· ผลอาจกลับมา<b>ทันทีที่ตู้</b> หรือบริษัทใช้เวลาพิจารณาแล้วแจ้งภายหลัง<br>
+            · กรณีใช้เวลานาน ท่าน<b>ไม่ต้องรอที่ตู้</b> ระบบจะแจ้งผลผ่านแอป <b>MyAtlas</b> หรือ <b>หมอพร้อม</b><br>
+            · สิ่งที่ได้คือ<b>คำแนะนำแบบประกันที่เหมาะกับข้อมูลสุขภาพของท่าน</b> พร้อมข้อเสนอเบื้องต้น</p>
+        </div>
+
+        <div class="csCard">
+          <h3><span class="n">5</span> สิทธิของท่าน</h3>
+          <p>· ท่าน<b>ถอนความยินยอม</b>ได้ทุกเมื่อ ผ่านแอป MyAtlas หรือที่เคาน์เตอร์เวชระเบียน<br>
+            · ตู้บริการ<b>ไม่เก็บ</b>ข้อมูลสุขภาพของท่านไว้หลังจบรายการ<br>
+            · ทุกครั้งที่มีการส่งหรือเปิดดูข้อมูล ระบบบันทึกหลักฐานไว้ให้ตรวจสอบย้อนหลังได้</p>
+        </div>
+
+        <div class="csNote blue"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6h.01"/></svg></i>
+          <div>การยินยอมนี้ <b>ไม่ใช่</b> การยินยอมให้ตัวแทนติดต่อขายประกัน
+            หากท่านสนใจข้อเสนอ ระบบจะถามยืนยันแยกอีกครั้งหลังทราบผล</div></div>
+
+        <div class="csNote amber"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 20h18.4L12 4Z"/><path d="M12 10v4.5M12 17.4h.01"/></svg></i>
+          <div>ผลการตรวจสอบเป็น<b>ข้อเสนอเบื้องต้น ไม่ใช่การอนุมัติกรมธรรม์</b>
+            การรับประกันขึ้นอยู่กับการพิจารณาของบริษัทประกัน</div></div>
+
+      </div>
+
+      <div class="sf">
+        <button class="agree locked" id="agree" role="checkbox" aria-checked="false">
+          <span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>
+          <span class="tx">ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ<b>ยินยอม</b>ให้ส่งข้อมูลสุขภาพ
+            ตามรายการที่เลือกไปยังบริษัทประกันที่ร่วมโครงการ</span>
+        </button>
+        <div class="row">
+          <button class="csBtn ghost" id="csDecline">ไม่ยินยอม, พิมพ์บัตรคิว</button>
+          <button class="csBtn primary" id="csAccept" disabled>ยินยอมและส่งข้อมูล</button>
+        </div>
+      </div>
+
+      <div class="scrollcue" id="cue"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 12.5l6 6 6-6"/></svg> เลื่อนลงเพื่ออ่านให้ครบ</div>
+    </div>
+  </div>
+
+  </div>`;
+
+/* ---------- Insurance Gateway: ส่งให้ทุกบริษัทพร้อมกัน → รอข้อเสนอ ----------
+   ต้นแบบ: บริษัทที่ slow:true (AIA) ยังพิจารณาอยู่ → ข้อเสนอของบริษัทนั้นขึ้นเป็น "รอผลพิจารณา" */
+const gatewayScreen = () => `
+  <div class="pp">
+${ppHead(true)}
+    <div class="gw">
+      <div class="phd"><span class="hub">${svg('shield',1.8)}</span><h2>กำลังส่งข้อมูลให้บริษัทประกัน</h2><p>ผ่าน Insurance Gateway แบบเข้ารหัส · กรุณารอสักครู่</p></div>
+      <div class="cos">${Object.entries(INSURERS).map(([k, c]) => `<div class="co" data-co="${k}"><span class="lg"><img class="${c.fit}" src="${c.logo}" alt=""></span><b>${c.name}</b>
+        <span class="st busy"><i class="mini-spin"></i> กำลังส่ง</span></div>`).join('')}</div>
+      <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
+    </div>
+  </div>`;
+
+/* ---------- ผลลัพธ์: สนใจแผนนี้ (บริษัทติดต่อกลับ) ---------- */
+const doneScreen = () => { const {plan, co} = planInfo(); return `
+  <div class="pp">
+${ppHead(true)}
+    <div class="pg" data-screen="done">
+      <div class="phd"><span class="bigic ok">${svg('bigcheck',2.4)}</span><h2>บันทึกความสนใจแล้ว</h2><p>บริษัทประกันจะติดต่อกลับเพื่อให้ข้อมูลเพิ่มเติม</p></div>
+      <div class="pgb">
+        ${planSum(plan, co, `<span class="st done">${svg('check',3)} สนใจแผนนี้</span>`)}
+        <div class="apps">
+          ${appRow('แอป MyAtlas','ดูรายละเอียดได้ที่เมนู “ประกันของฉัน”',`<span class="st done">${svg('check',3)} ส่งแล้ว</span>`)}
+          ${appRow('แอปหมอพร้อม','ดูรายละเอียดได้ที่การแจ้งเตือน',`<span class="st done">${svg('check',3)} ส่งแล้ว</span>`)}
+        </div>
+        <div class="rid">รหัสรายการ <b>${REQ_ID}</b></div>
+      </div>
+    </div>
+${ppFoot()}
   </div>`; };
 
 /* ---------- ประกอบเป็นหน้าจอ ---------- */
+/* flow ใหม่: consent → gateway → select (ข้อเสนอจากบริษัท) → detail → done (สนใจ) · แผนที่รอผล → slow · ทุกทางจบที่พิมพ์บัตรคิว */
 const VIEW = {
-  /* ความยินยอมเกิดที่หน้าแรกของตู้แล้ว (welcome_v2.html) ขั้นที่ 1 จึงแสดงเป็นเสร็จแล้ว */
+  consent:  () => consentScreen(),
+  gateway:  () => gatewayScreen(),
   select:   () => selectScreen(),
   detail:   () => detailScreen(),
-
-  submit: () => detailScreen().replace(/<\/div>\s*$/, sendModal() + '\n  </div>'),
-  sent:   () => sentScreen(),
-  slow:   () => slowScreen(),
+  done:     () => doneScreen(),
+  slow:     () => slowScreen(),
 };
 
 /* ---------- ตัวควบคุม ---------- */
 /* เสียงแนะนำ (voice.js) */
-window.VOICE_STATE = () => { const id = (SCREENS[idx] || {}).id; return {select:['insselect'], sent:['inssent'], slow:['insslow']}[id] || null; };
+window.VOICE_STATE = () => { const id = (SCREENS[idx] || {}).id; return {consent:['consent'], gateway:['insgw'], select:['insselect'], done:['insdone'], slow:['insslow']}[id] || null; };
 function render(id){
   const at = SCREENS.findIndex(s => s.id === id);
   if (at >= 0) idx = at;
@@ -800,6 +1100,8 @@ function render(id){
   fit();
 }
 
+/* จบเรื่องประกันทุกทาง → กลับไปพิมพ์ VN Slip (บัตรคิว) ที่หน้าลงทะเบียน */
+const toPrint = () => { const q = new URLSearchParams(location.search); q.set('print', '1'); location.href = 'services.html?' + q.toString(); };
 function wire(){
   const scr = document.getElementById('screen');
   const modal = scr.querySelector('.ov');
@@ -814,9 +1116,7 @@ function wire(){
   });
 
   /* ออกจาก flow ประกัน → ระบบลงทะเบียน (หน้าเลือกบริการ) */
-  scr.querySelectorAll('[data-home]').forEach(el => {
-    el.onclick = () => { if (!el.disabled) location.href = 'services.html' + location.search; };   /* ไปที่ระบบลงทะเบียน (เลือกบริการ) */
-  });
+  scr.querySelectorAll('[data-home]').forEach(el => { el.onclick = () => { if (!el.disabled) toPrint(); }; });
 
   scr.querySelectorAll('[data-radio]').forEach(el => {
     el.onclick = () => {
@@ -839,9 +1139,17 @@ function wire(){
     agree.onclick = () => {
       const on = agree.getAttribute('aria-checked') !== 'true';
       agree.setAttribute('aria-checked', String(on));
-      document.getElementById('btnConsent').disabled = !on;
+      document.getElementById('csAccept').disabled = !on;
     };
   }
+  /* ความยินยอม: เลือกข้อมูล · ยินยอม → Gateway · ไม่ยินยอม → พิมพ์บัตรคิว */
+  scr.querySelectorAll('[data-share]').forEach(el => {
+    const d = SHARE[+el.dataset.share]; if (d.lock) return;
+    el.onclick = () => { d.on = !d.on; el.classList.toggle('no', !d.on); el.setAttribute('aria-checked', d.on);
+      el.querySelector('i').innerHTML = svg(d.on ? 'check' : 'close', 3); };
+  });
+  const acc = document.getElementById('csAccept'); if (acc) acc.onclick = () => { if (!acc.disabled) render('gateway'); };
+  const dec = document.getElementById('csDecline'); if (dec) dec.onclick = toPrint;
 
   const agree2 = document.getElementById('agree2');
   if (agree2) agree2.onclick = () => {
@@ -879,10 +1187,16 @@ function wire(){
   const sc = scr.querySelector('.pp .scroll');
   if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
 
-  clearTimeout(window._st);
-  if (scr.querySelector('[data-screen="submit"]')){
-    const slow = planInfo().co.slow;
-    window._st = setTimeout(() => render(slow ? 'slow' : 'sent'), slow ? 5200 : 2800);
+  /* Gateway: บริษัทตอบทีละราย (ต้นแบบ) · บริษัท slow ยังพิจารณาอยู่ → ไปหน้าข้อเสนอ */
+  [window._st1, window._st2, window._st3, window._st4].forEach(clearTimeout);
+  if (scr.querySelector('.gw')){
+    const done = (k, slow) => { const el = scr.querySelector(`[data-co="${k}"] .st`); if (!el) return;
+      el.className = 'st ' + (slow ? 'wait' : 'done'); el.innerHTML = slow ? `${svg('clock',2)} กำลังพิจารณา` : `${svg('check',3)} ได้รับข้อเสนอแล้ว`; };
+    const ks = Object.keys(INSURERS);
+    window._st1 = setTimeout(() => done(ks[0], INSURERS[ks[0]].slow), 1300);
+    window._st2 = setTimeout(() => done(ks[1], INSURERS[ks[1]].slow), 2100);
+    window._st3 = setTimeout(() => done(ks[2], INSURERS[ks[2]].slow), 2800);
+    window._st4 = setTimeout(() => render('select'), 3800);
   }
 
   clearInterval(window._it);   /* ไม่มีการนับเวลากลับหน้าแรกอัตโนมัติแล้ว */
@@ -918,7 +1232,7 @@ clearInterval(window._ct);
 window._ct = setInterval(tickClock, 1000);
 
 addEventListener('resize', fit);
-render('select');
+render('consent');
 </script>
 
 <!-- ===== dev only: หน้าเว็บรีโหลดเองเมื่อไฟล์ถูกแก้ · ทำงานเฉพาะตอนเปิดผ่าน localhost ===== -->

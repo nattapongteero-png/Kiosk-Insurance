@@ -397,65 +397,6 @@ body.bleed{padding:0;overflow:hidden}
 body.bleed .screen{border-radius:0;box-shadow:none}
 
 
-/* ================= Modal ความยินยอม — ปรับให้เข้ากับ UI ปัจจุบัน (ผิวไข่มุก · ขอบทองบาง · ปุ่มกรมท่า) =================
-   ข้อ 3 คงแนวเดิม: รายการ ✓ ส่ง / ✗ ไม่ส่ง 2 คอลัมน์ เปลี่ยนแค่ผิวการ์ดและระยะ */
-#consentOv{background:rgba(10,25,60,.42);backdrop-filter:blur(8px);padding:120px 64px}
-#consentOv .sheet{width:100%;border-radius:40px;
-  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 55%,#F8F5EF 100%);
-  box-shadow:0 0 0 1px rgba(191,145,58,.32),0 40px 100px rgba(6,20,50,.35)}
-#consentOv .sh{padding:48px 136px 28px 48px;gap:24px;align-items:center;border-bottom:1px solid rgba(191,145,58,.2)}
-#consentOv .sh .ic{width:88px;height:88px;border-radius:50%;border:0;
-  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);
-  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
-#consentOv .sh .ic svg{width:44px;height:44px;stroke:#A87C2A}
-#consentOv .csClose{position:absolute;top:32px;right:32px;z-index:2;width:88px;height:88px;border-radius:50%;border:0;cursor:pointer;
-  display:grid;place-items:center;background:rgba(20,38,90,.06);transition:transform .15s}
-#consentOv .csClose:active{transform:scale(.94)}
-#consentOv .csClose svg{width:40px;height:40px;stroke:var(--ink-muted)}
-/* แจ้งผลตอนกลับหน้าแรก (ยกเลิก / หมดเวลา) · ป้ายกรมท่าใต้แบนเนอร์ หายเองใน 4 วิ */
-.bye{position:absolute;left:50%;top:296px;z-index:8;transform:translateX(-50%);display:flex;align-items:center;gap:16px;white-space:nowrap;
-  padding:22px 40px 22px 32px;border-radius:99px;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);color:#fff;
-  font-size:30px;font-weight:600;box-shadow:0 16px 40px rgba(20,38,90,.3);animation:byeIn .35s cubic-bezier(.2,.8,.2,1)}
-.bye svg{width:36px;height:36px;stroke:#fff;flex:none}
-@keyframes byeIn{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translateX(-50%)}}
-#consentOv .sh h2{font-size:40px;line-height:52px;color:var(--ink)}
-#consentOv .sh p{font-size:24px;line-height:36px;color:var(--ink-muted);margin-top:2px}
-#consentOv .sb{padding:32px 48px;gap:24px}
-#consentOv .csCard{border:0;border-radius:24px;padding:28px 32px;background:#fff;
-  box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.28),0 6px 14px rgba(20,38,90,.05)}
-#consentOv .csCard h3{font-size:30px;line-height:40px;color:var(--ink);gap:16px;margin-bottom:16px}
-#consentOv .csCard h3 .n{width:40px;height:40px;border-radius:50%;font-size:22px;font-weight:700;
-  color:#8A6420;background:rgba(191,145,58,.14)}
-#consentOv .csCard p{font-size:26px;line-height:42px;color:var(--ink)}
-#consentOv .csCard p b{color:var(--ink)}
-/* ข้อ 3: ✓/✗ คงเดิม */
-#consentOv .scope{gap:16px 32px}
-#consentOv .scope li{font-size:25px;line-height:36px;color:var(--ink);font-weight:600}
-#consentOv .scope li i{width:32px;height:32px;margin-top:2px}
-#consentOv .scope li i svg{width:18px;height:18px}
-#consentOv .scope li small{font-size:21px;line-height:30px;color:var(--ink-soft);font-weight:400}
-#consentOv .scope li.no{color:#98211A}
-#consentOv .scope li.no small{color:#B07871}
-#consentOv .csNote{border:0;border-radius:24px;padding:24px 32px;font-size:25px;line-height:38px;gap:16px}
-#consentOv .csNote.blue{background:rgba(30,123,224,.06);color:var(--ink-muted)}
-#consentOv .csNote.blue b{color:var(--ink)}
-#consentOv .csNote.amber{background:var(--amber-050,#FEF5E7);color:#7A4A0A}
-#consentOv .csNote i{width:40px;height:40px;background:transparent!important}
-#consentOv .csNote i svg{width:32px;height:32px}
-#consentOv .sf{padding:28px 48px 40px;gap:24px;border-top:1px solid rgba(191,145,58,.2)}
-#consentOv .agree{border:0;border-radius:24px;padding:24px 28px;gap:20px;background:#fff;
-  box-shadow:0 0 0 1.5px var(--line,#D7E4F2)}
-#consentOv .agree[aria-checked="true"]{background:#E8F7F2;box-shadow:0 0 0 2px #1E9C78}
-#consentOv .agree .bx{width:44px;height:44px;border-radius:12px}
-#consentOv .agree .tx{font-size:26px;line-height:40px}
-#consentOv .sf .row{gap:24px}
-#consentOv .csBtn{height:88px;padding:0 40px;border-radius:99px}
-#consentOv .csBtn.ghost{flex:none;min-width:360px;border:0;background:#fff;color:var(--ink-muted);font-size:26px;font-weight:600;
-  box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line,#D7E4F2),0 8px 20px rgba(20,38,90,.08)}
-#consentOv .csBtn.primary{background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);font-size:30px;
-  box-shadow:0 10px 24px rgba(20,38,90,.22)}
-#consentOv .csBtn.primary[disabled]{background:#D5DCE6;color:#fff;box-shadow:none}
-#consentOv .scrollcue{background:var(--ink)}
 </style>
 </head>
 <body>
@@ -785,90 +726,6 @@ body.bleed .screen{border-radius:0;box-shadow:none}
   </div>
 
   <!-- Modal ความยินยอม: เด้งทันทีหลังยืนยันตัวตนสำเร็จ -->
-  <div class="ov" id="consentOv" hidden>
-    <div class="sheet">
-      <!-- ปิด = ยกเลิกทั้งรายการ กลับหน้าแรก (ต่างจาก "ไม่ยินยอม" ที่ยังลงทะเบียนต่อ) -->
-      <button class="csClose" id="csClose" aria-label="ปิด ยกเลิกรายการ"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-
-      <div class="sh">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h6M10 16h6"/></svg></div>
-        <div>
-          <h2>ความยินยอมให้ส่งข้อมูลสุขภาพ</h2>
-          <p>กรุณาเลื่อนอ่านให้ครบก่อนตัดสินใจ · ฉบับที่ 1.0 (1 ก.ย. 2569)</p>
-        </div>
-      </div>
-
-      <div class="sb" id="consentBody">
-        <div class="csCard">
-          <h3><span class="n">1</span> วัตถุประสงค์</h3>
-          <p>เพื่อให้บริษัทประกันใช้<b>รายงานแพทย์ (FMR)</b> และ<b>ประวัติสุขภาพส่วนบุคคล (PHR)</b> ของท่าน
-            ประกอบการแนะนำแบบประกันชีวิต/สุขภาพที่เหมาะกับสุขภาพของท่าน และจัดทำข้อเสนอเบื้องต้น
-            <b>เฉพาะการตรวจสอบครั้งนี้เท่านั้น</b></p>
-        </div>
-
-        <div class="csCard">
-          <h3><span class="n">2</span> ผู้รับข้อมูล</h3>
-          <p><b>บริษัทประกันที่ร่วมโครงการ</b> ส่งผ่านระบบกลางของ BMS แบบเข้ารหัส
-            ระบบจะแสดงรายชื่อบริษัทที่ได้รับข้อมูลให้ท่านทราบก่อนส่งจริง
-            ท่านจะเป็นผู้เลือก<b>แบบประกัน</b>ที่สนใจเองหลังทราบผล</p>
-        </div>
-
-        <div class="csCard">
-          <h3><span class="n">3</span> ข้อมูลที่จะถูกส่ง (FMR / PHR)</h3>
-          <ul class="scope">
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>ข้อมูลพื้นฐาน<small>เพศ อายุ รหัสอ้างอิงผู้ป่วย</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>ประวัติการรับบริการ<small>วันที่ แผนก ย้อนหลัง 3 ปี</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>การวินิจฉัยโรค<small>รหัส ICD ตามขอบเขต</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>ประวัติการใช้ยา<small>รายการยาที่เกี่ยวข้อง</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>ผลตรวจห้องปฏิบัติการ<small>เฉพาะชุดที่บริษัทร้องขอ</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>สัญญาณชีพ<small>ความดันโลหิต ดัชนีมวลกาย</small></span></li>
-            <li><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></i><span>รายงานแพทย์ (FMR)<small>สรุปโดยแพทย์ผู้รักษา</small></span></li>
-            <li class="no"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></i><span>เลขบัตรประชาชน<small>เลข 13 หลักไม่ถูกส่งออก</small></span></li>
-            <li class="no"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></i><span>ที่อยู่<small>ตามทะเบียนบ้านและที่ติดต่อ</small></span></li>
-            <li class="no"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></i><span>เบอร์โทรศัพท์<small>ช่องทางติดต่อส่วนตัว</small></span></li>
-            <li class="no"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5"/></svg></i><span>เวชระเบียนส่วนที่เหลือ<small>ส่วนที่ไม่เกี่ยวกับการพิจารณา</small></span></li>
-          </ul>
-        </div>
-
-        <div class="csCard">
-          <h3><span class="n">4</span> การรับผล</h3>
-          <p>· ผลอาจกลับมา<b>ทันทีที่ตู้</b> หรือบริษัทใช้เวลาพิจารณาแล้วแจ้งภายหลัง<br>
-            · กรณีใช้เวลานาน ท่าน<b>ไม่ต้องรอที่ตู้</b> ระบบจะแจ้งผลผ่านแอป <b>MyAtlas</b> หรือ <b>หมอพร้อม</b><br>
-            · สิ่งที่ได้คือ<b>คำแนะนำแบบประกันที่เหมาะกับข้อมูลสุขภาพของท่าน</b> พร้อมข้อเสนอเบื้องต้น</p>
-        </div>
-
-        <div class="csCard">
-          <h3><span class="n">5</span> สิทธิของท่าน</h3>
-          <p>· ท่าน<b>ถอนความยินยอม</b>ได้ทุกเมื่อ ผ่านแอป MyAtlas หรือที่เคาน์เตอร์เวชระเบียน<br>
-            · ตู้บริการ<b>ไม่เก็บ</b>ข้อมูลสุขภาพของท่านไว้หลังจบรายการ<br>
-            · ทุกครั้งที่มีการส่งหรือเปิดดูข้อมูล ระบบบันทึกหลักฐานไว้ให้ตรวจสอบย้อนหลังได้</p>
-        </div>
-
-        <div class="csNote blue"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6h.01"/></svg></i>
-          <div>การยินยอมนี้ <b>ไม่ใช่</b> การยินยอมให้ตัวแทนติดต่อขายประกัน
-            หากท่านสนใจข้อเสนอ ระบบจะถามยืนยันแยกอีกครั้งหลังทราบผล</div></div>
-
-        <div class="csNote amber"><i><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 20h18.4L12 4Z"/><path d="M12 10v4.5M12 17.4h.01"/></svg></i>
-          <div>ผลการตรวจสอบเป็น<b>ข้อเสนอเบื้องต้น ไม่ใช่การอนุมัติกรมธรรม์</b>
-            การรับประกันขึ้นอยู่กับการพิจารณาของบริษัทประกัน</div></div>
-
-      </div>
-
-      <div class="sf">
-        <button class="agree locked" id="agree" role="checkbox" aria-checked="false">
-          <span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>
-          <span class="tx">ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ<b>ยินยอม</b>ให้ส่งข้อมูลสุขภาพ
-            ตามรายการที่ระบุไปยังบริษัทประกันที่ร่วมโครงการ</span>
-        </button>
-        <div class="row">
-          <button class="csBtn ghost" id="csDecline">ไม่ยินยอม, ไปที่ระบบลงทะเบียน</button>
-          <button class="csBtn primary" id="csAccept" disabled>ยินยอม</button>
-        </div>
-      </div>
-
-      <div class="scrollcue" id="cue"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13M6 12.5l6 6 6-6"/></svg> เลื่อนลงเพื่ออ่านให้ครบ</div>
-    </div>
-  </div>
 
 </div>
 </div>
@@ -883,45 +740,26 @@ document.querySelector('.lang .en').onclick = () => setLang('en');
 document.querySelector('.lang .th').onclick = () => setLang('th');
 addEventListener('load', () => setLang(new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'th'));
 
-/* ---------- จำลอง flow: เสียบบัตร → อ่านบัตร → เด้ง consent ---------- */
+/* ---------- flow ใหม่: ยืนยันตัวตนสำเร็จ → ตรวจสอบสิทธิ/ส่งตรวจทันที (services.html)
+   เรื่องประกันถามหลังสร้าง Visit/VN แล้วเท่านั้น (ความยินยอมย้ายไปอยู่ใน insurance.html) ---------- */
 const reading = document.getElementById('reading');
-const ov = document.getElementById('consentOv');
-const agree = document.getElementById('agree');
-const cue = document.getElementById('cue');
-const cbody = document.getElementById('consentBody');
-const accept = document.getElementById('csAccept');
+const goReg = () => { location.href = 'services.html' + RIGHTS_Q; };
 
 function resetFlow(){
-  reading.hidden = true; ov.hidden = true;
+  reading.hidden = true;
   const k = document.getElementById('kpOv'); if (k) k.hidden = true;
   const rt = document.getElementById('readTitle');
   if (rt){ rt.textContent = 'กำลังอ่านบัตรประชาชน';
     document.getElementById('readSub').textContent = 'กรุณาอย่าดึงบัตรออกจนกว่าจะอ่านเสร็จ'; }
-  agree.classList.add('locked'); agree.setAttribute('aria-checked','false');
-  accept.disabled = true; cue.classList.remove('hide'); cbody.scrollTop = 0;
 }
 function insertCard(){
   resetFlow(); RIGHTS_Q = '';
   reading.dataset.k = 'reading'; reading.hidden = false;
-  setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 1800);
+  setTimeout(goReg, 1800);
 }
-function checkScroll(){
-  if (cbody.scrollTop + cbody.clientHeight >= cbody.scrollHeight - 24){
-    agree.classList.remove('locked'); cue.classList.add('hide');
-  }
-}
-cbody.addEventListener('scroll', checkScroll);
-agree.onclick = () => {
-  const on = agree.getAttribute('aria-checked') !== 'true';
-  agree.setAttribute('aria-checked', String(on));
-  accept.disabled = !on;
-};
 /* ต้นแบบ: เสียบบัตร = สิทธิใช้ได้ · กรอก HN/เลขบัตร = สิทธิใช้ที่นี่ไม่ได้ (สาธิตหน้าผลตรวจสอบสิทธิทั้ง 2 กรณี)
    TODO(integration): ผลจริงจาก NHSO Smartcard Agent / สปสช. */
 let RIGHTS_Q = '';
-accept.onclick = () => { location.href = 'insurance.html' + RIGHTS_Q; };
-/* ไม่ยินยอมเรื่องประกันก็ลงทะเบียนต่อได้ — ประกันไม่ใช่เงื่อนไขการรับบริการ */
-document.getElementById('csDecline').onclick = () => { location.href = 'services.html' + RIGHTS_Q; };
 
 /* ---------- ยกเลิก / หมดเวลา → กลับหน้าแรก ล้างข้อมูล + แจ้งให้รับบัตรคืน ----------
    TODO(integration): ล้างข้อมูลผู้ป่วยที่อ่านจากบัตร / session */
@@ -932,14 +770,13 @@ function showBye(k){
   b.hidden = false; clearTimeout(window._byeT); window._byeT = setTimeout(() => { b.hidden = true; }, 4000);
 }
 function cancelFlow(k){ resetFlow(); rdErr.hidden = true; setLang('th'); showBye(k); }
-document.getElementById('csClose').onclick = () => cancelFlow('cancel');
 /* ปุ่มเฟือง → หน้าตั้งค่าตู้ · TODO(integration): ถามรหัสผ่านตั้งค่าก่อนเข้า */
 document.querySelector('.sysBtn').onclick = () => { location.href = 'settings.html'; };
 /* เสียงแนะนำ (voice.js): คีย์ตามชั้นที่เปิดอยู่ */
 window.VOICE_STATE = () => !rdErr.hidden ? [rdErr.dataset.k || 'nocard'] : !reading.hidden ? [reading.dataset.k || 'reading']
-  : !kpOv.hidden ? [KP.mode === 'hn' ? 'kphn' : 'kpcid'] : !ov.hidden ? ['consent'] : !document.getElementById('bye').hidden ? ['bye'] : ['home'];
+  : !kpOv.hidden ? [KP.mode === 'hn' ? 'kphn' : 'kpcid'] : !document.getElementById('bye').hidden ? ['bye'] : ['home'];
 /* ตัวจับเวลาไม่มีการแตะ (idle.js): หน้าแรกนับเฉพาะตอนมีชั้นซ้อนเปิดอยู่ */
-window.IDLE_BUSY = () => !ov.hidden || !kpOv.hidden || !rdErr.hidden;
+window.IDLE_BUSY = () => !kpOv.hidden || !rdErr.hidden;
 window.IDLE_HOME = k => cancelFlow(k);
 { const k = new URLSearchParams(location.search).get('bye');
   if (BYE[k]){ showBye(k); history.replaceState(null, '', location.pathname); } }
@@ -1000,7 +837,7 @@ document.getElementById('kpOk').onclick = () => {
   document.getElementById('readTitle').textContent = 'กำลังตรวจสอบข้อมูล';
   document.getElementById('readSub').textContent = 'ระบบกำลังค้นหาข้อมูลผู้ป่วยจากเลขที่ท่านกรอก';
   reading.dataset.k = 'checking'; reading.hidden = false;
-  setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 1600);
+  setTimeout(goReg, 1600);
 };
 
 
@@ -1012,7 +849,7 @@ document.querySelector('.opt.scan').onclick = () => {
   document.getElementById('readTitle').textContent = 'กำลังสแกนใบหน้า';
   document.getElementById('readSub').textContent = 'กรุณามองตรงมาที่กล้องด้านบนของตู้';
   reading.dataset.k = 'face'; reading.hidden = false;
-  setTimeout(() => { reading.hidden = true; ov.hidden = false; cbody.scrollTop = 0; checkScroll(); }, 2000);
+  setTimeout(goReg, 2000);
 };
 /* ---------- ปุ่มอ่านบัตร + แจ้งเตือนอ่านไม่ได้ ----------
    ต้นแบบวนผล: กดครั้งที่ 1 = ไม่พบบัตร · 2 = อ่านบัตรไม่สำเร็จ · 3 = อ่านสำเร็จ → consent

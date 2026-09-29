@@ -773,6 +773,26 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 .pcard p.hint{color:var(--ink-muted);font-size:28px;line-height:44px}
 .pcard p.hint b{color:var(--ink)}
 .tk .rcard .r{padding:16px 0}   /* หน้าบัตรคิวของแน่น: แถวชิดขึ้นไม่ให้ล้นใต้แถบปุ่ม */
+/* หน้าสรุปสุขภาพ (AI) + คำถามประกัน */
+.rt.sm .phd .bigic{margin-bottom:24px}
+.rcard.ai .aih{display:flex;align-items:center;gap:14px;padding:22px 0 14px;border-bottom:1px solid rgba(20,38,90,.08)}
+.rcard.ai .aih b{font-size:28px;font-weight:700}
+.rcard.ai .aib{font-size:18px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7C5CFF,#3A7BFF);border-radius:8px;padding:2px 10px;letter-spacing:.5px}
+.rcard.ai .aip{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:600;color:#0F6B51;background:var(--green-050);border-radius:99px;padding:6px 16px}
+.rcard.ai .aip svg{width:22px;height:22px;stroke:#0F6B51}
+.askins{width:100%;display:flex;flex-direction:column;gap:6px;padding:28px 32px;border-radius:24px;text-align:left;
+  background:#FBF3E2;box-shadow:0 0 0 1.5px rgba(191,145,58,.45)}
+.askins b{font-size:32px;font-weight:700;line-height:44px}
+.askins span{font-size:24px;line-height:36px;color:#7A5A1A}
+/* modal ถามสนใจประกัน (หลังลงทะเบียนสำเร็จ) */
+.cov.insq{animation:ovIn .3s ease-out .8s both}
+.cov.insq .cbox{gap:32px;animation:boxIn .4s cubic-bezier(.2,.8,.2,1) .8s both}
+.cov.insq .qic{width:112px;height:112px;border-radius:50%;margin:0 auto 24px;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FDF8EE 55%,#F6EAD2 100%);box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 12px rgba(191,145,58,.06)}
+.cov.insq .qic svg{width:56px;height:56px;stroke:#A87C2A}
+.cov.insq .ch h2{line-height:60px}
+.cov.insq .cfoot.two{flex-direction:column-reverse;gap:20px}   /* ปุ่มหลักบน เต็มความกว้าง · ปุ่มรองใต้ (ข้อความยาวทั้งคู่ วางคู่กันไม่พอ) */
+.cov.insq .cfoot .cancel,.cov.insq .cfoot .finish{width:100%;justify-content:center}
 .rcard .r.use b{font-size:32px;color:var(--blue-deep)}
 .rcard .r.use b small{display:block;font-size:22px;line-height:32px;font-weight:500;color:#7A4A0A}
 </style>
@@ -1269,10 +1289,18 @@ const RIGHTS_OK = new URLSearchParams(location.search).get('r') !== 'fail';
 const RIGHTS = RIGHTS_OK
   ? {main:'สิทธิหลักประกันสุขภาพแห่งชาติ (UC)', sub:'—', hosp:'โรงพยาบาลบ้านลาด', hosp2:'—', authen:'PP1234567890'}
   : {main:'สิทธิประกันสังคม', sub:'เบิกกองทุนประกันสังคม (ผู้ประกันตน)', hosp:'โรงพยาบาลขอนแก่น', hosp2:'—'};
-let STEP = 'rights';   /* rights → svc → (เลือกบริการ + ลักษณะการมา) → ยืนยันการมารับบริการ → บัตรคิว */
-let CONFIRM = null;    /* {svc, arrive} รอผู้ป่วยกดยืนยันก่อนพิมพ์บัตรคิว (ตาม flow ตู้เดิม) */
+/* flow ใหม่: rights → svc → (เลือกบริการ + ลักษณะการมา) → ยืนยันการรับบริการ → สร้าง Visit/VN → AI Health Summary + ถามสนใจประกัน
+   ไม่สนใจ → พิมพ์ VN Slip (บัตรคิว) ทันที · สนใจ → insurance.html (ความยินยอม → Gateway → ข้อเสนอ) จบแล้วกลับมาพิมพ์ที่นี่ (?print=1) */
+let STEP = 'rights';
+let CONFIRM = null;    /* {svc, arrive} รอผู้ป่วยกดยืนยันการรับบริการ */
+let VISIT = null;      /* {svc, arrive, vn} สร้างแล้ว · เก็บใน sessionStorage ข้ามไปหน้าประกันแล้วกลับมาพิมพ์ */
+const VN = '690929-0142';   /* ต้นแบบ · TODO(integration): VN จาก HIS หลังเปิด visit */
+{ const q = new URLSearchParams(location.search);
+  if (q.get('print') === '1'){ try { VISIT = JSON.parse(sessionStorage.getItem('kioskVisit')); } catch (e) {}
+    if (VISIT){ STEP = 'svc'; TICKET = VISIT; } } }
 PATIENT.rightFull = RIGHTS.main;   /* แถบผู้ป่วยแสดงชื่อสิทธิเต็ม · บนบัตรคิวใช้ชื่อสั้น (PATIENT.right) */
 if (!RIGHTS_OK) PATIENT.right = 'ประกันสังคม';
+if (TICKET && !RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง';   /* กลับจากหน้าประกันมาพิมพ์: ยืนยันชำระเงินเองไปแล้ว */
 const rrow = (k, v, cls = '') => `<div class="r ${cls}"><span>${k}</span><b class="${v === '—' ? 'dim' : ''}">${v}</b></div>`;
 const rightsScreen = () => `
   <div class="pp">
@@ -1304,19 +1332,61 @@ window.VOICE_STATE = () => {
     if (!t || t.classList.contains('busy')) return ['printing'];
     return ['printed', {q: PREFIX[TICKET.svc] + '003', room: TICKET.svc}]; }
   if (CONFIRM) return ['confirm'];
+  if (STEP === 'summary') return ['askins'];
   if (PICK) return ['arrive'];
   if (STEP === 'rights') return [RIGHTS_OK ? 'rightsok' : 'rightsbad'];
   return ['services'];
 };
+/* ---------- สร้าง Visit แล้ว: AI Health Summary + ถามสนใจตรวจสอบแผนประกัน ----------
+   สรุปสุขภาพเพื่อการบริการในโรงพยาบาล (ยังไม่ส่งบริษัทประกัน) · ข้อมูลสมมติ
+   TODO(integration): สรุปจากระบบ AI ของ BMS บน PHR/HIS */
+const AI_SUM = [['โรคประจำตัว','ความดันโลหิตสูง'], ['แพ้ยา','ไม่มีประวัติแพ้ยา'], ['สัญญาณชีพล่าสุด','ความดัน 128/82 · BMI 23.4'], ['มารับบริการล่าสุด','12 ส.ค. 2569 · อายุรกรรม']];
+const summaryScreen = () => { const sv = [MAIN, ...CLINICS, ...APPT].find(x => x.id === VISIT.svc), ar = ARRIVE.find(a => a.id === VISIT.arrive); return `
+  <div class="pp">
+${ppHead(true)}
+    <div class="pg rt sm">
+      <div class="phd"><span class="bigic ok">${svg('bigcheck',2.4)}</span><h2>ลงทะเบียนรับบริการแล้ว</h2><p>VN <b>${VISIT.vn}</b> · <span>${sv.name}</span></p></div>
+      <div class="pgb" style="width:100%">
+        <div class="rcard">
+          ${rrow('บริการ', sv.name)}${rrow('ลักษณะการมา', ar.name)}
+          <div class="r use"><span>สิทธิการรักษาที่จะใช้</span><b>${RIGHTS_OK ? RIGHTS.main : 'ชำระเงินเอง'}</b></div>
+        </div>
+      </div>
+    </div>
+    ${insAskModal()}
+  </div>`; };
+/* modal ถามสนใจประกัน: ผู้ป่วยต้องอ่านสรุปก่อนตัดสินใจ · เด้งหลังหน้าลงทะเบียนสำเร็จ 0.8 วิ ให้เห็นว่าสำเร็จก่อน
+   ไม่มีปุ่มปิด / แตะพื้นหลังไม่ปิด: ต้องเลือก 1 ใน 2 เพราะทั้งสองทางจบที่การพิมพ์บัตรคิว */
+const insAskModal = () => `
+    <div class="cov insq" role="dialog" aria-modal="true" aria-labelledby="iqTtl">
+      <div class="cbox">
+        <div class="ch"><span class="qic">${svg('shield',2)}</span><h2 id="iqTtl" data-en="Would you like to check<br>insurance plans that suit you?">สนใจตรวจสอบแผนประกัน<br>ที่เหมาะกับความต้องการไหม?</h2><p>ใช้เวลาประมาณ 2–3 นาที · ส่งเฉพาะข้อมูลที่ท่านเลือกและยินยอมเท่านั้น</p></div>
+        <div class="rcard ai">
+          <div class="aih"><span class="aib">AI</span><b>สรุปข้อมูลสุขภาพ</b><span class="aip">${svg('shield',2)}ยังไม่ส่งบริษัทประกัน</span></div>
+          ${AI_SUM.map(([k, v]) => rrow(k, v)).join('')}
+        </div>
+        <div class="cfoot two">
+          <button class="cancel" data-print>ไม่สนใจ, พิมพ์บัตรคิว</button>
+          <button class="finish" data-ins>สนใจ, ตรวจสอบแผนประกัน</button>
+        </div>
+      </div>
+    </div>`;
+
 function render(){
-  document.getElementById('screen').innerHTML = TICKET ? ticketScreen() : CONFIRM ? ticketScreen(CONFIRM, true) : STEP === 'rights' ? rightsScreen() : screen();
+  document.getElementById('screen').innerHTML = TICKET ? ticketScreen() : CONFIRM ? ticketScreen(CONFIRM, true) : STEP === 'rights' ? rightsScreen() : STEP === 'summary' ? summaryScreen() : screen();
   document.querySelectorAll('[data-next]').forEach(el => el.onclick = () => { if (!RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง'; STEP = 'svc'; render(); });
   const scr = document.getElementById('screen');
   scr.querySelectorAll('[data-svc]').forEach(el => el.onclick = () => { PICK = el.dataset.svc; render(); });
   scr.querySelectorAll('[data-close]').forEach(el => el.onclick = () => { PICK = null; render(); });
   /* TODO(integration): ส่งบริการ + ลักษณะการมา ให้ HIS แล้วพิมพ์บัตรคิว */
   scr.querySelectorAll('[data-arrive]').forEach(el => el.onclick = () => { CONFIRM = {svc: PICK, arrive: el.dataset.arrive}; PICK = null; render(); });
-  scr.querySelectorAll('[data-confirm]').forEach(el => el.onclick = () => { TICKET = CONFIRM; CONFIRM = null; render(); });
+  /* ยืนยันการรับบริการ = เปิด Visit/VN แล้วไปหน้าสรุปสุขภาพ + ถามเรื่องประกัน (ยังไม่พิมพ์) */
+  scr.querySelectorAll('[data-confirm]').forEach(el => el.onclick = () => {
+    VISIT = {...CONFIRM, vn: VN}; CONFIRM = null; STEP = 'summary';
+    try { sessionStorage.setItem('kioskVisit', JSON.stringify(VISIT)); } catch (e) {}
+    render(); });
+  scr.querySelectorAll('[data-print]').forEach(el => el.onclick = () => { TICKET = VISIT; render(); });
+  scr.querySelectorAll('[data-ins]').forEach(el => el.onclick = () => { location.href = 'insurance.html' + location.search.replace(/[?&]print=1/, ''); });
   scr.querySelectorAll('[data-home]').forEach(el => el.onclick = () => { location.href = 'welcome_v2.html'; });
   const sc = scr.querySelector('.pp .scroll');
   if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
