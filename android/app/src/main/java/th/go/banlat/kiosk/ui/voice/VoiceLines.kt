@@ -12,7 +12,7 @@ internal val VoiceLines: Map<String, Pair<String, String>> = mapOf(
     "checking" to ("กำลังตรวจสอบข้อมูล กรุณารอสักครู่" to "Checking your information. Please wait."),
     "consent" to ("กรุณาอ่านข้อความ เลือกข้อมูลที่ยินยอมให้เปิดเผย แล้วกดยินยอม หรือไม่ยินยอม" to "Please read, choose the data you agree to share, then tap Agree or Decline."),
     "rightsok" to ("ตรวจสอบสิทธิเรียบร้อย กรุณากดถัดไป เพื่อเลือกบริการ" to "Your coverage is verified. Tap Next to choose a service."),
-    "rightsbad" to ("สิทธิประจำตัวไม่สามารถใช้ที่โรงพยาบาลนี้ได้ ท่านยังรับบริการได้โดยชำระเงินเอง" to "Your coverage can't be used at this hospital. You can still be seen as self-pay."),
+    "rightsbad" to ("สิทธิประจำตัวไม่สามารถใช้ที่โรงพยาบาลนี้ได้ ท่านยังรับบริการได้โดยชำระเงินเอง" to "Your coverage cannot be used at this hospital. You can still be seen as self-pay."),
     "services" to ("กรุณาเลือกบริการที่ต้องการ" to "Please choose a service."),
     "arrive" to ("ท่านมาในลักษณะใด กรุณาเลือก" to "How did you arrive? Please choose."),
     "confirm" to ("กรุณาตรวจสอบข้อมูล แล้วกดยืนยันการรับบริการ" to "Please check the details, then tap Confirm visit."),

@@ -50,7 +50,7 @@ object Voice {
 
     /** เรียกทุกครั้งที่ผู้ใช้แตะจอ */
     fun touched() { lastTouch = android.os.SystemClock.uptimeMillis() }
-    private fun playing() = player?.let { runCatching { it.isPlaying }.getOrDefault(false) } == true || queue.isNotEmpty()
+    private fun playing() = player?.let { runCatching { it.isPlaying }.getOrDefault(false) } == true || queue.isNotEmpty() || track != null
     /** จบประโยค: มีประโยครอ → พูดต่อ */
     private fun finished() { pending?.let { (k, v) -> pending = null; main.post { say(k, v) } } }
 
@@ -98,12 +98,10 @@ object Voice {
         thread(isDaemon = true) {
             val wav = runCatching { fetch(text) }.onFailure { Log.i("KioskVoice", "online voice unavailable: ${it.message}") }.getOrNull()
             if (my != token) return@thread
-            if (wav != null) {
-                val f = File(app.cacheDir, "voice_printed.wav").apply { writeBytes(wav) }
-                val mp = MediaPlayer().apply { setDataSource(f.path); prepare() }
-                if (my != token) { mp.release(); return@thread }
-                player = mp.apply { setOnCompletionListener { it.release(); if (player === it) player = null; finished() }; start() }
-            } else playJoined(l, q, room, my)
+            val pcm = wav?.let { runCatching { dropTailWord(it) }.getOrNull() }
+            if (my != token) return@thread
+            if (pcm != null) playPcm(pcm.second, pcm.first, my)
+            else playJoined(l, q, room, my)
         }
     }
 
@@ -111,11 +109,68 @@ object Voice {
         val c = URL(VOX_URL).openConnection() as HttpURLConnection
         c.connectTimeout = 2000; c.readTimeout = 3500; c.requestMethod = "POST"; c.doOutput = true
         c.setRequestProperty("Content-Type", "application/json")
-        // เติม " ..." ท้ายข้อความ: VoxCPM มักตัดพยางค์สุดท้ายของประโยคที่ไม่มีจุดจบ
-        val body = org.json.JSONObject().put("model", "voxcpm-thai").put("input", "$text ...").put("voice", VOX_VOICE).put("response_format", "wav").toString()
+        // VoxCPM จำกัดความยาวเสียงตามความยาวข้อความ → คำท้ายประโยคโดนตัด: ต่อคำท้าย (TailWord) ให้ประโยคจริงพูดครบ แล้วตัดทิ้งใน dropTailWord
+        val tail = if (text.any { it in '\u0E00'..'\u0E7F' }) TailWord.first else TailWord.second
+        val body = org.json.JSONObject().put("model", "voxcpm-thai").put("input", text + tail).put("voice", VOX_VOICE).put("response_format", "wav").toString()
         c.outputStream.use { it.write(body.toByteArray()) }
         check(c.responseCode == 200) { "HTTP ${c.responseCode}" }
         return c.inputStream.use { it.readBytes() }.also { check(it.size > 2000) }
+    }
+
+    private val TailWord = ", สวัสดี" to ", hello."
+
+    /**
+     * ตัดคำต่อท้ายออก: หาช่วงเงียบ ≥120 ms สุดท้าย ที่เสียงหลังช่วงนั้นยาวพอดีคำต่อท้าย (0.25–1.2 วิ) แล้วตัดหลังคำจริง 60 ms
+     * หาไม่เจอ = null (ไปใช้ชิ้นเสียงในเครื่องแทน ไม่เสี่ยงตัดเนื้อหา) · คืน (sampleRate, PCM 16-bit mono)
+     */
+    private fun dropTailWord(wav: ByteArray): Pair<Int, ShortArray>? {
+        val bb = java.nio.ByteBuffer.wrap(wav).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        var i = 12; var rate = 24000; var ch = 1; var bits = 16; var data: ShortArray? = null
+        while (i + 8 <= wav.size) {
+            val id = String(wav, i, 4); val n = bb.getInt(i + 4)
+            if (id == "fmt ") { ch = bb.getShort(i + 10).toInt(); rate = bb.getInt(i + 12); bits = bb.getShort(i + 22).toInt() }
+            if (id == "data") { val len = minOf(n, wav.size - i - 8) / (2 * ch); data = ShortArray(len) { k -> bb.getShort(i + 8 + k * 2 * ch) }; break }
+            i += 8 + n + (n and 1)
+        }
+        val x = data ?: return null
+        if (bits != 16) return null
+        val win = rate / 100; val nw = x.size / win
+        val env = IntArray(nw) { w -> var m = 0; for (k in w * win until (w + 1) * win) m = maxOf(m, kotlin.math.abs(x[k].toInt())); m }
+        val pk = env.maxOrNull() ?: return null
+        val loud = BooleanArray(nw) { env[it] > pk * .04 }
+        val end = loud.lastIndexOf(true); val start = loud.indexOf(true)
+        var w = end
+        while (w > start) {
+            if (!loud[w]) {
+                var j = w; while (j > start && !loud[j]) j--
+                if (w - j >= 12) {
+                    val tailSec = (end - w) / 100f
+                    if (tailSec !in .25f..1.2f) return null
+                    val cut = (j + 1 + 6) * win
+                    val y = x.copyOf(cut); val f = rate / 50
+                    for (k in 0 until f) y[cut - 1 - k] = (y[cut - 1 - k] * (k / f.toFloat())).toInt().toShort()
+                    return rate to y
+                }
+                w = j
+            } else w--
+        }
+        return null
+    }
+
+    /** เล่น PCM ก้อนเดียวด้วย AudioTrack (เงียบนำ 150 ms ท้าย 250 ms) · จบแล้วพูดประโยคที่รอต่อ */
+    private fun playPcm(x: ShortArray, rate: Int, my: Int) {
+        val lead = rate * 15 / 100; val pad = rate / 4
+        val all = ShortArray(lead + x.size + pad); System.arraycopy(x, 0, all, lead, x.size)
+        if (my != token) return
+        @Suppress("DEPRECATION")
+        val t = AudioTrack(AudioManager.STREAM_MUSIC, rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, all.size * 2, AudioTrack.MODE_STATIC)
+        t.write(all, 0, all.size)
+        t.notificationMarkerPosition = all.size - 1
+        t.setPlaybackPositionUpdateListener(object : AudioTrack.OnPlaybackPositionUpdateListener {
+            override fun onMarkerReached(a: AudioTrack) { main.post { if (track === a) { track = null; a.release(); finished() } } }
+            override fun onPeriodicNotification(a: AudioTrack) {}
+        }, main)
+        t.play(); track = t
     }
 
     /** ต่อชิ้น WAV (24 kHz 16-bit mono) เป็นก้อนเดียว เว้นช่วงคงที่ → เล่นด้วย AudioTrack ครั้งเดียว */
@@ -127,16 +182,14 @@ object Voice {
         }
         fun gap(ms: Int) = ByteArray(rate * ms / 1000 * 2)
         val out = java.io.ByteArrayOutputStream()
-        out.write(gap(150))   // เงียบนำ 150 ms ให้ลำโพงตื่นก่อน ไม่กินพยางค์แรก
         pcm("${l}_printed1")?.let { out.write(it) }; out.write(gap(220))
         q.lowercase().forEachIndexed { i, c -> if (i > 0) out.write(gap(90)); pcm(if (c.isDigit()) "${l}_d$c" else "${l}_l$c")?.let { out.write(it) } }
         out.write(gap(260)); pcm("${l}_printed2")?.let { out.write(it) }
         room?.let { out.write(gap(80)); pcm("${l}_room_$it")?.let { b -> out.write(b) } }
         val data = out.toByteArray()
         if (my != token || data.isEmpty()) return
-        @Suppress("DEPRECATION")
-        val t = AudioTrack(AudioManager.STREAM_MUSIC, rate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, data.size, AudioTrack.MODE_STATIC)
-        t.write(data, 0, data.size); t.play(); track = t
+        val sb = java.nio.ByteBuffer.wrap(data).order(java.nio.ByteOrder.LITTLE_ENDIAN).asShortBuffer()
+        playPcm(ShortArray(sb.remaining()).also { sb.get(it) }, rate, my)
     }
 
     private fun playNext() {
