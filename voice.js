@@ -1,15 +1,19 @@
 /* =========================================================
    เสียงแนะนำตามขั้นตอน + อ่านเลขคิว/ห้องตรวจ (ตรงกับ ui/voice/Voice.kt)
    เล่นไฟล์เสียงใน voice/ ({th|en}_{คีย์}.m4a) · สร้างจาก VoxCPM TTS ของ BMS (voice "female_alma")
-   เลขคิว = ไฟล์ตัวอักษร/ตัวเลขต่อกัน · ห้อง = {ภาษา}_room_{รหัสบริการ} · ประโยคใหม่ตัดประโยคเก่า
+   เลขคิว = ไฟล์ตัวอักษร/ตัวเลขต่อกัน · ห้อง = {ภาษา}_room_{รหัสบริการ}
+   ประโยคใหม่ตัดประโยคเก่าเมื่อผู้ใช้แตะจอระหว่างพูด · หน้าจอเปลี่ยนเอง = พูดประโยคเดิมให้จบก่อนแล้วต่อประโยคใหม่ (ตรงกับ Voice.kt)
    เบราว์เซอร์ให้เล่นเสียงได้หลังผู้ใช้แตะจอครั้งแรกเท่านั้น (ประโยคที่ค้างจะเล่นเมื่อแตะ) · ?mute=1 ปิดไว้ทดสอบ
    ========================================================= */
 (function(){
   const mute = new URLSearchParams(location.search).get('mute') === '1';
   let last = null, lastKey = null, lastVars = {}, pending = null, unlocked = false, cur = null, seq = [];
   const lang = () => (window.I18N && I18N.lang) || 'th';
-  let tok = 0, ctx = null, src = null;
-  function stop(){ tok++; seq = []; if (cur){ cur.onended = null; cur.pause(); cur = null; } if (src){ try { src.stop(); } catch (e) {} src = null; } }
+  let tok = 0, ctx = null, src = null, srcOn = false, lastTouch = 0, startedAt = 0, queued = null;
+  const playing = () => !!(cur && !cur.paused && !cur.ended) || seq.length > 0 || srcOn;
+  function finished(){ if (queued){ const [k, v] = queued; queued = null; VOICE.say(k, v, true); } }
+  addEventListener('pointerdown', () => { lastTouch = performance.now(); }, true);
+  function stop(){ tok++; seq = []; queued = null; srcOn = false; if (cur){ cur.onended = null; cur.pause(); cur = null; } if (src){ try { src.stop(); } catch (e) {} src = null; } }
 
   /* ---------- ประโยคเลขคิว (ตรงกับ Voice.kt) ----------
      ออนไลน์: ขอประโยคเต็มจาก VoxCPM (จังหวะพูดเลขต่อเนื่อง) รอไม่เกิน 3.5 วิ · ไม่ได้ = ต่อชิ้น WAV เป็นก้อนเดียวด้วย Web Audio เว้นช่วงคงที่ */
@@ -30,7 +34,7 @@
         body: JSON.stringify({model:'voxcpm-thai', input:text + ' ...',   /* เติมจุดท้าย: VoxCPM มักตัดพยางค์สุดท้าย */ voice:VOX_VOICE, response_format:'wav'})});
       if (!r.ok) throw new Error(r.status);
       const blob = await r.blob(); if (my !== tok) return;
-      cur = new Audio(URL.createObjectURL(blob)); cur.play().catch(() => {}); return;
+      cur = new Audio(URL.createObjectURL(blob)); cur.onended = finished; cur.play().catch(() => {}); return;
     } catch (e) { console.info('[voice] online voice unavailable → joined clips', e.message || e); }
     if (my !== tok) return;
     ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
@@ -39,13 +43,13 @@
     parts.push([l + '_printed2', 80]); if (room) parts.push([l + '_room_' + room, 0]);
     const bufs = await Promise.all(parts.map(([n]) => fetch('voice/' + n + '.wav').then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b))));
     if (my !== tok) return;
-    const rate = bufs[0].sampleRate, len = bufs.reduce((t, b, i) => t + b.length + Math.round(rate * parts[i][1] / 1000), 0);
-    const all = ctx.createBuffer(1, len, rate), d = all.getChannelData(0); let at = 0;
+    const rate = bufs[0].sampleRate, lead = Math.round(rate * .15), len = lead + bufs.reduce((t, b, i) => t + b.length + Math.round(rate * parts[i][1] / 1000), 0);   /* เงียบนำ 150 ms */
+    const all = ctx.createBuffer(1, len, rate), d = all.getChannelData(0); let at = lead;
     bufs.forEach((b, i) => { d.set(b.getChannelData(0), at); at += b.length + Math.round(rate * parts[i][1] / 1000); });
-    src = ctx.createBufferSource(); src.buffer = all; src.connect(ctx.destination); src.start();
+    src = ctx.createBufferSource(); src.buffer = all; src.connect(ctx.destination); srcOn = true; src.onended = () => { srcOn = false; finished(); }; src.start();
   }
   function next(){
-    const n = seq.shift(); if (!n) return;
+    const n = seq.shift(); if (!n){ cur = null; finished(); return; }
     cur = new Audio('voice/' + n + '.m4a');
     cur.onended = next; cur.onerror = next;
     cur.play().catch(() => {});
@@ -63,6 +67,9 @@
     say(key, vars = {}, force = false){
       const l = lang(), id = key + '|' + l + '|' + JSON.stringify(vars);
       if (!force && id === last) return; last = id; lastKey = key; lastVars = vars;
+      /* หน้าจอเปลี่ยนเอง (ไม่ได้แตะจอตั้งแต่ประโยคนี้เริ่ม) → รอให้จบก่อน ไม่ตัดกลางประโยค */
+      if (unlocked && playing() && lastTouch < startedAt){ queued = [key, vars]; return; }
+      if (unlocked) startedAt = performance.now();
       if (key === 'printed'){ if (!unlocked){ pending = () => printed(l, vars.q || '', vars.room); return; } printed(l, vars.q || '', vars.room); return; }
       const n = names(key, vars, l);
       if (!unlocked){ pending = n; return; }
