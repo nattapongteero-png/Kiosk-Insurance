@@ -68,6 +68,10 @@ window.VOICE_LINES = {
 "th": "ลงทะเบียนรับบริการแล้ว สนใจตรวจสอบแผนประกันที่เหมาะกับท่านไหม ถ้าไม่สนใจ กดพิมพ์บัตรคิวได้เลย",
 "en": "You're registered. Would you like to check insurance plans that suit you? If not, tap Print ticket."
 },
+"phr": {
+"th": "กรุณาอ่านข้อความ แล้วเลือกยินยอม หรือไม่ยินยอม ให้เข้าถึงข้อมูลสุขภาพ",
+"en": "Please read, then choose whether to allow access to your health records."
+},
 "insgw": {
 "th": "กำลังส่งข้อมูลให้บริษัทประกัน กรุณารอสักครู่",
 "en": "Sending your data to insurers. Please wait."

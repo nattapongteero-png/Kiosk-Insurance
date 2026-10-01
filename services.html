@@ -793,6 +793,21 @@ body.bleed .screen{border-radius:0;box-shadow:none}
 .cov.insq .ch h2{line-height:60px}
 .cov.insq .cfoot.two{flex-direction:column-reverse;gap:20px}   /* ปุ่มหลักบน เต็มความกว้าง · ปุ่มรองใต้ (ข้อความยาวทั้งคู่ วางคู่กันไม่พอ) */
 .cov.insq .cfoot .cancel,.cov.insq .cfoot .finish{width:100%;justify-content:center}
+/* modal ความยินยอม PHR: ชุดเดียวกับ modal ประกัน (ขึ้นทันที ไม่หน่วง) */
+.cov.phr .cbox{gap:32px}
+.cov.phr .qic{width:112px;height:112px;border-radius:50%;margin:0 auto 24px;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FDF8EE 55%,#F6EAD2 100%);box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 12px rgba(191,145,58,.06)}
+.cov.phr .qic svg{width:56px;height:56px;stroke:#A87C2A}
+.cov.phr .ch h2{line-height:60px}
+.cov.phr .phl{list-style:none;display:flex;flex-direction:column;gap:28px;padding:32px 36px;border-radius:24px;
+  background:linear-gradient(176deg,#FFFFFF 0%,#FDFCFA 52%,#F8F5EF 100%);box-shadow:inset 0 1px 0 #fff,0 0 0 1px rgba(191,145,58,.32),0 7px 16px rgba(20,38,90,.055)}
+.cov.phr .phl li{display:flex;gap:24px;align-items:center}
+.cov.phr .phl .pi{width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--blue-050)}
+.cov.phr .phl .pi svg{width:32px;height:32px;stroke:var(--blue-deep)}
+.cov.phr .phl b{display:block;font-size:30px;line-height:42px;font-weight:700}
+.cov.phr .phl span:not(.pi){display:block;font-size:24px;line-height:34px;color:var(--ink-muted)}
+.cov.phr .cfoot.two{flex-direction:column-reverse;gap:20px}
+.cov.phr .cfoot .cancel,.cov.phr .cfoot .finish{width:100%;justify-content:center}
 .rcard .r.use b{font-size:32px;color:var(--blue-deep)}
 .rcard .r.use b small{display:block;font-size:22px;line-height:32px;font-weight:500;color:#7A4A0A}
 </style>
@@ -1293,14 +1308,15 @@ const RIGHTS = RIGHTS_OK
    ไม่สนใจ → พิมพ์ VN Slip (บัตรคิว) ทันที · สนใจ → insurance.html (ความยินยอม → Gateway → ข้อเสนอ) จบแล้วกลับมาพิมพ์ที่นี่ (?print=1) */
 let STEP = 'rights';
 let CONFIRM = null;    /* {svc, arrive} รอผู้ป่วยกดยืนยันการรับบริการ */
+let PHR = null;       /* 'print' = กดไม่สนใจประกันแล้ว → ขอความยินยอม PHR ก่อนพิมพ์บัตรคิว */
 let VISIT = null;      /* {svc, arrive, vn} สร้างแล้ว · เก็บใน sessionStorage ข้ามไปหน้าประกันแล้วกลับมาพิมพ์ */
 const VN = '690929-0142';   /* ต้นแบบ · TODO(integration): VN จาก HIS หลังเปิด visit */
 { const q = new URLSearchParams(location.search);
   if (q.get('print') === '1'){ try { VISIT = JSON.parse(sessionStorage.getItem('kioskVisit')); } catch (e) {}
-    if (VISIT){ STEP = 'svc'; TICKET = VISIT; } } }
+    if (VISIT){ STEP = 'summary'; PHR = 'print'; } } }   /* กลับจากเรื่องประกัน → ขอความยินยอม PHR ก่อนพิมพ์บัตรคิว */
 PATIENT.rightFull = RIGHTS.main;   /* แถบผู้ป่วยแสดงชื่อสิทธิเต็ม · บนบัตรคิวใช้ชื่อสั้น (PATIENT.right) */
 if (!RIGHTS_OK) PATIENT.right = 'ประกันสังคม';
-if (TICKET && !RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง';   /* กลับจากหน้าประกันมาพิมพ์: ยืนยันชำระเงินเองไปแล้ว */
+if (VISIT && !RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง';   /* กลับจากหน้าประกันมาพิมพ์: ยืนยันชำระเงินเองไปแล้ว */
 const rrow = (k, v, cls = '') => `<div class="r ${cls}"><span>${k}</span><b class="${v === '—' ? 'dim' : ''}">${v}</b></div>`;
 const rightsScreen = () => `
   <div class="pp">
@@ -1332,7 +1348,7 @@ window.VOICE_STATE = () => {
     if (!t || t.classList.contains('busy')) return ['printing'];
     return ['printed', {q: PREFIX[TICKET.svc] + '003', room: TICKET.svc}]; }
   if (CONFIRM) return ['confirm'];
-  if (STEP === 'summary') return ['askins'];
+  if (STEP === 'summary') return [PHR ? 'phr' : 'askins'];
   if (PICK) return ['arrive'];
   if (STEP === 'rights') return [RIGHTS_OK ? 'rightsok' : 'rightsbad'];
   return ['services'];
@@ -1353,7 +1369,7 @@ ${ppHead(true)}
         </div>
       </div>
     </div>
-    ${insAskModal()}
+    ${PHR ? phrModal() : insAskModal()}
   </div>`; };
 /* modal ถามสนใจประกัน: ผู้ป่วยต้องอ่านสรุปก่อนตัดสินใจ · เด้งหลังหน้าลงทะเบียนสำเร็จ 0.8 วิ ให้เห็นว่าสำเร็จก่อน
    ไม่มีปุ่มปิด / แตะพื้นหลังไม่ปิด: ต้องเลือก 1 ใน 2 เพราะทั้งสองทางจบที่การพิมพ์บัตรคิว */
@@ -1372,6 +1388,26 @@ const insAskModal = () => `
       </div>
     </div>`;
 
+/* modal ขอความยินยอมเข้าถึงข้อมูลสุขภาพ (PHR) — สายไม่สนใจประกัน (สายสนใจ: อยู่ในหน้า consent ประกัน ข้อ 2 ไม่ต้องขึ้นซ้ำ)
+   ข้อความจากผู้ดูแลระบบ · ยินยอม = เตรียมสิทธิ์เข้าถึง MOPH PHR ให้แพทย์ (ไม่ต้องขอ OTP ซ้ำในห้องตรวจ) · ทั้งสองทางพิมพ์บัตรคิว
+   TODO(integration): ขอ consent token จาก MOPH PHR */
+/* ย่อข้อความจากผู้ดูแลระบบเป็น 3 ประเด็น (ตัวหนาอ่านแล้วเข้าใจ) · หัวข้อ + ปุ่ม = คำถาม ไม่ต้องถามซ้ำ */
+const phrModal = () => `
+    <div class="cov phr" role="dialog" aria-modal="true" aria-labelledby="phTtl">
+      <div class="cbox">
+        <div class="ch"><span class="qic">${svg('steth',1.9)}</span><h2 id="phTtl" data-en="Allow your doctor to<br>see your health history">อนุญาตให้แพทย์ดู<br>ประวัติสุขภาพของคุณ</h2></div>
+        <ul class="phl">
+          <li><span class="pi">${svg('clock',2)}</span><div><b>แพทย์ดูประวัติได้ทันที</b><span>ดูประวัติการรักษาจาก MOPH PHR ระหว่างตรวจ</span></div></li>
+          <li><span class="pi">${svg('phone',2)}</span><div><b>ไม่ต้องขอ OTP ซ้ำในห้องตรวจ</b><span>เตรียมสิทธิ์ไว้เฉพาะการรับบริการครั้งนี้</span></div></li>
+          <li><span class="pi">${svg('shield',2)}</span><div><b>ใช้เพื่อการรักษาเท่านั้น</b><span>เข้าถึงได้เฉพาะบุคลากรที่ได้รับสิทธิ์</span></div></li>
+        </ul>
+        <div class="cfoot two">
+          <button class="cancel" data-phr="no">ไม่ยินยอม, พิมพ์บัตรคิว</button>
+          <button class="finish" data-phr="yes">ยินยอม, พิมพ์บัตรคิว</button>
+        </div>
+      </div>
+    </div>`;
+
 function render(){
   document.getElementById('screen').innerHTML = TICKET ? ticketScreen() : CONFIRM ? ticketScreen(CONFIRM, true) : STEP === 'rights' ? rightsScreen() : STEP === 'summary' ? summaryScreen() : screen();
   document.querySelectorAll('[data-next]').forEach(el => el.onclick = () => { if (!RIGHTS_OK) PATIENT.right = PATIENT.rightFull = 'ชำระเงินเอง'; STEP = 'svc'; render(); });
@@ -1385,8 +1421,12 @@ function render(){
     VISIT = {...CONFIRM, vn: VN}; CONFIRM = null; STEP = 'summary';
     try { sessionStorage.setItem('kioskVisit', JSON.stringify(VISIT)); } catch (e) {}
     render(); });
-  scr.querySelectorAll('[data-print]').forEach(el => el.onclick = () => { TICKET = VISIT; render(); });
+  scr.querySelectorAll('[data-print]').forEach(el => el.onclick = () => { PHR = 'print'; render(); });
   scr.querySelectorAll('[data-ins]').forEach(el => el.onclick = () => { location.href = 'insurance.html' + location.search.replace(/[?&]print=1/, ''); });
+  scr.querySelectorAll('[data-phr]').forEach(el => el.onclick = () => {
+    const yes = el.dataset.phr === 'yes';
+    try { sessionStorage.setItem('kioskPhr', yes ? '1' : '0'); } catch (e) {}
+    PHR = null; TICKET = VISIT; render(); });
   scr.querySelectorAll('[data-home]').forEach(el => el.onclick = () => { location.href = 'welcome_v2.html'; });
   const sc = scr.querySelector('.pp .scroll');
   if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
