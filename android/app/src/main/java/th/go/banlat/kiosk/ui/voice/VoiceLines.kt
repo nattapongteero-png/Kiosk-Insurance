@@ -19,6 +19,7 @@ internal val VoiceLines: Map<String, Pair<String, String>> = mapOf(
     "printing" to ("กำลังพิมพ์บัตรคิว กรุณารอสักครู่" to "Printing your queue ticket. Please wait."),
     "printed" to ("ลงทะเบียนสำเร็จ คิวของท่านคือ {q} กรุณารับบัตรคิว แล้วไปที่{room}" to "You're registered. Your queue number is {q}. Please take your ticket and go to {room}."),
     "askins" to ("ลงทะเบียนรับบริการแล้ว สนใจตรวจสอบแผนประกันที่เหมาะกับท่านไหม ถ้าไม่สนใจ กดพิมพ์บัตรคิวได้เลย" to "You're registered. Would you like to check insurance plans that suit you? If not, tap Print ticket."),
+    "phr" to ("กรุณาอ่านข้อความ แล้วเลือกยินยอม หรือไม่ยินยอม ให้เข้าถึงข้อมูลสุขภาพ" to "Please read, then choose whether to allow access to your health records."),
     "insgw" to ("กำลังส่งข้อมูลให้บริษัทประกัน กรุณารอสักครู่" to "Sending your data to insurers. Please wait."),
     "insdone" to ("บันทึกความสนใจแล้ว บริษัทประกันจะติดต่อกลับ กรุณากดพิมพ์บัตรคิว" to "Your interest is recorded. The insurer will contact you. Please tap Print ticket."),
     "insselect" to ("ได้รับข้อเสนอจากบริษัทประกันแล้ว กรุณาเลือกแผนที่สนใจ" to "Offers have arrived. Please choose a plan you like."),

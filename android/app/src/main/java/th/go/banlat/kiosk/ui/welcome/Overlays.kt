@@ -474,8 +474,10 @@ private fun CsNote(icon: KIcon, bg: Color, fg: Color, text: String, iconColor: C
     }
 }
 
+private const val AgreeText = "ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ**ยินยอม**ให้ส่งข้อมูลสุขภาพ ตามรายการที่เลือกไปยังบริษัทประกันที่ร่วมโครงการ"
+
 @Composable
-private fun AgreeBox(checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
+private fun AgreeBox(checked: Boolean, enabled: Boolean, text: String = AgreeText, onToggle: () -> Unit) {
     val shape = RoundedCornerShape(24.s)
     Row(Modifier.fillMaxWidth().alpha(if (enabled) 1f else .45f).clip(shape)
         .background(if (checked) K.Green050 else Color.White).border(if (checked) 2.s else 1.5.s, if (checked) K.Green else K.Line, shape)
@@ -485,8 +487,7 @@ private fun AgreeBox(checked: Boolean, enabled: Boolean, onToggle: () -> Unit) {
             .border(2.5.s, if (checked) K.Green else K.Line, RoundedCornerShape(12.s)), contentAlignment = Alignment.Center) {
             if (checked) LineIcon(KIcon.Check, Color.White, Modifier.size(25.s), 3.2f)
         }
-        KText(rich("ข้าพเจ้าอ่านและเข้าใจข้อความข้างต้น และ**ยินยอม**ให้ส่งข้อมูลสุขภาพ ตามรายการที่เลือกไปยังบริษัทประกันที่ร่วมโครงการ"),
-            26, lineHeight = 40f)
+        KText(rich(text), 26, lineHeight = 40f)
     }
 }
 

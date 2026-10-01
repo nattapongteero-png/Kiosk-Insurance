@@ -156,15 +156,16 @@ fun ServicesScreen(onExit: () -> Unit, printVisit: Pair<String, String>? = null,
                    onQueued: (service: String, arrive: String) -> Unit = { _, _ -> }) {
     val all = listOf(Main) + Clinics + Appointments
     var pick by remember { mutableStateOf<Service?>(null) }
-    // กลับจากเรื่องประกัน (printVisit) → เริ่มพิมพ์บัตรคิวทันที
-    var ticket by remember { mutableStateOf(printVisit?.let { (id, ar) -> all.first { it.id == id } to ar }) }
+    var ticket by remember { mutableStateOf<Pair<Service, String>?>(null) }
     var confirm by remember { mutableStateOf<Pair<Service, String>?>(null) }   // รอกดยืนยันการรับบริการ
-    var visit by remember { mutableStateOf<Pair<Service, String>?>(null) }     // สร้าง Visit/VN แล้ว → สรุปสุขภาพ + ถามเรื่องประกัน
+    // สร้าง Visit/VN แล้ว → สรุปสุขภาพ + ถามเรื่องประกัน · กลับจากเรื่องประกัน (printVisit) = visit เดิม แล้วขอความยินยอม PHR ก่อนพิมพ์
+    var visit by remember { mutableStateOf(printVisit?.let { (id, ar) -> all.first { it.id == id } to ar }) }
+    var phr by remember { mutableStateOf(printVisit != null) }   // modal ความยินยอม MOPH PHR (ก่อนพิมพ์บัตรคิวเสมอ)
     var rightsDone by remember { mutableStateOf(printVisit != null) }
-    th.go.banlat.kiosk.ui.voice.Speak(when { !rightsDone -> if (DemoSession.rightsOk) "rightsok" else "rightsbad"; ticket != null -> "printing"; visit != null -> "askins"; confirm != null -> "confirm"; pick != null -> "arrive"; else -> "services" })
+    th.go.banlat.kiosk.ui.voice.Speak(when { !rightsDone -> if (DemoSession.rightsOk) "rightsok" else "rightsbad"; ticket != null -> "printing"; visit != null -> if (phr) "phr" else "askins"; confirm != null -> "confirm"; pick != null -> "arrive"; else -> "services" })
     if (!rightsDone) { RightsScreen(onCancel = onExit, onNext = { if (!DemoSession.rightsOk) DemoSession.selfPay = true; rightsDone = true }); return }
     if (ticket == null) visit?.let { v ->
-        VisitSummaryScreen(v.first, Arrivals.plus(Proxy).first { it.id == v.second }.name, onPrint = { ticket = v; onQueued(v.first.id, v.second) }, onInsurance = { onInsurance(v.first.id to v.second) }); return
+        VisitSummaryScreen(v.first, Arrivals.plus(Proxy).first { it.id == v.second }.name, phr, onAskPhr = { phr = true }, onPrint = { ticket = v; onQueued(v.first.id, v.second) }, onInsurance = { onInsurance(v.first.id to v.second) }); return
     }
     // หน้าเดียว 2 สถานะ: รอยืนยัน (เครื่องพิมพ์ว่าง) → ยืนยัน = สร้าง Visit (ไปหน้าสรุปสุขภาพ) · กลับมาพิมพ์ = พิมพ์บัตรคิวบนการ์ดเดิม
     (ticket ?: confirm)?.let { (sv, ar) ->
@@ -557,7 +558,7 @@ private val AiSummary = listOf("โรคประจำตัว" to "ควา
 
 /** หน้าหลัง = ลงทะเบียนสำเร็จ (VN · บริการ · ลักษณะการมา · สิทธิ) · คำถามประกันเป็น modal ให้อ่านสรุปก่อนตัดสินใจ */
 @Composable
-private fun VisitSummaryScreen(sv: Service, arrive: String, onPrint: () -> Unit, onInsurance: () -> Unit) {
+private fun VisitSummaryScreen(sv: Service, arrive: String, phr: Boolean, onAskPhr: () -> Unit, onPrint: () -> Unit, onInsurance: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
         PageShell {
             Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
@@ -575,7 +576,57 @@ private fun VisitSummaryScreen(sv: Service, arrive: String, onPrint: () -> Unit,
                 SummaryRows(listOf("บริการ" to sv.name, "ลักษณะการมา" to arrive, "สิทธิการรักษาที่จะใช้" to right), useLast = true)
             }
         }
-        InsAskModal(onPrint, onInsurance)
+        // ไม่สนใจประกัน → ขอความยินยอม PHR แล้วพิมพ์ · สนใจ → เรื่องประกัน แล้วกลับมาขอความยินยอม PHR ก่อนพิมพ์
+        if (!phr) InsAskModal(onPrint = onAskPhr, onInsurance = onInsurance)
+        else PhrModal(onDecline = onPrint, onAccept = onPrint)
+    }
+}
+
+@Composable
+private fun PhrPoint(icon: KIcon, title: String, sub: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(24.s)) {
+        Box(Modifier.size(64.s).clip(CircleShape).background(K.Blue050), contentAlignment = Alignment.Center) {
+            LineIcon(icon, K.BlueDeep, Modifier.size(32.s), 2f)
+        }
+        Column {
+            KText(title, 30, weight = FontWeight.Bold, lineHeight = 42f)
+            KText(sub, 24, color = K.InkMuted, lineHeight = 34f)
+        }
+    }
+}
+
+/**
+ * modal ความยินยอม MOPH PHR ให้แพทย์ — ตรงกับ services.html phrModal · ขึ้นก่อนพิมพ์บัตรคิวเสมอ (requirement) แยกจาก consent ประกัน
+ * ไม่สนใจประกัน: ถามประกัน → PHR → พิมพ์ · สนใจ: consent ประกัน → … → กดพิมพ์บัตรคิว → กลับมาที่นี่ → PHR → พิมพ์
+ * ข้อความจากผู้ดูแลระบบ · ยินยอม = เตรียมสิทธิ์เข้าถึง MOPH PHR ให้แพทย์ (ไม่ต้องขอ OTP ซ้ำในห้องตรวจ) · ทั้งสองทางพิมพ์บัตรคิว
+ * TODO(integration): ขอ consent token จาก MOPH PHR
+ */
+@Composable
+private fun PhrModal(onDecline: () -> Unit, onAccept: () -> Unit) {
+    Box(Modifier.fillMaxSize().background(K.ScrimLight).swallowTaps().padding(horizontal = 80.s), contentAlignment = Alignment.Center) {
+        Column(Modifier.fillMaxWidth()
+            .softShadow(40f, Shade(Color(0x59061432), 40f, 100f))
+            .clip(RoundedCornerShape(40.s))
+            .background(Brush.linearGradient(0f to K.PearlTop, .55f to K.PearlMid, 1f to K.PearlBottom))
+            .padding(56.s), verticalArrangement = Arrangement.spacedBy(32.s)) {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(Modifier.padding(bottom = 24.s).size(112.s).creamDisc(halo = 12f), contentAlignment = Alignment.Center) {
+                    LineIcon(KIcon.Steth, K.GoldIcon, Modifier.size(56.s), 1.9f)
+                }
+                KText("อนุญาตให้แพทย์ดู\nประวัติสุขภาพของคุณ", 44, weight = FontWeight.Bold, lineHeight = 60f, align = TextAlign.Center)
+            }
+            // ย่อข้อความจากผู้ดูแลระบบเป็น 3 ประเด็น (ตัวหนาอ่านแล้วเข้าใจ) · หัวข้อ + ปุ่ม = คำถาม ไม่ต้องถามซ้ำ
+            Column(Modifier.fillMaxWidth().pearl(24f, gradientRing = false).padding(horizontal = 36.s, vertical = 32.s),
+                verticalArrangement = Arrangement.spacedBy(28.s)) {
+                    PhrPoint(KIcon.Clock, "แพทย์ดูประวัติได้ทันที", "ดูประวัติการรักษาจาก MOPH PHR ระหว่างตรวจ")
+                    PhrPoint(KIcon.Phone, "ไม่ต้องขอ OTP ซ้ำในห้องตรวจ", "เตรียมสิทธิ์ไว้เฉพาะการรับบริการครั้งนี้")
+                    PhrPoint(KIcon.Shield, "ใช้เพื่อการรักษาเท่านั้น", "เข้าถึงได้เฉพาะบุคลากรที่ได้รับสิทธิ์")
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(20.s)) {
+                PrimaryPill("ยินยอม, พิมพ์บัตรคิว", onAccept, Modifier.fillMaxWidth())
+                SecondaryPill("ไม่ยินยอม, พิมพ์บัตรคิว", onDecline, Modifier.fillMaxWidth())
+            }
+        }
     }
 }
 
