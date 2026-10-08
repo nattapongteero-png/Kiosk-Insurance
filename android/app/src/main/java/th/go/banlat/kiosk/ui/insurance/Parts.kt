@@ -64,7 +64,7 @@ fun PlanCard(p: Plan, modifier: Modifier, onClick: () -> Unit) {
         KText(p.cov, 22, color = K.InkMuted, lineHeight = 30.8f)
         Spacer(Modifier.weight(1f))
         // บริษัทที่ยังพิจารณา (slow) → ไม่มีราคา แสดง "รอผลพิจารณา" · แตะ = หน้ารอผล (แจ้งทางแอป)
-        if (p.co.slow) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.s)) {
+        if (p.pending) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.s)) {
             LineIcon(KIcon.Clock, K.GoldIcon, Modifier.size(26.s), 2f)
             KText("รอผลพิจารณา", 22, weight = FontWeight.SemiBold, color = K.GoldText)
         } else Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.s)) {

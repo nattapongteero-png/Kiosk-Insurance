@@ -90,8 +90,8 @@ private sealed interface Step {
 /**
  * flow ประกันแบบใหม่ (ถามหลังสร้าง Visit/VN แล้ว) — ตรงกับ insurance.html
  * ความยินยอม + เลือกข้อมูลที่เปิดเผย → Insurance Gateway ส่งให้ทุกบริษัท → ข้อเสนอจากบริษัท → รายละเอียด → สนใจแผนนี้ (บริษัทติดต่อกลับ)
- * แผนของบริษัทที่ยังพิจารณา (slow) → แจ้งผลทางแอป MyAtlas / หมอพร้อม · ไม่ยินยอม/ไม่สนใจ/จบ → onExit = กลับไปพิมพ์ VN Slip
- * ต้นแบบ: บริษัทที่ slow = true (AIA) ยังพิจารณาอยู่ · TODO(integration): ผลจริงจาก Insurance Gateway ของ BMS
+ * แผนที่บริษัทยังพิจารณา (pending) → แจ้งผลทางแอป MyAtlas / หมอพร้อม · ไม่ยินยอม/ไม่สนใจ/จบ → onExit = กลับไปพิมพ์ VN Slip
+ * ต้นแบบ: บริษัทประกันที่ร่วมโครงการ = AIA · แผนที่ pending = true ยังพิจารณาอยู่ · TODO(integration): ผลจริงจาก Insurance Gateway ของ BMS
  */
 @Composable
 fun InsuranceFlow(onExit: () -> Unit) {
@@ -104,7 +104,7 @@ fun InsuranceFlow(onExit: () -> Unit) {
             th.go.banlat.kiosk.ui.welcome.ConsentModal(onDecline = onExit, onAccept = { step = Step.Gateway })
         }
         Step.Gateway -> GatewayScreen(onDone = { step = Step.Select })
-        Step.Select -> SelectScreen(onPick = { step = if (it.co.slow) Step.Slow(it) else Step.Detail(it) }, onCancel = onExit)
+        Step.Select -> SelectScreen(onPick = { step = if (it.pending) Step.Slow(it) else Step.Detail(it) }, onCancel = onExit)
         is Step.Detail -> DetailScreen(s.plan, onBack = { step = Step.Select }, onSend = { step = Step.Done(s.plan) })
         is Step.Done -> SummaryScreen(s.plan, slow = false, onDone = onExit)
         is Step.Slow -> SummaryScreen(s.plan, slow = true, onDone = onExit)
@@ -114,9 +114,9 @@ fun InsuranceFlow(onExit: () -> Unit) {
 // ---------------- Insurance Gateway: ส่งให้ทุกบริษัทพร้อมกัน แล้วรอข้อเสนอ ----------------
 @Composable
 private fun GatewayScreen(onDone: () -> Unit) {
-    val cos = listOf(th.go.banlat.kiosk.data.InsurerA, th.go.banlat.kiosk.data.InsurerB, th.go.banlat.kiosk.data.InsurerC)
+    val cos = th.go.banlat.kiosk.data.Insurers
     var answered by remember { mutableStateOf(0) }
-    LaunchedEffect(Unit) { delay(1300); answered = 1; delay(800); answered = 2; delay(700); answered = 3; delay(1000); onDone() }
+    LaunchedEffect(Unit) { cos.indices.forEach { delay(if (it == 0) 1300L else 800L); answered = it + 1 }; delay(1000); onDone() }
     PageShell {
         Column(Modifier.fillMaxSize().padding(start = 80.s, end = 80.s, top = 594.s, bottom = 328.s),
             verticalArrangement = Arrangement.spacedBy(40.s, Alignment.CenterVertically)) {
@@ -138,7 +138,6 @@ private fun GatewayScreen(onDone: () -> Unit) {
                         KText(co.name, 26, Modifier.weight(1f), weight = FontWeight.SemiBold, lineHeight = 36f, softWrap = false, maxLines = 1, minSize = 20)
                         when {
                             answered <= i -> StatusPill(StatusKind.Busy, "กำลังส่ง")
-                            co.slow -> StatusPill(StatusKind.Wait, "กำลังพิจารณา")
                             else -> StatusPill(StatusKind.Done, "ได้รับข้อเสนอแล้ว")
                         }
                     }

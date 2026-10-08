@@ -744,31 +744,28 @@ function ageYMD(dob, now = new Date()){
 /* เลขบัตร 13 หลักแสดงเฉพาะ 3 หลักท้าย: X-XXXX-XXXXX-12-3 */
 const maskCid = c => `X-XXXX-XXXXX-${c.slice(10,12)}-${c.slice(12)}`;
 
-/* บริษัทประกัน — โลโก้จาก Wikimedia Commons (ใช้ในต้นแบบเท่านั้น ก่อนขึ้นระบบจริงต้องได้ไฟล์และสิทธิ์ใช้จากบริษัท)
-   A: File:เมืองไทยประกันชีวิต-01.svg (CC BY-SA 4.0) · B: File:Thai Life Insurance Logo.svg (Public domain)
-   C: File:AIA wordmark logo.svg (Public domain)
-   fit: 'contain' = โลโก้วางกลางวงบนพื้นขาว · 'cover' = โลโก้พื้นเต็มสี่เหลี่ยมให้เต็มวง
-   ถ้าโหลดรูปไม่ได้ จะแสดงอักษรย่อแทน (onerror ลบรูปทิ้ง)
-   br / brd = สีหลักจากโลโก้ (RGB) / สีเข้มสำหรับตัวอักษร ใช้เปลี่ยนโทนหน้ารายละเอียดแบบประกันตามบริษัท */
+/* บริษัทประกันที่ร่วมโครงการ: AIA บริษัทเดียว — โลโก้จาก Wikimedia Commons: File:AIA wordmark logo.svg (Public domain)
+   ใช้ในต้นแบบเท่านั้น ก่อนขึ้นระบบจริงต้องได้ไฟล์และสิทธิ์ใช้จากบริษัท
+   fit: 'contain' = โลโก้วางกลางวงบนพื้นขาว · ถ้าโหลดรูปไม่ได้ จะแสดงอักษรย่อแทน (onerror ลบรูปทิ้ง)
+   br / brd = สีหลักจากโลโก้ (RGB) / สีเข้มสำหรับตัวอักษร ใช้เปลี่ยนโทนหน้ารายละเอียดแบบประกัน */
 const INSURERS = {
-  A:{name:'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)', short:'MTL', logo:'ins_logo_a.png', fit:'contain', br:'226,0,122',  brd:'#B0005F'},
-  B:{name:'บริษัท ไทยประกันชีวิต จำกัด (มหาชน)',     short:'TL',  logo:'ins_logo_b.png', fit:'cover',   br:'0,128,195',  brd:'#005E94'},
-  C:{name:'บริษัท เอไอเอ จำกัด',                    short:'AIA', logo:'ins_logo_c.png', fit:'contain', br:'211,17,69', brd:'#A00D34', slow:true},   // slow = สาธิตกรณีส่งข้อมูลนาน
+  C:{name:'บริษัท เอไอเอ จำกัด', short:'AIA', logo:'ins_logo_c.png', fit:'contain', br:'211,17,69', brd:'#A00D34'},
 };
+/* pend = บริษัทยังพิจารณาแผนนี้อยู่ (ไม่มีราคา · แจ้งผลทางแอป) — ต้นแบบสาธิตกรณีส่งนาน */
 const PLANS_REC = [
-  {co:'A', tag:'ประกันสุขภาพ', name:'Health Plus',      cov:'ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี', pr:'12,000'},
-  {co:'B', tag:'ประกันสุขภาพ', name:'Health Care Lite', cov:'ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี', pr:'6,500'},
+  {co:'C', tag:'ประกันสุขภาพ', name:'Health Plus',      cov:'ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี', pr:'12,000'},
+  {co:'C', tag:'ประกันสุขภาพ', name:'Health Care Lite', cov:'ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี', pr:'6,500'},
   {co:'C', tag:'ประกันชีวิต',  name:'Life Protect 20',  cov:'ทุนประกัน 1,000,000 บาท ระยะ 20 ปี',     pr:'18,000'},
 ];
 const PLANS_MORE = [
-  {co:'B', tag:'ประกันสุขภาพ', name:'Cancer Care',        cov:'คุ้มครองโรคมะเร็งทุกระยะ สูงสุด 1,000,000 บาท', pr:'3,200'},
-  {co:'C', tag:'ประกันอุบัติเหตุ', name:'Accident Shield',   cov:'ค่ารักษาจากอุบัติเหตุ สูงสุด 100,000 บาท/ครั้ง', pr:'1,800'},
-  {co:'A', tag:'ประกันโรคร้ายแรง', name:'Critical Illness 30', cov:'จ่ายเงินก้อนเมื่อตรวจพบ 30 โรคร้ายแรง',        pr:'7,400'},
-  {co:'C', tag:'ประกันชีวิต',  name:'Saving Life 15',     cov:'ออมทรัพย์พร้อมคุ้มครองชีวิต ระยะ 15 ปี',       pr:'24,000'},
-  {co:'A', tag:'ประกันสุขภาพ', name:'OPD Care',           cov:'ค่ารักษาผู้ป่วยนอก ครั้งละ 1,500 บาท 30 ครั้ง/ปี', pr:'4,900'},
-  {co:'B', tag:'ประกันสุขภาพ', name:'Senior Health 60+',  cov:'ค่ารักษาผู้ป่วยใน สูงสุด 300,000 บาท/ปี',       pr:'21,500'},
-  {co:'C', tag:'ประกันชีวิต',  name:'Life Care 99',       cov:'คุ้มครองชีวิตถึงอายุ 99 ปี ทุน 500,000 บาท',    pr:'15,800'},
-  {co:'A', tag:'ประกันสุขภาพ', name:'Family Health',      cov:'คุ้มครองทั้งครอบครัว สูงสุด 4 คน',              pr:'28,000'},
+  {co:'C', tag:'ประกันสุขภาพ', name:'Cancer Care',        cov:'คุ้มครองโรคมะเร็งทุกระยะ สูงสุด 1,000,000 บาท', pr:'3,200'},
+  {co:'C', tag:'ประกันอุบัติเหตุ', name:'Accident Shield',   cov:'ค่ารักษาจากอุบัติเหตุ สูงสุด 100,000 บาท/ครั้ง', pr:'1,800', pend:true},
+  {co:'C', tag:'ประกันโรคร้ายแรง', name:'Critical Illness 30', cov:'จ่ายเงินก้อนเมื่อตรวจพบ 30 โรคร้ายแรง',        pr:'7,400'},
+  {co:'C', tag:'ประกันชีวิต',  name:'Saving Life 15',     cov:'ออมทรัพย์พร้อมคุ้มครองชีวิต ระยะ 15 ปี',       pr:'24,000', pend:true},
+  {co:'C', tag:'ประกันสุขภาพ', name:'OPD Care',           cov:'ค่ารักษาผู้ป่วยนอก ครั้งละ 1,500 บาท 30 ครั้ง/ปี', pr:'4,900'},
+  {co:'C', tag:'ประกันสุขภาพ', name:'Senior Health 60+',  cov:'ค่ารักษาผู้ป่วยใน สูงสุด 300,000 บาท/ปี',       pr:'21,500'},
+  {co:'C', tag:'ประกันชีวิต',  name:'Life Care 99',       cov:'คุ้มครองชีวิตถึงอายุ 99 ปี ทุน 500,000 บาท',    pr:'15,800', pend:true},
+  {co:'C', tag:'ประกันสุขภาพ', name:'Family Health',      cov:'คุ้มครองทั้งครอบครัว สูงสุด 4 คน',              pr:'28,000'},
 ];
 /* แบบประกันที่ผู้ใช้เลือก (ตั้งค่าเมื่อแตะการ์ด) ใช้แสดงในหน้าส่งข้อมูล/ผลการส่ง */
 let CHOSEN = null;
@@ -776,13 +773,13 @@ const planInfo = () => { const p = [...PLANS_REC, ...PLANS_MORE].find(x => x.nam
   return {plan:p, co:INSURERS[p.co]}; };
 
 /* การ์ดแบบประกัน: โลโก้บริษัท + ป้ายประเภทอยู่แถวบน (ใช้โครงเดียวกันทั้งส่วนแนะนำและแบบประกันอื่น) */
-/* บริษัทที่ยังพิจารณาอยู่ (slow) → การ์ดไม่มีราคา แสดง "รอผลพิจารณา" · แตะ = ไปหน้ารอผล (แจ้งทางแอป) */
+/* แผนที่บริษัทยังพิจารณาอยู่ (pend) → การ์ดไม่มีราคา แสดง "รอผลพิจารณา" · แตะ = ไปหน้ารอผล (แจ้งทางแอป) */
 const planCard = p => `
-  <button class="plan${INSURERS[p.co].slow ? ' pending' : ''}" data-go="${INSURERS[p.co].slow ? 'slow' : 'detail'}" data-plan="${p.name}">
+  <button class="plan${p.pend ? ' pending' : ''}" data-go="${p.pend ? 'slow' : 'detail'}" data-plan="${p.name}">
     <div class="top"><span class="ic lg" title="${INSURERS[p.co].name}"><b>${INSURERS[p.co].short}</b><img class="${INSURERS[p.co].fit}" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"></span><span class="tag">${p.tag}</span></div>
     <b>${p.name}</b>
     <span class="cov">${p.cov}</span>
-    ${INSURERS[p.co].slow ? `<span class="wait">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>`}
+    ${p.pend ? `<span class="wait">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>`}
   </button>`;
 
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
@@ -828,7 +825,7 @@ ${ppHead()}
 /* ---------- หลังเลือกแบบประกัน: ส่งข้อมูล → ส่งสำเร็จ หรือ ส่งนาน ----------
    ส่งเสร็จเร็ว  → แจ้งว่าส่งให้บริษัทประกันแล้ว และส่งสำเนาเข้าแอปแล้ว
    ส่งใช้เวลานาน → แจ้งให้รับข่าวสารผลทางแอปหมอพร้อม และ MyAtlas (ไม่ต้องรอที่ตู้)
-   ต้นแบบ: บริษัทที่ตั้ง slow:true (AIA) จำลองกรณีส่งนาน บริษัทอื่นจำลองกรณีส่งเร็ว */
+   ต้นแบบ: แผนที่ตั้ง pend:true จำลองกรณีส่งนาน แผนอื่นจำลองกรณีส่งเร็ว */
 const REQ_ID = 'INS-2569-000123';
 const ppFoot = () => `<div class="foot"><button class="finish" data-home>พิมพ์บัตรคิว</button></div>`;   /* จบเรื่องประกัน → กลับไปพิมพ์ VN Slip */
 
@@ -1047,7 +1044,7 @@ ${ppHead(true)}
   </div>`;
 
 /* ---------- Insurance Gateway: ส่งให้ทุกบริษัทพร้อมกัน → รอข้อเสนอ ----------
-   ต้นแบบ: บริษัทที่ slow:true (AIA) ยังพิจารณาอยู่ → ข้อเสนอของบริษัทนั้นขึ้นเป็น "รอผลพิจารณา" */
+   ต้นแบบ: บริษัทที่ร่วมโครงการ = AIA · แผนที่ pend:true ขึ้นเป็น "รอผลพิจารณา" */
 const gatewayScreen = () => `
   <div class="pp">
 ${ppHead(true)}
@@ -1187,16 +1184,13 @@ function wire(){
   const sc = scr.querySelector('.pp .scroll');
   if (sc) sc.onscroll = () => sc.classList.toggle('scrolled', sc.scrollTop > 4);
 
-  /* Gateway: บริษัทตอบทีละราย (ต้นแบบ) · บริษัท slow ยังพิจารณาอยู่ → ไปหน้าข้อเสนอ */
+  /* Gateway: บริษัทตอบทีละราย (ต้นแบบ) → ไปหน้าข้อเสนอ */
   [window._st1, window._st2, window._st3, window._st4].forEach(clearTimeout);
   if (scr.querySelector('.gw')){
-    const done = (k, slow) => { const el = scr.querySelector(`[data-co="${k}"] .st`); if (!el) return;
-      el.className = 'st ' + (slow ? 'wait' : 'done'); el.innerHTML = slow ? `${svg('clock',2)} กำลังพิจารณา` : `${svg('check',3)} ได้รับข้อเสนอแล้ว`; };
-    const ks = Object.keys(INSURERS);
-    window._st1 = setTimeout(() => done(ks[0], INSURERS[ks[0]].slow), 1300);
-    window._st2 = setTimeout(() => done(ks[1], INSURERS[ks[1]].slow), 2100);
-    window._st3 = setTimeout(() => done(ks[2], INSURERS[ks[2]].slow), 2800);
-    window._st4 = setTimeout(() => render('select'), 3800);
+    const done = k => { const el = scr.querySelector(`[data-co="${k}"] .st`); if (!el) return;
+      el.className = 'st done'; el.innerHTML = `${svg('check',3)} ได้รับข้อเสนอแล้ว`; };
+    Object.keys(INSURERS).forEach((k, i) => { window['_st' + (i + 1)] = setTimeout(() => done(k), 1300 + i * 800); });
+    window._st4 = setTimeout(() => render('select'), 2300 + (Object.keys(INSURERS).length - 1) * 800);
   }
 
   clearInterval(window._it);   /* ไม่มีการนับเวลากลับหน้าแรกอัตโนมัติแล้ว */

@@ -26,29 +26,29 @@ fun ageYMD(dob: LocalDate, today: LocalDate = LocalDate.now()): String {
 
 enum class FitMode { Contain, Cover }
 /** brand = สีหลักจากโลโก้ · brandDeep = สีเข้มสำหรับตัวอักษรบนพื้นอ่อน — ใช้เปลี่ยนโทนหน้ารายละเอียดแบบประกันตามบริษัท */
-data class Insurer(val name: String, val short: String, val logo: Int, val fit: FitMode, val brand: Long, val brandDeep: Long, val slow: Boolean = false)
+data class Insurer(val name: String, val short: String, val logo: Int, val fit: FitMode, val brand: Long, val brandDeep: Long)
 
-/* โลโก้จาก Wikimedia Commons ใช้ในต้นแบบเท่านั้น (เมืองไทยประกันชีวิต: CC BY-SA 4.0 · ไทยประกันชีวิต / AIA: Public domain) */
-val InsurerA = Insurer("บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)", "MTL", R.drawable.ins_logo_a, FitMode.Contain, 0xFFE2007A, 0xFFB0005F)
-val InsurerB = Insurer("บริษัท ไทยประกันชีวิต จำกัด (มหาชน)", "TL", R.drawable.ins_logo_b, FitMode.Cover, 0xFF0080C3, 0xFF005E94)
-val InsurerC = Insurer("บริษัท เอไอเอ จำกัด", "AIA", R.drawable.ins_logo_c, FitMode.Contain, 0xFFD31145, 0xFFA00D34, slow = true) // slow = สาธิตกรณีส่งนาน
+/* บริษัทประกันที่ร่วมโครงการ: AIA บริษัทเดียว · โลโก้จาก Wikimedia Commons (Public domain) ใช้ในต้นแบบเท่านั้น */
+val InsurerAia = Insurer("บริษัท เอไอเอ จำกัด", "AIA", R.drawable.ins_logo_c, FitMode.Contain, 0xFFD31145, 0xFFA00D34)
+val Insurers = listOf(InsurerAia)
 
-data class Plan(val co: Insurer, val tag: String, val name: String, val cov: String, val price: String)
+/** pending = บริษัทยังพิจารณาแผนนี้อยู่ (ไม่มีราคา · แจ้งผลทางแอป) — ต้นแบบสาธิตกรณีส่งนาน */
+data class Plan(val co: Insurer, val tag: String, val name: String, val cov: String, val price: String, val pending: Boolean = false)
 
 val RecommendedPlans = listOf(
-    Plan(InsurerA, "ประกันสุขภาพ", "Health Plus", "ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี", "12,000"),
-    Plan(InsurerB, "ประกันสุขภาพ", "Health Care Lite", "ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี", "6,500"),
-    Plan(InsurerC, "ประกันชีวิต", "Life Protect 20", "ทุนประกัน 1,000,000 บาท ระยะ 20 ปี", "18,000"),
+    Plan(InsurerAia, "ประกันสุขภาพ", "Health Plus", "ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี", "12,000"),
+    Plan(InsurerAia, "ประกันสุขภาพ", "Health Care Lite", "ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี", "6,500"),
+    Plan(InsurerAia, "ประกันชีวิต", "Life Protect 20", "ทุนประกัน 1,000,000 บาท ระยะ 20 ปี", "18,000"),
 )
 val OtherPlans = listOf(
-    Plan(InsurerB, "ประกันสุขภาพ", "Cancer Care", "คุ้มครองโรคมะเร็งทุกระยะ สูงสุด 1,000,000 บาท", "3,200"),
-    Plan(InsurerC, "ประกันอุบัติเหตุ", "Accident Shield", "ค่ารักษาจากอุบัติเหตุ สูงสุด 100,000 บาท/ครั้ง", "1,800"),
-    Plan(InsurerA, "ประกันโรคร้ายแรง", "Critical Illness 30", "จ่ายเงินก้อนเมื่อตรวจพบ 30 โรคร้ายแรง", "7,400"),
-    Plan(InsurerC, "ประกันชีวิต", "Saving Life 15", "ออมทรัพย์พร้อมคุ้มครองชีวิต ระยะ 15 ปี", "24,000"),
-    Plan(InsurerA, "ประกันสุขภาพ", "OPD Care", "ค่ารักษาผู้ป่วยนอก ครั้งละ 1,500 บาท 30 ครั้ง/ปี", "4,900"),
-    Plan(InsurerB, "ประกันสุขภาพ", "Senior Health 60+", "ค่ารักษาผู้ป่วยใน สูงสุด 300,000 บาท/ปี", "21,500"),
-    Plan(InsurerC, "ประกันชีวิต", "Life Care 99", "คุ้มครองชีวิตถึงอายุ 99 ปี ทุน 500,000 บาท", "15,800"),
-    Plan(InsurerA, "ประกันสุขภาพ", "Family Health", "คุ้มครองทั้งครอบครัว สูงสุด 4 คน", "28,000"),
+    Plan(InsurerAia, "ประกันสุขภาพ", "Cancer Care", "คุ้มครองโรคมะเร็งทุกระยะ สูงสุด 1,000,000 บาท", "3,200"),
+    Plan(InsurerAia, "ประกันอุบัติเหตุ", "Accident Shield", "ค่ารักษาจากอุบัติเหตุ สูงสุด 100,000 บาท/ครั้ง", "1,800", pending = true),
+    Plan(InsurerAia, "ประกันโรคร้ายแรง", "Critical Illness 30", "จ่ายเงินก้อนเมื่อตรวจพบ 30 โรคร้ายแรง", "7,400"),
+    Plan(InsurerAia, "ประกันชีวิต", "Saving Life 15", "ออมทรัพย์พร้อมคุ้มครองชีวิต ระยะ 15 ปี", "24,000", pending = true),
+    Plan(InsurerAia, "ประกันสุขภาพ", "OPD Care", "ค่ารักษาผู้ป่วยนอก ครั้งละ 1,500 บาท 30 ครั้ง/ปี", "4,900"),
+    Plan(InsurerAia, "ประกันสุขภาพ", "Senior Health 60+", "ค่ารักษาผู้ป่วยใน สูงสุด 300,000 บาท/ปี", "21,500"),
+    Plan(InsurerAia, "ประกันชีวิต", "Life Care 99", "คุ้มครองชีวิตถึงอายุ 99 ปี ทุน 500,000 บาท", "15,800", pending = true),
+    Plan(InsurerAia, "ประกันสุขภาพ", "Family Health", "คุ้มครองทั้งครอบครัว สูงสุด 4 คน", "28,000"),
 )
 
 const val RequestId = "INS-2569-000123"

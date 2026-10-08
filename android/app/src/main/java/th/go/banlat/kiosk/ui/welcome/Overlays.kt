@@ -374,7 +374,7 @@ fun ConsentModal(onDecline: () -> Unit, onAccept: () -> Unit) {
                     CsCard(2, "ผู้รับข้อมูล") {
                         CsText("ส่งผ่าน**Insurance Gateway** ของ BMS แบบเข้ารหัส ไปยังบริษัทประกันที่ร่วมโครงการ")
                         Column(Modifier.padding(top = 16.s), verticalArrangement = Arrangement.spacedBy(12.s)) {
-                            listOf(th.go.banlat.kiosk.data.InsurerA, th.go.banlat.kiosk.data.InsurerB, th.go.banlat.kiosk.data.InsurerC).forEach { co ->
+                            th.go.banlat.kiosk.data.Insurers.forEach { co ->
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.s)) {
                                     th.go.banlat.kiosk.ui.insurance.InsurerLogo(co, 48, 7)
                                     KText(co.name, 22, weight = FontWeight.SemiBold, softWrap = false)
