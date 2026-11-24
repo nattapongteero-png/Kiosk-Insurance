@@ -254,7 +254,7 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
 .pp .who .rgt b{overflow:hidden;text-overflow:ellipsis}
 .pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
 /* ข้อเสนอแนะนำ (บนตู้จริง = "สิทธิประกันที่ใช้ได้") — แบบ master–detail
-   ซ้าย = การ์ดภาพ = หัวเรื่อง (ประเภท ชื่อแผน เบี้ยรายปี) แตะเพื่อเลือก · ขวา = เนื้อหา (โลโก้ + ชื่อบริษัท อายุรับประกัน/ต่ออายุ
+   ซ้าย = การ์ด = หัวเรื่อง (ภาพปกสีแบรนด์ + โลโก้ · ประเภท ชื่อแผน เบี้ยรายปี) แตะเพื่อเลือก · ขวา = เนื้อหา (ชื่อบริษัท อายุรับประกัน/ต่ออายุ
    ความคุ้มครองหลัก เบี้ยเฉลี่ยรายเดือน ปุ่มดูรายละเอียด/สนใจแผนนี้) — ไม่ซ้ำข้อมูลกัน
    ผู้ซื้อหลักอายุ 35–60 ปี (สายตายาวเริ่ม ~40): เนื้อหา ≥ 26px สีเข้ม · ทุกอย่างอยู่ในจอ ไม่ต้องปัด · การ์ดที่เลือกอยู่มีขอบกรมหนา + เครื่องหมายถูก
    ระยะห่าง (ตาราง 8): หัวข้อ→เนื้อหา 32 · ภาพ↔ภาพ 24 (~9 มม. บนจอ 32" กันแตะพลาด) · ซ้าย↔ขวา 32 · ในแผงขวา ขอบ 32
@@ -280,8 +280,11 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
 .pp .rec .pick:active{transform:scale(.98)}
 .pp .rec .pick.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
 .pp .rec .pick.on:active{transform:none}
-.pp .rec .pick .ph{position:relative;height:144px;border-radius:16px;overflow:hidden;background:var(--tint)}
-.pp .rec .pick .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 22%;pointer-events:none}
+/* ภาพปก = พื้นสีแบรนด์บริษัทประกัน (INSURERS[].br) + โลโก้สีขาวตรงกลาง · โลโก้มีที่นี่ที่เดียวในส่วนนี้ */
+.pp .rec .pick .ph{position:relative;height:144px;border-radius:16px;overflow:hidden;
+  background:radial-gradient(120% 140% at 18% 0%,rgba(255,255,255,.20),rgba(255,255,255,0) 62%),rgb(var(--brand))}
+.pp .rec .pick .ph .brand{position:absolute;left:50%;top:54%;height:44px;width:auto;transform:translate(-50%,-50%);pointer-events:none;
+  filter:brightness(0) invert(1)}   /* โลโก้สี → ขาวล้วน อ่านชัดบนพื้นสีแบรนด์ */
 .pp .rec .pick .ty{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 10px;border-radius:99px;
   background:rgba(255,255,255,.94);font-size:20px;font-weight:700;color:var(--deep);white-space:nowrap}
 .pp .rec .pick .ty::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
@@ -298,12 +301,7 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
 .pp .rec .pick .ck svg{width:26px;height:26px;stroke:#fff}
 /* แผงรายละเอียด (ขวา) = เนื้อหาของแผนที่เลือก · ไม่ซ้ำชื่อ/ประเภท/เบี้ยรายปีที่อยู่บนการ์ดแล้ว · เริ่มที่ "ได้อะไร" */
 .pp .rec .sel{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;padding:32px;transition:margin-top .28s cubic-bezier(.3,.7,.2,1)}
-.pp .rec .sel h3{display:flex;align-items:center;gap:14px;font-size:34px;font-weight:700;line-height:1.28}   /* หัวแผง = โลโก้ + ชื่อบริษัทประกัน (ชื่อแผนอยู่บนการ์ดซ้ายแล้ว) */
-.pp .rec .sel .ic{width:52px;height:52px;border-radius:50%;flex:none;position:relative;overflow:hidden;display:grid;place-items:center;background:#fff;
-  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 5px rgba(191,145,58,.06)}
-.pp .rec .sel .ic img{position:absolute;inset:8px;width:36px;height:36px;object-fit:contain;background:#fff}
-.pp .rec .sel .ic b{font-size:16px;font-weight:700;color:#A87C2A}
-.pp .rec .sel .ic:has(img) b{visibility:hidden}   /* อักษรย่อสำรองใช้เมื่อโหลดรูปไม่ได้ (onerror ลบรูป) · มีรูปอยู่ = ซ่อน ไม่ให้โผล่ข้างรูป */
+.pp .rec .sel h3{font-size:34px;font-weight:700;line-height:1.28}   /* หัวแผง = ชื่อบริษัทประกัน (โลโก้อยู่บนภาพปกการ์ด · ชื่อแผนอยู่บนการ์ด) */
 .pp .rec .sel .fit{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 10px}
 .pp .rec .sel .fit span{display:inline-flex;align-items:center;gap:6px;padding:5px 14px 5px 9px;border-radius:99px;background:var(--tint);
   font-size:22px;font-weight:600;white-space:nowrap}   /* 22px ให้ป้าย 2 อันอยู่บรรทัดเดียวในแผงกว้าง 484 */
@@ -846,11 +844,9 @@ const planCard = p => `
     <span class="cov">${p.cov}</span>
     ${p.pend ? `<span class="wait">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>`}
   </button>`;
-/* ข้อเสนอแนะนำแบบ master–detail: ซ้าย = การ์ดภาพ (recPick) แตะเพื่อเลือก · ขวา = รายละเอียดแผนที่เลือก (recSel)
-   สีพื้นภาพตามประเภทประกัน [พื้น, สีตัวอักษรประเภท] · ภาพประกอบใช้ภาพคุณลุงคุณป้าทุกแผนไปก่อน
-   TODO: ขอภาพแยกแต่ละแผนจากบริษัทประกัน แล้วใส่ใน PLANS_REC[].art */
+/* ข้อเสนอแนะนำแบบ master–detail: ซ้าย = การ์ด (recPick) แตะเพื่อเลือก · ขวา = รายละเอียดแผนที่เลือก (recSel)
+   ภาพปกการ์ด = พื้นสีแบรนด์ + โลโก้บริษัท · TAG_TINT = สีตามประเภทประกัน [พื้นป้าย, สีตัวอักษรประเภท] */
 const TAG_TINT = {'ประกันสุขภาพ':['#DCEBFB','#0D5BC6'], 'ประกันชีวิต':['#FDF0D9','#B45309'], 'ประกันอุบัติเหตุ':['#FBE6E1','#C2410C'], 'ประกันโรคร้ายแรง':['#FBE3EC','#BE185D']};
-const PLAN_ART = 'ins_couple.png';
 let REC_SEL = null;   /* ชื่อแผนแนะนำที่เปิดดูอยู่ · ค่าเริ่มต้น = แผนแรก · กดย้อนกลับจากหน้ารายละเอียดแล้วยังอยู่ที่แผนเดิม */
 const curRec = () => PLANS_REC.find(p => p.name === REC_SEL) || PLANS_REC[0];
 /* ป้ายเรื่องที่คนวัย 35–60 ห่วง: สมัครได้ถึงอายุเท่าไร · ต่ออายุได้ถึงเมื่อไร (หรือคุ้มครองทันที) — ดึงจาก TERMS ตามประเภทแผน */
@@ -860,16 +856,16 @@ const fitOf = tag => { const T = TERMS[tag] || {}, out = [];
   if (rn) out.push(`ต่ออายุได้ถึง ${rn[1]} ปี`); else { const w = (T.wait || '').match(/^ไม่มี \((.*)\)/); if (w) out.push(w[1]); }
   return out; };
 const perMonth = pr => Math.round(parseInt(String(pr).replace(/,/g, ''), 10) / 12).toLocaleString('en-US');
-/* การ์ดซ้าย = หัวเรื่อง: ภาพ + ป้ายประเภท + ชื่อแผน + เบี้ยรายปี */
+/* การ์ดซ้าย = หัวเรื่อง: ภาพปก (สีแบรนด์ + โลโก้) + ป้ายประเภท + ชื่อแผน + เบี้ยรายปี */
 const recPick = p => { const [tint, deep] = TAG_TINT[p.tag] || TAG_TINT['ประกันสุขภาพ'], on = p === curRec(); return `
-  <button class="pick${on ? ' on' : ''}" data-pick="${p.name}" aria-pressed="${on}" style="--tint:${tint};--deep:${deep}">
-    <span class="ph"><img src="${p.art || PLAN_ART}" alt=""><span class="ty">${p.tag}</span><span class="ck">${svg('check',3)}</span></span>
+  <button class="pick${on ? ' on' : ''}" data-pick="${p.name}" aria-pressed="${on}" style="--tint:${tint};--deep:${deep};--brand:${INSURERS[p.co].br}">
+    <span class="ph"><img class="brand" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"><span class="ty">${p.tag}</span><span class="ck">${svg('check',3)}</span></span>
     <span class="cap"><b>${p.name}</b>${p.pend ? `<span class="wt">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="p"><strong>${p.pr}</strong>บาท/ปี</span>`}</span>
   </button>`; };
-/* แผงขวา = เนื้อหา: โลโก้ + ชื่อบริษัทประกัน · ป้ายอายุ · ความคุ้มครอง 3 รายการแรก · เบี้ยเฉลี่ยรายเดือน · ปุ่ม
+/* แผงขวา = เนื้อหา: ชื่อบริษัทประกัน · ป้ายอายุ · ความคุ้มครอง 3 รายการแรก · เบี้ยเฉลี่ยรายเดือน · ปุ่ม
    ไม่ซ้ำชื่อแผน/ประเภท/เบี้ยรายปีที่อยู่บนการ์ดซ้ายซึ่งต่อเป็นแผ่นเดียวกันอยู่แล้ว · ทั้งหมด + เงื่อนไข + ข้อยกเว้น อยู่ในหน้ารายละเอียด */
 const recSel = p => { const fit = fitOf(p.tag); return `
-      <h3>${planLogo(p)}<span>${INSURERS[p.co].name}</span></h3>
+      <h3>${INSURERS[p.co].name}</h3>
       ${fit.length ? `<div class="fit">${fit.map(f => `<span>${svg('check',2.8)}${f}</span>`).join('')}</div>` : ''}
       <h4>ความคุ้มครองหลัก</h4>
       <div class="rws">${(COVER[p.name] || []).slice(0, 3).map(r => row(...r)).join('')}</div>

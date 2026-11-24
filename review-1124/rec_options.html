@@ -81,8 +81,9 @@ body.fullmode .frame{border-radius:0}
 .ty{display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 10px;border-radius:99px;background:rgba(255,255,255,.94);
   font-size:20px;font-weight:700;color:var(--deep);white-space:nowrap}
 .ty::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
-.ph{position:relative;border-radius:16px;overflow:hidden;background:var(--tint)}
-.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:40% 20%;pointer-events:none;-webkit-user-drag:none}
+/* ภาพปก = พื้นสีแบรนด์บริษัทประกัน + โลโก้สีขาวตรงกลาง · โลโก้มีที่นี่ที่เดียว */
+.ph{position:relative;border-radius:16px;overflow:hidden;background:radial-gradient(120% 140% at 18% 0%,rgba(255,255,255,.20),rgba(255,255,255,0) 62%),var(--brand)}
+.ph .brand{position:absolute;left:50%;top:54%;height:var(--lh,44px);width:auto;transform:translate(-50%,-50%);pointer-events:none;-webkit-user-drag:none;filter:brightness(0) invert(1)}
 .ph .ty{position:absolute;left:10px;top:10px}
 .wt{display:inline-flex;align-items:center;gap:8px;font-size:24px;font-weight:600;color:#7A5717}
 .wt svg{width:26px;height:26px;stroke:#A87C2A}
@@ -137,7 +138,7 @@ body.fullmode .frame{border-radius:0}
 .oH .card:active{transform:scale(.98)}
 .oH .card.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
 .oH .card.on:active{transform:none}
-.oH .card .ph{height:130px}
+.oH .card .ph{height:130px;--lh:42px}
 .oH .card .ck{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;display:none;place-items:center;background:var(--ink);box-shadow:0 0 0 3px #fff}
 .oH .card.on .ck{display:grid}
 .oH .card .ck svg{width:24px;height:24px;stroke:#fff}
@@ -172,7 +173,7 @@ body.fullmode .frame{border-radius:0}
   transition:transform .5s cubic-bezier(.3,.7,.2,1),opacity .5s}
 .oN .stage.drag .slide{transition:none}
 .oN .slide.cur{cursor:default;box-shadow:0 0 0 4px var(--ink),0 10px 28px rgba(20,38,90,.18)}
-.oN .slide .ph{height:190px;border-radius:20px}
+.oN .slide .ph{height:190px;border-radius:20px;--lh:64px}
 .oN .slide .ph .ty{font-size:22px;left:14px;top:14px}
 /* หัวการ์ด: ชื่อแผน + เบี้ยรายปี */
 .oN .slide .hdr{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 12px 0}
@@ -246,12 +247,13 @@ const fitOf = t => { const T = DATA.TERMS[t] || {}, out = [];
 const P = DATA.PLANS_REC.map(p => ({...p, tint: TINT[p.tag][0], deep: TINT[p.tag][1], fit: fitOf(p.tag),
   rows: (DATA.COVER[p.name] || []).slice(0, 3).map(([k, sub, v]) => { const m = v.match(/^([\d,]+)\s*(.*)$/);
     return {k, sub, v, ic: (BEN_IC.find(([re]) => re.test(k)) || [, 'shield'])[1], num: m && m[1], unit: m && m[2]}; })}));
-const vars = p => `--tint:${p.tint};--deep:${p.deep}`;
+const BRAND = '#D31145';   /* AIA · สีหลักจากโลโก้ (INSURERS[].br ใน insurance.html) */
+const vars = p => `--tint:${p.tint};--deep:${p.deep};--brand:${BRAND}`;
 const perMonth = p => Math.round(parseInt(String(p.pr).replace(/,/g, ''), 10) / 12).toLocaleString('en-US');
 const price = p => p.pend ? `<span class="wt">${svg('clock', 2)}รอผลพิจารณา</span>` : `<strong>${p.pr}</strong>บาท/ปี`;
-const ph = (p, h) => `<span class="ph"${h ? ` style="height:${h}px"` : ''}><img src="ins_couple.png" alt=""><span class="ty">${p.tag}</span></span>`;
+const ph = (p, h) => `<span class="ph"${h ? ` style="height:${h}px"` : ''}><img class="brand" src="ins_logo_c.png" alt="AIA"><span class="ty">${p.tag}</span></span>`;
 const detail = p => `
-  <h3><span class="lg"><img src="ins_logo_c.png" alt="AIA"></span>บริษัท เอไอเอ จำกัด</h3>
+  <h3>บริษัท เอไอเอ จำกัด</h3>
   ${p.fit.length ? `<div class="fit">${p.fit.map(f => `<span>${svg('check', 2.8)}${f}</span>`).join('')}</div>` : ''}
   <div class="ben">${p.rows.map(r => `<div><i>${svg(r.ic)}</i>${r.num ? `<strong>${r.num}${r.unit ? `<em>${r.unit}</em>` : ''}</strong>`
     : `<strong class="t">${r.v}</strong>`}<span>${r.k}</span>${r.sub ? `<small>${r.sub}</small>` : ''}</div>`).join('')}</div>
@@ -280,7 +282,7 @@ function tabPathH(x0, x1, y0, y1, tx0, tx1, ty0){
     + `V${n(y0+rL)}A${n(rL)} ${n(rL)} 0 0 1 ${n(x0+rL)} ${n(y0)}H${n(tx0-fL)}A${n(fL)} ${n(fL)} 0 0 0 ${n(tx0)} ${n(y0-fL)}V${n(ty0+rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx0+rt)} ${n(ty0)}Z`;
 }
 const cardH = (q, i, on) => `<button class="card${on ? ' on' : ''}" data-i="${i}" aria-pressed="${on}" style="${vars(q)}">
-  <span class="ph"><img src="ins_couple.png" alt=""><span class="ty">${q.tag}</span><span class="ck">${svg('check', 3)}</span></span>
+  <span class="ph"><img class="brand" src="ins_logo_c.png" alt="AIA"><span class="ty">${q.tag}</span><span class="ck">${svg('check', 3)}</span></span>
   <span class="cap"><b>${q.name}</b><span class="p">${price(q)}</span></span></button>`;
 function mountH(frame){
   let cur = 0, prog = false, progT = null, target = 0;
@@ -356,7 +358,7 @@ function mountH(frame){
 const slideCard = (p, i) => `<div class="slide" data-i="${i}" role="group" aria-label="${p.name}" style="${vars(p)}">${ph(p, 190)}
   <div class="hdr"><b>${p.name}</b><span class="p">${p.pend ? `<span class="wt">${svg('clock', 2)}รอผลพิจารณา</span>` : `<strong>${p.pr}</strong>บาท/ปี`}</span></div>
   <div class="bd">
-    <div class="co"><span class="lg"><img src="ins_logo_c.png" alt="AIA"></span>บริษัท เอไอเอ จำกัด</div>
+    <div class="co">บริษัท เอไอเอ จำกัด</div>
     ${p.fit.length ? `<div class="fit">${p.fit.map(f => `<span>${svg('check', 2.8)}${f}</span>`).join('')}</div>` : ''}
     <div class="ben">${p.rows.map(r => `<div><i>${svg(r.ic)}</i>${r.num ? `<strong>${r.num}${r.unit ? `<em>${r.unit}</em>` : ''}</strong>`
       : `<strong class="t">${r.v}</strong>`}<span>${r.k}</span>${r.sub ? `<small>${r.sub}</small>` : ''}</div>`).join('')}</div>
