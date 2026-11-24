@@ -11,7 +11,7 @@
   const css = `
 .idleOv{position:absolute;left:0;top:0;width:1080px;height:var(--H,1920px);z-index:60;   /* ขนาดจอจริง: กรอบนอก (#stage) ถูกตั้งความสูงเป็นค่าที่ย่อแล้วตอนแสดงแบบกรอบตัวอย่าง จึงอ้าง inset:0 ไม่ได้ */
   display:flex;align-items:center;justify-content:center;padding:0 100px;
-  background:rgba(10,25,60,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:"Noto Sans Thai",system-ui,sans-serif;color:#14265A}
+  background:rgba(10,25,60,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-family:"Sarabun",system-ui,sans-serif;color:#14265A}
 .idleOv[hidden]{display:none!important}
 body:not(.bleed) .idleOv{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(10,25,60,.55)}   /* กรอบตัวอย่าง (ย่อจอ): เบราว์เซอร์เบลอเพี้ยนเป็นลายซ้ำ → ใช้ scrim ทึบแทน */
 .idleBox{width:100%;padding:64px 56px 48px;border-radius:40px;display:flex;flex-direction:column;align-items:center;text-align:center;

@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kiosk — ตั้งค่าตู้</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- ฟอนต์ Sarabun เก็บในเครื่อง (fonts/) ไม่พึ่งอินเทอร์เน็ต — เดิมโหลดจาก Google Fonts ถ้าช้า/หลุดจะค้างเป็นฟอนต์ไทยไม่มีหัวของเครื่อง
+     preload ชุดอักษรไทยที่ใช้บ่อย ให้ฟอนต์พร้อมตั้งแต่วาดหน้าครั้งแรก -->
+<link rel="preload" href="fonts/sarabun-500-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-600-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-700-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/sarabun.css">
 <style>
 :root{
   --ink:#14265A; --ink-muted:#5B6B8A; --ink-soft:#8494AE;
@@ -16,7 +19,7 @@
   --line:#D7E4F2; --gutter:80px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px 12px}
+body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px 12px}
 .stage{width:1080px;height:var(--H,1920px);transform-origin:top center;flex:none}
 .screen{position:relative;width:1080px;height:var(--H,1920px);overflow:hidden;border-radius:10px;
   background:#EAF2FB url("bg_home.png") center/cover no-repeat;box-shadow:0 30px 90px rgba(0,0,0,.5);color:var(--ink)}
