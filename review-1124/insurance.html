@@ -259,7 +259,7 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
    แตะเปลี่ยนแผน = รูปทรงค่อยๆ เลื่อนไปหาการ์ดใหม่ · ปัดแถว = รูปทรงเลื่อนตามการ์ดที่เลือก
    ก่อนผู้ใช้แตะ เลือกใบถัดไปเองทุก 5 วิ ให้รู้ว่าปัดได้/แตะเลือกได้ · แตะ ปัด หรือเลื่อนครั้งแรก = หยุดเลื่อนเองถาวร
    ผู้ซื้อหลักอายุ 35–60 ปี: เนื้อหา ≥ 22px ตัวเลขสำคัญ ≥ 28px · การ์ดกว้าง 272 เห็น 3 ใบ + ใบที่ 4 โผล่ (บอกว่ามีต่อ) · ห่างกัน 24 กันแตะพลาด
-   ระยะห่าง: หัวข้อ→แถว 28 · การ์ด→แผง 24 · ในแผง ขอบ 28/36 · ส่วนนี้→"ข้อเสนออื่น" 64 */
+   ระยะห่าง: หัวข้อ→แถว 28 · การ์ด→แผง 24 · ในแผง ขอบ 28/36 · ส่วนนี้→"ข้อเสนออื่น" 64 · ระยะบรรทัดข้อความไทย ≥ 1.35–1.4 */
 .pp .rec{position:relative;padding:0 var(--gutter) 16px}   /* ล่าง 16 + .more บน 48 = ห่างหัวข้อ "ข้อเสนออื่น" 64 */
 .pp .hd h2{font-size:48px;font-weight:700;line-height:68px;white-space:nowrap}
 .pp .hd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);white-space:nowrap}
@@ -308,17 +308,20 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
 .pp .rec .rdet .fit{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 10px}
 .pp .rec .rdet .fit span{display:inline-flex;align-items:center;gap:6px;padding:5px 14px 5px 9px;border-radius:99px;background:var(--tint);font-size:22px;font-weight:600;white-space:nowrap}
 .pp .rec .rdet .fit svg{width:22px;height:22px;stroke:var(--deep)}
-.pp .rec .rben{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:24px}
-.pp .rec .rben > div{display:flex;flex-direction:column;min-width:0}
-.pp .rec .rben i{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--tint);margin-bottom:10px}
-.pp .rec .rben i svg{width:26px;height:26px;stroke:var(--deep)}
-.pp .rec .rben strong{font-size:36px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pp .rec .rben strong em{font-style:normal;font-size:22px;font-weight:600;margin-left:6px;color:var(--ink-muted)}
-.pp .rec .rben strong.t{font-size:28px;line-height:1.25;white-space:normal}
-.pp .rec .rben span{margin-top:6px;font-size:23px;line-height:1.3;color:#34466F;text-wrap:pretty}
-.pp .rec .rben small{font-size:21px;line-height:1.3;color:var(--ink-muted)}
+/* ตัวเลขเด่น 3 ข้อ: รายการ 3 แถว แถวละข้อ อ่านในบรรทัดเดียว [ไอคอน] ชื่อ + เงื่อนไข ··· จำนวนเงิน (ชิดขวา ตัวเลขตรงแนวเดียวกัน เทียบง่าย)
+   ระยะบรรทัดภาษาไทย ≥ 1.4 กันสระบน/วรรณยุกต์ชนบรรทัดบน · ชื่อยาวตัดบรรทัดได้ จำนวนเงินไม่ตัด */
+.pp .rec .rben{margin-top:18px;display:flex;flex-direction:column}
+.pp .rec .rben > div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;column-gap:16px;padding:12px 0;border-top:1px solid rgba(20,38,90,.07)}
+.pp .rec .rben > div:first-child{border-top:0;padding-top:4px}
+.pp .rec .rben i{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--tint)}
+.pp .rec .rben i svg{width:24px;height:24px;stroke:var(--deep)}
+.pp .rec .rben .k{font-size:24px;line-height:1.4;color:#34466F;text-wrap:pretty}
+.pp .rec .rben .k small{display:inline-block;margin-left:10px;font-size:21px;line-height:1.4;color:var(--ink-muted)}   /* เงื่อนไขต่อท้ายชื่อ ไม่พอที่ = ลงบรรทัดใหม่ทั้งก้อน */
+.pp .rec .rben .v{text-align:right;font-size:30px;font-weight:700;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pp .rec .rben .v em{font-style:normal;font-size:21px;font-weight:600;margin-left:6px;color:var(--ink-muted)}
+.pp .rec .rben .v.t{font-size:24px;line-height:1.4;white-space:normal;max-width:340px;text-wrap:pretty}   /* ค่าที่เป็นข้อความ เช่น "ตามจ่ายจริง" */
 .pp .rec .rbuy{display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:20px;border-top:1px solid rgba(20,38,90,.08)}
-.pp .rec .rbuy .mo{flex:1;display:flex;flex-direction:column;line-height:1.2;font-size:24px;color:var(--ink-muted);white-space:nowrap}   /* 2 บรรทัด: "เฉลี่ย" / ตัวเลข + หน่วย */
+.pp .rec .rbuy .mo{flex:1;display:flex;flex-direction:column;line-height:1.35;font-size:24px;color:var(--ink-muted);white-space:nowrap}   /* 2 บรรทัด: "เฉลี่ย" / ตัวเลข + หน่วย */
 .pp .rec .rbuy .mo small{font-size:22px}
 .pp .rec .rbuy .mo b{font-size:34px;font-weight:700;color:var(--ink);margin-right:8px;font-variant-numeric:tabular-nums}
 /* ปุ่ม: ดูรายละเอียด (รอง) + สนใจแผนนี้ (หลัก → บันทึกความสนใจ บริษัทติดต่อกลับ) ตัดสินใจได้จากหน้านี้ */
@@ -888,7 +891,7 @@ const recDet = p => { const fit = fitOf(p.tag); return `
       <h3>${INSURERS[p.co].name}</h3>
       ${fit.length ? `<div class="fit">${fit.map(f => `<span>${svg('check',2.8)}${f}</span>`).join('')}</div>` : ''}
       <div class="rben">${(COVER[p.name] || []).slice(0, 3).map(([k, sub, v]) => { const m = v.match(/^([\d,]+)(?:\s+(.+))?$/), ic = (BEN_IC.find(([re]) => re.test(k)) || [, 'shield'])[1];
-        return `<div><i>${svg(ic)}</i>${m ? `<strong>${m[1]}${m[2] ? `<em>${m[2]}</em>` : ''}</strong>` : `<strong class="t">${v}</strong>`}<span>${k}</span>${sub ? `<small>${sub}</small>` : ''}</div>`; }).join('')}</div>
+        return `<div><i>${svg(ic)}</i><span class="k">${k}${sub ? `<small>${sub}</small>` : ''}</span>${m ? `<strong class="v">${m[1]}${m[2] ? `<em>${m[2]}</em>` : ''}</strong>` : `<strong class="v t">${v}</strong>`}</div>`; }).join('')}</div>
       <div class="rbuy"><span class="mo">${p.pend ? 'รอผลพิจารณา' : `<small>เฉลี่ย</small><span><b>${perMonth(p.pr)}</b>บาท/เดือน</span>`}</span>
         <button class="rbtn sec" data-go="${p.pend ? 'slow' : 'detail'}" data-plan="${p.name}">ดูรายละเอียด</button>
         ${p.pend ? '' : `<button class="rbtn pri" data-go="done" data-plan="${p.name}">สนใจแผนนี้</button>`}</div>`; };
