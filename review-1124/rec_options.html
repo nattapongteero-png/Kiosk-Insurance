@@ -118,32 +118,50 @@ body.fullmode .frame{border-radius:0}
 .arw svg{width:30px;height:30px;stroke:var(--ink)}
 .arw[hidden]{display:none}
 
-/* ---------- H · แนวนอน: แถวการ์ดด้านบน (ปัดซ้าย-ขวา) + แผ่นรายละเอียดด้านล่าง ต่อเป็นผืนเดียวกับการ์ดที่เลือก ---------- */
+/* ---------- H · แนวนอน: แถวการ์ดด้านบน (ปัดซ้าย-ขวา) + แผงรายละเอียดเต็มกว้างด้านล่าง
+   การ์ดที่เลือก + แผง = แผ่นขาวผืนเดียว วาดเป็นรูปทรงเดียวด้วย SVG (.sheetbg) อยู่ด้านหลัง (วิธีเดียวกับแบบแนวตั้ง)
+   ขอบนอกมุมโค้ง 24 · รอยต่อมุมเว้า 24 · เส้นขอบ + เงาวาดรอบรูปทรงรวม ไม่มีตะเข็บ
+   แตะเปลี่ยนแผน = รูปทรงค่อยๆ เลื่อนไปหาการ์ดใหม่ · ปัดแถว = รูปทรงเลื่อนตามการ์ดที่เลือก ---------- */
 .oH .wrap{position:relative}
-.oH .strip{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 24px;margin:0 -2px;scroll-behavior:smooth}
+.oH .sheetbg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0;
+  filter:drop-shadow(0 1px 2px rgba(20,38,90,.06)) drop-shadow(0 4px 12px rgba(20,38,90,.08))}
+.oH .sheetbg path{fill:#fff;stroke:rgba(20,38,90,.11);stroke-width:1.5;transition:d .38s cubic-bezier(.3,.7,.2,1)}
+.oH .rowbox{position:relative;z-index:1}
+.oH .strip{position:relative;display:flex;align-items:stretch;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:4px 0 8px;touch-action:pan-x pan-y}
 .oH .strip::-webkit-scrollbar{display:none}
-.oH .card{position:relative;flex:0 0 280px;scroll-snap-align:start;display:flex;flex-direction:column;border:0;padding:12px;font:inherit;text-align:left;cursor:pointer;color:var(--ink);
-  border-radius:22px;background:rgba(255,255,255,.62)}
+/* การ์ด = หัวเรื่อง: ภาพ (ป้ายประเภท) + ชื่อแผน + เบี้ย · 3 ใบเต็ม + ใบที่ 4 โผล่ให้รู้ว่าปัดต่อได้ */
+.oH .card{position:relative;flex:0 0 272px;scroll-snap-align:start;display:flex;flex-direction:column;border:0;padding:12px;font:inherit;text-align:left;cursor:pointer;color:var(--ink);
+  border-radius:22px;background:rgba(255,255,255,.8);box-shadow:0 0 0 1px rgba(20,38,90,.10),0 1px 3px rgba(20,38,90,.07);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1);-webkit-user-drag:none;user-select:none}
+.oH .card:active{transform:scale(.98)}
+.oH .card.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
+.oH .card.on:active{transform:none}
 .oH .card .ph{height:130px}
-.oH .card .cap{padding:12px 8px 4px;display:flex;flex-direction:column;gap:4px}
-.oH .card .cap b{font-size:28px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.oH .card .cap .p{font-size:21px;color:var(--ink-muted);white-space:nowrap}
-.oH .card .cap .p strong{font-size:28px;font-weight:700;color:var(--ink);margin-right:6px}
-.oH .card.on{background:#fff;border-radius:22px 22px 0 0}
-.oH .card .br{display:none}
-.oH .card.on .br{display:block;position:absolute;left:0;right:0;top:100%;height:25px;background:#fff}
-.oH .card.on .br::before,.oH .card.on .br::after{content:"";position:absolute;bottom:0;width:16px;height:16px}
-.oH .card.on .br::before{left:-16px;background:radial-gradient(circle at 0 0,transparent 15.5px,#fff 16px)}
-.oH .card.on .br::after{right:-16px;background:radial-gradient(circle at 100% 0,transparent 15.5px,#fff 16px)}
-.oH .card.on:first-child .br::before,.oH .card.on:last-child .br::after{display:none}
-.oH .det{border-radius:24px}
-.oH .det.l{border-top-left-radius:0}
-.oH .det.r{border-top-right-radius:0}
-.oH .arw{top:96px}
-.oH .arw.prev{left:-30px}
-.oH .arw.next{right:-30px}
-.oH .fadeR{position:absolute;right:0;top:0;bottom:24px;width:72px;pointer-events:none;background:linear-gradient(90deg,rgba(240,245,251,0),rgba(240,245,251,.92))}
+.oH .card .ck{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;display:none;place-items:center;background:var(--ink);box-shadow:0 0 0 3px #fff}
+.oH .card.on .ck{display:grid}
+.oH .card .ck svg{width:24px;height:24px;stroke:#fff}
+.oH .card .cap{flex:1;padding:12px 8px 4px;display:flex;flex-direction:column;gap:4px}
+.oH .card .cap b{font-size:28px;font-weight:700;line-height:1.25;text-wrap:pretty}   /* ชื่อยาวตัดบรรทัดได้ ไม่ตัด "…" · การ์ดทุกใบสูงเท่ากัน */
+.oH .card .cap .p{margin-top:auto;font-size:21px;color:var(--ink-muted);white-space:nowrap}
+.oH .card .cap .p strong{font-size:28px;font-weight:700;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
+.oH .fadeR{position:absolute;right:0;top:0;bottom:8px;width:64px;pointer-events:none;background:linear-gradient(90deg,rgba(242,246,251,0),rgba(242,246,251,.95))}
 .oH .fadeR[hidden]{display:none}
+/* ปุ่มเลื่อน: อยู่แถวหัวข้อด้านขวา ไม่ทับการ์ด/ไม่ชิดภาพ (แตะพลาดไม่กลายเป็นเลือกแผน) · 72px ≈ 27 มม. บนจอ 32"
+   + ตัวนับ "แผนที่ 1–3 จาก 6" บอกว่ามีอีกกี่แผน · สุดทางแล้วปุ่มจาง (ไม่ซ่อน ตำแหน่งไม่กระโดด) · ปัดแถวได้เหมือนเดิม */
+.oH .hdH{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:24px}
+.oH .hdH p{grid-column:1 / -1}
+.oH .nav{display:flex;align-items:center;gap:16px}
+.oH .nav .cnt{font-size:24px;font-weight:600;color:var(--ink-muted);white-space:nowrap;margin-right:4px}
+.oH .nav .cnt b{color:var(--ink)}
+.oH .nav .arw{position:static;width:72px;height:72px;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22),0 2px 6px rgba(20,38,90,.10);transition:transform .15s,opacity .2s}
+.oH .nav .arw svg{width:36px;height:36px}
+.oH .nav .arw:active{transform:scale(.94)}
+.oH .nav .arw:disabled{opacity:.3;cursor:default;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22)}
+/* แผงรายละเอียด: ห่างการ์ด 24 (padding ล่างแถว 8 + 16) · พื้นมาจากแผ่น SVG · เนื้อหาเปลี่ยนแบบจางเข้า */
+.oH .det{position:relative;z-index:1;margin-top:16px;background:transparent;border-radius:0;transition:opacity .22s}
+.oH .det.swap{opacity:0;transition:none}
+@media (prefers-reduced-motion:reduce){.oH .sheetbg path,.oH .det{transition:none}}
 
 /* ---------- N · แบบ Netflix: แถบหมุน ใบที่โฟกัสอยู่กลาง (ใหญ่) ใบข้างย่อ/จาง · ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว
    เลื่อนเองทุก 6 วิ · ปัด/แตะใบข้าง/ลูกศรได้ · แตะแล้วหยุดเลื่อนเอง 15 วิ ---------- */
@@ -249,36 +267,86 @@ const screen = inner => `<div class="pp">
   <div class="foot"><button class="cancel">ไม่สนใจ, พิมพ์บัตรคิว</button></div></div>`;
 
 /* ---------- H · แนวนอน ---------- */
+/* path รวม "การ์ดที่เลือก (ด้านบน) + แผง (ด้านล่าง)" พิกัดภายใน .wrap · คำสั่งชุดเดียวกันเสมอ (มุมที่ไม่ใช้ = รัศมี 0) ให้ transition ของ d ลื่น
+   แผง (x0..x1, y0..y1) · การ์ด (tx0..tx1, ty0..y0) · การ์ดชิดขอบแผง → มุมฝั่งนั้นเป็น 0 = เส้นตรง */
+function tabPathH(x0, x1, y0, y1, tx0, tx1, ty0){
+  const R = 24, F = 24, n = v => Math.round(v * 10) / 10;
+  const w = Math.max(0, tx1 - tx0), rt = Math.min(R, w / 2), dl = Math.max(0, tx0 - x0), dr = Math.max(0, x1 - tx1);
+  const fL = Math.min(F, dl / 2), rL = Math.min(R, dl / 2), fR = Math.min(F, dr / 2), rR = Math.min(R, dr / 2);
+  return `M${n(tx0+rt)} ${n(ty0)}H${n(tx1-rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx1)} ${n(ty0+rt)}V${n(y0-fR)}A${n(fR)} ${n(fR)} 0 0 0 ${n(tx1+fR)} ${n(y0)}`
+    + `H${n(x1-rR)}A${n(rR)} ${n(rR)} 0 0 1 ${n(x1)} ${n(y0+rR)}V${n(y1-R)}A${R} ${R} 0 0 1 ${n(x1-R)} ${n(y1)}H${n(x0+R)}A${R} ${R} 0 0 1 ${n(x0)} ${n(y1-R)}`
+    + `V${n(y0+rL)}A${n(rL)} ${n(rL)} 0 0 1 ${n(x0+rL)} ${n(y0)}H${n(tx0-fL)}A${n(fL)} ${n(fL)} 0 0 0 ${n(tx0)} ${n(y0-fL)}V${n(ty0+rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx0+rt)} ${n(ty0)}Z`;
+}
+const cardH = (q, i, on) => `<button class="card${on ? ' on' : ''}" data-i="${i}" aria-pressed="${on}" style="${vars(q)}">
+  <span class="ph"><img src="ins_couple.png" alt=""><span class="ty">${q.tag}</span><span class="ck">${svg('check', 3)}</span></span>
+  <span class="cap"><b>${q.name}</b><span class="p">${price(q)}</span></span></button>`;
 function mountH(frame){
-  let cur = 0, keepScroll = 0;
-  const draw = () => {
-    const p = P[cur];
-    frame.innerHTML = screen(`<section class="rec oH">
-      <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แตะแผนเพื่อดูรายละเอียด ปัดซ้าย-ขวาดูแผนอื่น</p></div>
-      <div class="wrap sheet">
-        <button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button><button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button>
-        <div class="strip">${P.map((q, i) => `<button class="card${i === cur ? ' on' : ''}" data-i="${i}" style="${vars(q)}">${ph(q)}
-          <span class="cap"><b>${q.name}</b><span class="p">${price(q)}</span></span><span class="br"></span></button>`).join('')}</div>
+  let cur = 0, prog = false, progT = null, target = 0;
+  frame.innerHTML = screen(`<section class="rec oH">
+    <div class="hd hdH"><h2>ข้อเสนอแนะนำ</h2>
+      <div class="nav"><span class="cnt"></span><button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button><button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
+      <p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แตะแผนเพื่อดูรายละเอียด</p></div>
+    <div class="wrap">
+      <svg class="sheetbg" aria-hidden="true"><path/></svg>
+      <div class="rowbox">
+        <div class="strip">${P.map((q, i) => cardH(q, i, i === cur)).join('')}</div>
         <span class="fadeR"></span>
-        <div class="det${cur === 0 ? ' l' : cur === P.length - 1 ? ' r' : ''}" style="${vars(p)}">${detail(p)}</div>
-      </div></section>`);
-    const strip = frame.querySelector('.strip'), prev = frame.querySelector('.prev'), next = frame.querySelector('.next'), fade = frame.querySelector('.fadeR');
-    strip.style.scrollBehavior = 'auto'; strip.scrollLeft = keepScroll; strip.style.scrollBehavior = '';
-    const upd = () => { prev.hidden = strip.scrollLeft < 8; const end = strip.scrollLeft > strip.scrollWidth - strip.clientWidth - 8; next.hidden = end; fade.hidden = end; keepScroll = strip.scrollLeft; };
-    strip.addEventListener('scroll', upd); upd();
-    /* การ์ดที่เลือกโผล่ไม่เต็ม → เลื่อนแถวให้เห็นทั้งใบ */
-    const on = strip.querySelector('.card.on'), L = on.offsetLeft - strip.offsetLeft, R = L + on.offsetWidth;
-    if (L < strip.scrollLeft || R > strip.scrollLeft + strip.clientWidth) strip.scrollTo({left: L - (strip.clientWidth - on.offsetWidth) / 2, behavior:'smooth'});
-    prev.onclick = () => strip.scrollBy({left: -300, behavior:'smooth'});
-    next.onclick = () => strip.scrollBy({left: 300, behavior:'smooth'});
-    /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) */
-    let x0 = null, s0 = 0, moved = false;
-    strip.onpointerdown = e => { if (e.pointerType === 'touch') return; x0 = e.clientX; s0 = strip.scrollLeft; moved = false; strip.style.scrollSnapType = 'none'; };
-    strip.onpointermove = e => { if (x0 === null) return; const dx = (e.clientX - x0) / (parseFloat(getComputedStyle(frame).getPropertyValue('--s')) || 1); if (Math.abs(dx) > 6) moved = true; strip.scrollLeft = s0 - dx; };
-    addEventListener('pointerup', () => { if (x0 !== null){ x0 = null; strip.style.scrollSnapType = ''; } });
-    strip.addEventListener('click', e => { if (moved){ e.stopPropagation(); moved = false; return; } const c = e.target.closest('[data-i]'); if (c){ cur = +c.dataset.i; draw(); } }, true);
+      </div>
+      <div class="det" aria-live="polite"></div>
+    </div></section>`);
+  const wrap = frame.querySelector('.wrap'), row = frame.querySelector('.rowbox'), strip = frame.querySelector('.strip'), det = frame.querySelector('.det');
+  const path = frame.querySelector('.sheetbg path'), cards = [...strip.children];
+  const prev = frame.querySelector('.prev'), next = frame.querySelector('.next'), fade = frame.querySelector('.fadeR');
+  const fill = () => { det.setAttribute('style', vars(P[cur])); det.innerHTML = detail(P[cur]); };
+  /* วาดแผ่น: ตำแหน่งการ์ดคิดจาก scrollLeft ที่ให้มา (ระหว่างเลื่อนอัตโนมัติใช้ค่าปลายทาง) · ส่วนที่เลื่อนพ้นแถวถูกตัดออก */
+  const sync = (animate, sl = strip.scrollLeft) => {
+    const c = cards[cur], x0 = 0, x1 = wrap.clientWidth, y0 = det.offsetTop, y1 = y0 + det.offsetHeight;
+    const cx = row.offsetLeft + strip.offsetLeft + c.offsetLeft - sl, clamp = v => Math.max(x0, Math.min(x1, v));
+    const d = `path("${tabPathH(x0, x1, y0, y1, clamp(cx), clamp(cx + c.offsetWidth), row.offsetTop + strip.offsetTop + c.offsetTop)}")`;
+    if (!animate) path.style.transition = 'none';
+    path.style.d = d;
+    if (!animate){ void path.getBoundingClientRect(); path.style.transition = ''; }
   };
-  draw();
+  const cnt = frame.querySelector('.cnt');
+  const arrows = () => { const max = strip.scrollWidth - strip.clientWidth, sl = strip.scrollLeft, st = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+    prev.disabled = sl < 8; next.disabled = sl > max - 8; fade.hidden = next.disabled;
+    const per = Math.max(1, Math.floor((strip.clientWidth + 24) / st)), a = sl > max - 8 ? Math.max(1, P.length - per + 1) : Math.round(sl / st) + 1;
+    cnt.innerHTML = P.length > per ? `แผนที่ <b>${a}–${Math.min(P.length, a + per - 1)}</b> จาก ${P.length}` : '';
+    prev.parentElement.querySelectorAll('.arw').forEach(b => b.hidden = P.length <= per); };   /* แผนพอดีจอ = ไม่ต้องมีปุ่ม */
+  strip.addEventListener('scroll', () => { arrows(); if (!prog) sync(false); });
+  /* ตำแหน่งเลื่อนที่ทำให้เห็นการ์ดทั้งใบ (เลือกจากจุด snap = ขอบซ้ายการ์ด) · เห็นครบอยู่แล้ว = ไม่เลื่อน */
+  const scrollFor = c => { const sl = strip.scrollLeft, cw = strip.clientWidth, max = strip.scrollWidth - cw, L = c.offsetLeft, R = L + c.offsetWidth;
+    if (L >= sl - 1 && R <= sl + cw + 1) return sl;
+    const snaps = [...new Set(cards.map(k => Math.min(k.offsetLeft, max)))].filter(s => L >= s - 1 && R <= s + cw + 1);
+    return snaps.length ? snaps.reduce((a, b) => Math.abs(b - sl) < Math.abs(a - sl) ? b : a) : Math.min(L, max); };
+  const select = i => {
+    if (i === cur) return;
+    cur = i;
+    cards.forEach((c, k) => { c.classList.toggle('on', k === i); c.setAttribute('aria-pressed', k === i); });
+    det.classList.add('swap'); fill(); void det.offsetWidth; det.classList.remove('swap');
+    target = scrollFor(cards[i]);
+    if (Math.abs(target - strip.scrollLeft) > 1){
+      prog = true; strip.scrollTo({left: target, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      clearTimeout(progT); progT = setTimeout(() => { prog = false; sync(false); }, 650);
+    }
+    sync(true, target);
+  };
+  const step = () => cards[1].offsetLeft - cards[0].offsetLeft;
+  prev.onclick = () => strip.scrollBy({left: -step(), behavior: 'smooth'});
+  next.onclick = () => strip.scrollBy({left: step(), behavior: 'smooth'});
+  /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) · ลากเกิน 6px = ไม่นับเป็นการแตะเลือก */
+  let x0 = null, s0 = 0, moved = false;
+  const sc = () => parseFloat(getComputedStyle(frame).getPropertyValue('--s')) || 1;
+  strip.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; x0 = e.clientX; s0 = strip.scrollLeft; moved = false; });
+  strip.addEventListener('pointermove', e => { if (x0 === null) return; const dx = (e.clientX - x0) / sc();
+    if (!moved && Math.abs(dx) > 6){ moved = true; strip.style.scrollSnapType = 'none'; } if (moved) strip.scrollLeft = s0 - dx; });
+  addEventListener('pointerup', () => { if (x0 === null) return; x0 = null;
+    if (moved){ const sl = strip.scrollLeft; strip.style.scrollSnapType = ''; strip.scrollLeft = sl; } });
+  strip.addEventListener('click', e => { if (moved){ e.stopPropagation(); moved = false; return; } const c = e.target.closest('[data-i]'); if (c) select(+c.dataset.i); }, true);
+  /* ขนาดเปลี่ยน (ฟอนต์โหลดเสร็จ · เนื้อหาแผงเปลี่ยน) → วาดใหม่ */
+  new ResizeObserver(() => sync(true, prog ? target : strip.scrollLeft)).observe(det);
+  fill(); arrows(); sync(false);
+  if (document.fonts) document.fonts.ready.then(() => sync(false));
 }
 
 /* ---------- N · แบบ Netflix ---------- */
