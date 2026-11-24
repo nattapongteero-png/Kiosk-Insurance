@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เทียบรูปแบบ — ข้อเสนอแนะนำ (แนวตั้ง · แนวนอน · แบบ Netflix)</title>
+<link rel="preload" href="fonts/sarabun-700-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-600-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/sarabun.css">
+<!-- หน้าเทียบรูปแบบส่วน "ข้อเสนอแนะนำ" ของหน้าเลือกแบบประกัน — ตัวอย่างไว้เปรียบเทียบ ยังไม่ได้ลง UI จริง
+     แบบปัจจุบัน = หน้าจริง insurance.html ฝังผ่าน iframe (?s=select · ปิดกลับหน้าแรกอัตโนมัติ · ปิดเสียง)
+     แนวนอน / แบบ Netflix = จอจำลองในหน้านี้ ข้อมูลแผนดึงจาก insurance.html (PLANS_REC 6 แผน · COVER · TERMS)
+     ?full=H|N = ดูจอเดียวเต็มความสูง -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+/* ---------- สไตล์พื้นฐานของจอในขั้นตอนประกัน (ดึงจาก insurance.html) ---------- */
+:root{
+  --ink:#14265A; --ink-muted:#5B6B8A; --ink-soft:#8494AE;
+  --blue:#1E7BE0; --blue-deep:#0D5BC6; --blue-light:#5FB2FF; --blue-050:#EAF3FD;
+  --green:#1E9C78; --green-050:#E8F7F2;
+  --amber:#B45309; --amber-050:#FEF5E7;
+  --red:#D92D20; --red-050:#FEF3F2;
+  --line:#D7E4F2; --card:rgba(255,255,255,.93);
+  
+  --gutter:80px;   
+}
+.pp{position:absolute;inset:0;background:#EAF2FB url("bg_home.png") center/cover no-repeat;color:var(--ink)}
+.pp .scroll{position:absolute;left:0;right:0;top:586px;bottom:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16px);mask-image:linear-gradient(180deg,transparent 0,#000 16px)}
+.pp .scroll::-webkit-scrollbar{display:none}
+.pp .who{position:absolute;left:0;right:0;top:262px;z-index:3;display:flex;flex-direction:column;gap:12px;padding:24px var(--gutter) 24px}
+.pp .veil{position:absolute;left:0;right:0;top:262px;bottom:0;z-index:0;pointer-events:none;border-radius:40px 40px 0 0;background:linear-gradient(180deg,rgba(255,255,255,1.000) 0px,rgba(255,255,255,0.993) 53px,rgba(255,255,255,0.974) 107px,rgba(255,255,255,0.945) 160px,rgba(255,255,255,0.909) 213px,rgba(255,255,255,0.868) 267px,rgba(255,255,255,0.825) 320px,rgba(255,255,255,0.782) 373px,rgba(255,255,255,0.741) 427px,rgba(255,255,255,0.705) 480px,rgba(255,255,255,0.676) 533px,rgba(255,255,255,0.657) 587px,rgba(255,255,255,0.650) 640px,rgba(255,255,255,0.665) 675px,rgba(255,255,255,0.705) 710px,rgba(255,255,255,0.761) 745px,rgba(255,255,255,0.825) 780px,rgba(255,255,255,0.889) 815px,rgba(255,255,255,0.945) 850px,rgba(255,255,255,0.985) 885px,rgba(255,255,255,1.000) 920px) 0 0/100% 920px no-repeat,linear-gradient(#fff,#fff) 0 920px/100% calc(100% - 920px) no-repeat}
+.pp .who .id{display:flex;align-items:center;gap:16px}
+.pp .who .av{width:88px;height:88px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 28%,#FFFFFF 0%,#FEFBF5 55%,#F7F1E4 100%);box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 8px rgba(191,145,58,.06)}
+.pp .who .av svg{width:44px;height:44px;stroke:#A87C2A}
+.pp .who .nm{font-size:40px;font-weight:700;height:44px;line-height:44px;white-space:nowrap}
+.pp .who .hn{font-size:28px;font-weight:500;color:var(--ink-muted);height:44px;line-height:44px;white-space:nowrap}
+.pp .who .kv{display:flex;gap:24px}
+.pp .who .kv div{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pp .who .kv span{font-size:24px;color:var(--ink-soft);height:32px;line-height:32px;white-space:nowrap}
+.pp .who .rgt b{overflow:hidden;text-overflow:ellipsis}
+.pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pp .hd h2{font-size:48px;font-weight:700;line-height:68px;white-space:nowrap}
+.pp .hd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);white-space:nowrap}
+.pp .foot{position:absolute;left:0;right:0;bottom:0;height:288px;z-index:3;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding:0 var(--gutter) 80px}
+.pp .foot::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,0) 0,rgba(255,255,255,.3) 32px,rgba(255,255,255,.66) 60px,rgba(255,255,255,.88) 84px,rgba(255,255,255,.93) 96px,rgba(255,255,255,.95) 100%);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 96px);mask-image:linear-gradient(180deg,transparent 0,#000 96px)}
+.pp .cancel{pointer-events:auto;height:88px;border-radius:99px;display:flex;align-items:center;gap:16px;padding:0 56px;border:0;cursor:pointer;font:inherit;font-size:28px;font-weight:600;color:var(--ink-muted);background:#fff;box-shadow:inset 0 1px 0 #fff,0 0 0 1.5px var(--line),0 8px 20px rgba(20,38,90,.08);transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s}
+.pp .cancel:active{transform:scale(.97);box-shadow:0 0 0 2px var(--ink-soft),0 4px 10px rgba(20,38,90,.1)}
+.bannerFade{position:absolute;left:0;top:196px;width:1080px;height:804px;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(178,238,244,0.000) 0px,rgba(181,238,245,0.000) 20px,rgba(186,239,246,0.000) 40px,rgba(190,240,247,0.010) 60px,rgba(191,240,247,0.046) 80px,rgba(197,240,248,0.119) 100px,rgba(204,241,248,0.226) 120px,rgba(210,241,249,0.360) 140px,rgba(214,241,249,0.507) 160px,rgba(215,241,249,0.655) 180px,rgba(217,241,249,0.786) 200px,rgba(220,241,249,0.890) 220px,rgba(224,242,249,0.959) 240px,rgba(227,242,249,0.992) 260px,rgba(228,242,249,1.000) 280px,rgba(228,242,249,1.000) 300px,rgba(229,242,249,1.000) 320px,rgba(230,242,249,1.000) 340px,rgba(231,242,249,1.000) 360px,rgba(232,243,248,1.000) 380px,rgba(233,243,248,1.000) 400px,rgba(234,243,248,1.000) 420px,rgba(234,243,248,1.000) 440px,rgba(234,243,248,1.000) 460px,rgba(234,243,248,1.000) 480px,rgba(235,243,248,1.000) 500px,rgba(235,243,248,1.000) 520px,rgba(236,244,248,1.000) 540px,rgba(236,244,248,1.000) 560px,rgba(237,244,248,1.000) 580px,rgba(237,244,248,1.000) 600px,rgba(237,244,248,1.000) 620px,rgba(237,244,248,1.000) 640px,rgba(237,244,248,1.000) 660px,rgba(237,244,248,1.000) 680px,rgba(237,244,248,1.000) 700px,rgba(238,244,248,1.000) 720px,rgba(238,244,248,1.000) 740px,rgba(238,244,248,1.000) 760px,rgba(238,244,248,1.000) 780px,rgba(238,244,248,1.000) 800px),linear-gradient(90deg,rgb(186, 246, 247) 0px,rgb(185, 245, 246) 180px,rgb(186, 244, 247) 270px,rgb(182, 240, 247) 360px,rgb(177, 237, 247) 450px,rgb(170, 234, 247) 540px,rgb(157, 229, 248) 630px,rgb(145, 224, 247) 720px,rgb(141, 221, 245) 810px,rgb(143, 221, 247) 900px,rgb(141, 219, 248) 990px,rgb(158, 227, 249) 1080px);-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px);mask-image:linear-gradient(180deg,rgba(0,0,0,1.000) 0px,rgba(0,0,0,0.991) 20px,rgba(0,0,0,0.974) 40px,rgba(0,0,0,0.961) 60px,rgba(0,0,0,0.957) 80px,rgba(0,0,0,0.943) 100px,rgba(0,0,0,0.925) 120px,rgba(0,0,0,0.909) 140px,rgba(0,0,0,0.900) 160px,rgba(0,0,0,0.892) 180px,rgba(0,0,0,0.865) 200px,rgba(0,0,0,0.828) 220px,rgba(0,0,0,0.789) 240px,rgba(0,0,0,0.757) 260px,rgba(0,0,0,0.741) 280px,rgba(0,0,0,0.732) 300px,rgba(0,0,0,0.704) 320px,rgba(0,0,0,0.661) 340px,rgba(0,0,0,0.610) 360px,rgba(0,0,0,0.559) 380px,rgba(0,0,0,0.512) 400px,rgba(0,0,0,0.477) 420px,rgba(0,0,0,0.461) 440px,rgba(0,0,0,0.454) 460px,rgba(0,0,0,0.431) 480px,rgba(0,0,0,0.396) 500px,rgba(0,0,0,0.352) 520px,rgba(0,0,0,0.306) 540px,rgba(0,0,0,0.261) 560px,rgba(0,0,0,0.222) 580px,rgba(0,0,0,0.194) 600px,rgba(0,0,0,0.180) 620px,rgba(0,0,0,0.176) 640px,rgba(0,0,0,0.161) 660px,rgba(0,0,0,0.139) 680px,rgba(0,0,0,0.111) 700px,rgba(0,0,0,0.081) 720px,rgba(0,0,0,0.052) 740px,rgba(0,0,0,0.027) 760px,rgba(0,0,0,0.009) 780px,rgba(0,0,0,0.000) 800px)}
+.pp .banner{position:absolute;left:0;top:0;width:1080px;height:262px;z-index:3;display:block;pointer-events:none}
+
+/* ---------- หน้าเทียบ ---------- */
+body{background:#1B2028;color:#E8EDF5;font-family:"Sarabun",system-ui,sans-serif;padding:36px 28px 72px}
+.intro{max-width:1540px;margin:0 auto 28px}
+.intro h1{font-size:30px;font-weight:700;color:#fff}
+.intro .sub{font-size:18px;color:#AEB9CB;margin-top:6px;line-height:1.5}
+.opts{max-width:1540px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(470px,1fr));gap:48px 28px;justify-items:center}
+.opt{width:454px}
+.opt > h2{font-size:22px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.opt > h2 .k{min-width:34px;height:34px;padding:0 8px;border-radius:9px;background:#3A4656;display:grid;place-items:center;font-size:16px}
+.frame{--s:.42;width:calc(1080px * var(--s));height:calc(1920px * var(--s));position:relative;overflow:hidden;border-radius:16px;box-shadow:0 22px 50px rgba(0,0,0,.5);background:#EAF2FB}
+.frame .pp{inset:auto;left:0;top:0;width:1080px;height:1920px;transform:scale(var(--s));transform-origin:0 0}
+.frame iframe{display:block;width:100%;height:100%;border:0}
+.opt .full{display:inline-block;margin-top:10px;font-size:15px;color:#9CC3FF;text-decoration:none}
+.why{margin-top:10px;font-size:16px;line-height:1.55;color:#C9D2E0}
+.why > p{color:#E8EDF5}
+.why ul{list-style:none;margin-top:8px;display:grid;gap:5px}
+.why li{padding-left:22px;position:relative}
+.why li.y::before{content:"✓";position:absolute;left:0;color:#5FD39B;font-weight:700}
+.why li.n::before{content:"!";position:absolute;left:5px;color:#F2B84B;font-weight:700}
+body.fullmode{padding:0;min-height:100vh;display:grid;place-items:center;background:#111}
+body.fullmode .intro,body.fullmode .opt > :not(.frame){display:none}
+body.fullmode .opts{display:block}
+body.fullmode .opt{width:auto}
+body.fullmode .frame{border-radius:0}
+
+/* ---------- ชิ้นส่วนร่วม ---------- */
+.pp .rec{position:relative;padding:8px var(--gutter) 16px}
+.pp .rec .hd{margin-bottom:28px}
+.pp .rec .hd p b{color:var(--ink)}
+.pp .more{padding:48px var(--gutter) 336px}
+.ty{display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 10px;border-radius:99px;background:rgba(255,255,255,.94);
+  font-size:20px;font-weight:700;color:var(--deep);white-space:nowrap}
+.ty::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
+/* ภาพปก = พื้นสีแบรนด์บริษัทประกัน + โลโก้สีขาวตรงกลาง · โลโก้มีที่นี่ที่เดียว */
+.ph{position:relative;border-radius:16px;overflow:hidden;background:radial-gradient(120% 140% at 18% 0%,rgba(255,255,255,.20),rgba(255,255,255,0) 62%),var(--brand)}
+.ph .brand{position:absolute;left:50%;top:54%;height:var(--lh,44px);width:auto;transform:translate(-50%,-50%);pointer-events:none;-webkit-user-drag:none;filter:brightness(0) invert(1)}
+.ph .ty{position:absolute;left:10px;top:10px}
+.wt{display:inline-flex;align-items:center;gap:8px;font-size:24px;font-weight:600;color:#7A5717}
+.wt svg{width:26px;height:26px;stroke:#A87C2A}
+/* แผงรายละเอียดเต็มกว้าง: โลโก้ + บริษัท · ป้ายอายุ · ตัวเลขเด่น 3 ข้อ · เฉลี่ยรายเดือน + ปุ่ม */
+.det{background:#fff;padding:28px 36px 30px}
+.det h3{display:flex;align-items:center;gap:14px;font-size:32px;font-weight:700}
+.lg{width:52px;height:52px;border-radius:50%;flex:none;position:relative;overflow:hidden;background:#fff;
+  box-shadow:0 0 0 1.5px rgba(191,145,58,.42),0 0 0 5px rgba(191,145,58,.06)}
+.lg img{position:absolute;inset:8px;width:36px;height:36px;object-fit:contain}
+.fit{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 10px}
+.fit span{display:inline-flex;align-items:center;gap:6px;padding:5px 14px 5px 9px;border-radius:99px;background:var(--tint);font-size:22px;font-weight:600;white-space:nowrap}
+.fit svg{width:22px;height:22px;stroke:var(--deep)}
+.ben{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:24px}
+.ben > div{display:flex;flex-direction:column;min-width:0}
+.ben i{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--tint);margin-bottom:10px}
+.ben i svg{width:26px;height:26px;stroke:var(--deep)}
+.ben strong{font-size:36px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ben strong em{font-style:normal;font-size:22px;font-weight:600;margin-left:6px;color:var(--ink-muted)}
+.ben strong.t{font-size:28px;line-height:1.25;white-space:normal}
+.ben span{margin-top:6px;font-size:23px;line-height:1.3;color:#34466F;text-wrap:pretty}
+.ben small{font-size:21px;line-height:1.3;color:var(--ink-muted)}
+.buy{display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:20px;border-top:1px solid rgba(20,38,90,.08)}
+.buy .mo{flex:1;font-size:24px;color:var(--ink-muted);white-space:nowrap}
+.buy .mo{display:flex;flex-direction:column;line-height:1.2}   /* 2 บรรทัด: ป้าย "เฉลี่ย" / ตัวเลข + หน่วย · เหลือที่ให้ปุ่ม */
+.buy .mo small{font-size:22px}
+.buy .mo b{font-size:34px;font-weight:700;color:var(--ink);margin-right:8px;font-variant-numeric:tabular-nums}
+.btn{height:84px;padding:0 30px;border:0;border-radius:99px;font:inherit;font-size:28px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--ink)}
+.btn.sec{background:#fff;box-shadow:inset 0 0 0 2px rgba(20,38,90,.2)}
+.btn.pri{color:#fff;background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);box-shadow:0 2px 6px rgba(20,38,90,.2)}
+.sheet{filter:drop-shadow(0 0 1px rgba(20,38,90,.24)) drop-shadow(0 1px 2px rgba(20,38,90,.06)) drop-shadow(0 4px 12px rgba(20,38,90,.08))}
+.arw{position:absolute;z-index:20;width:60px;height:60px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;
+  background:#fff;box-shadow:0 0 0 1px rgba(20,38,90,.12),0 4px 12px rgba(20,38,90,.16)}
+.arw svg{width:30px;height:30px;stroke:var(--ink)}
+.arw[hidden]{display:none}
+
+/* ---------- H · แนวนอน: แถวการ์ดด้านบน (ปัดซ้าย-ขวา) + แผงรายละเอียดเต็มกว้างด้านล่าง
+   การ์ดที่เลือก + แผง = แผ่นขาวผืนเดียว วาดเป็นรูปทรงเดียวด้วย SVG (.sheetbg) อยู่ด้านหลัง (วิธีเดียวกับแบบแนวตั้ง)
+   ขอบนอกมุมโค้ง 24 · รอยต่อมุมเว้า 24 · เส้นขอบ + เงาวาดรอบรูปทรงรวม ไม่มีตะเข็บ
+   แตะเปลี่ยนแผน = รูปทรงค่อยๆ เลื่อนไปหาการ์ดใหม่ · ปัดแถว = รูปทรงเลื่อนตามการ์ดที่เลือก ---------- */
+.oH .wrap{position:relative}
+.oH .sheetbg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0;
+  filter:drop-shadow(0 1px 2px rgba(20,38,90,.06)) drop-shadow(0 4px 12px rgba(20,38,90,.08))}
+.oH .sheetbg path{fill:#fff;stroke:rgba(20,38,90,.11);stroke-width:1.5;transition:d .38s cubic-bezier(.3,.7,.2,1)}
+.oH .rowbox{position:relative;z-index:1}
+.oH .strip{position:relative;display:flex;align-items:stretch;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:4px 0 8px;touch-action:pan-x pan-y}
+.oH .strip::-webkit-scrollbar{display:none}
+/* การ์ด = หัวเรื่อง: ภาพ (ป้ายประเภท) + ชื่อแผน + เบี้ย · 3 ใบเต็ม + ใบที่ 4 โผล่ให้รู้ว่าปัดต่อได้ */
+.oH .card{position:relative;flex:0 0 272px;scroll-snap-align:start;display:flex;flex-direction:column;border:0;padding:12px;font:inherit;text-align:left;cursor:pointer;color:var(--ink);
+  border-radius:22px;background:rgba(255,255,255,.8);box-shadow:0 0 0 1px rgba(20,38,90,.10),0 1px 3px rgba(20,38,90,.07);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1);-webkit-user-drag:none;user-select:none}
+.oH .card:active{transform:scale(.98)}
+.oH .card.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
+.oH .card.on:active{transform:none}
+.oH .card .ph{height:130px;--lh:42px}
+.oH .card .ck{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;display:none;place-items:center;background:var(--ink);box-shadow:0 0 0 3px #fff}
+.oH .card.on .ck{display:grid}
+.oH .card .ck svg{width:24px;height:24px;stroke:#fff}
+.oH .card .cap{flex:1;padding:12px 8px 4px;display:flex;flex-direction:column;gap:4px}
+.oH .card .cap b{font-size:28px;font-weight:700;line-height:1.25;text-wrap:pretty}   /* ชื่อยาวตัดบรรทัดได้ ไม่ตัด "…" · การ์ดทุกใบสูงเท่ากัน */
+.oH .card .cap .p{margin-top:auto;font-size:21px;color:var(--ink-muted);white-space:nowrap}
+.oH .card .cap .p strong{font-size:28px;font-weight:700;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
+.oH .fadeR{position:absolute;right:0;top:0;bottom:8px;width:64px;pointer-events:none;background:linear-gradient(90deg,rgba(242,246,251,0),rgba(242,246,251,.95))}
+.oH .fadeR[hidden]{display:none}
+/* ปุ่มเลื่อน: อยู่แถวหัวข้อด้านขวา ไม่ทับการ์ด/ไม่ชิดภาพ (แตะพลาดไม่กลายเป็นเลือกแผน) · 72px ≈ 27 มม. บนจอ 32"
+   + ตัวนับ "แผนที่ 1–3 จาก 6" บอกว่ามีอีกกี่แผน · สุดทางแล้วปุ่มจาง (ไม่ซ่อน ตำแหน่งไม่กระโดด) · ปัดแถวได้เหมือนเดิม */
+.oH .hdH{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:24px}
+.oH .hdH p{grid-column:1 / -1}
+.oH .nav{display:flex;align-items:center;gap:16px}
+.oH .nav .cnt{font-size:24px;font-weight:600;color:var(--ink-muted);white-space:nowrap;margin-right:4px}
+.oH .nav .cnt b{color:var(--ink)}
+.oH .nav .arw{position:static;width:72px;height:72px;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22),0 2px 6px rgba(20,38,90,.10);transition:transform .15s,opacity .2s}
+.oH .nav .arw svg{width:36px;height:36px}
+.oH .nav .arw:active{transform:scale(.94)}
+.oH .nav .arw:disabled{opacity:.3;cursor:default;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22)}
+/* แผงรายละเอียด: ห่างการ์ด 24 (padding ล่างแถว 8 + 16) · พื้นมาจากแผ่น SVG · เนื้อหาเปลี่ยนแบบจางเข้า */
+.oH .det{position:relative;z-index:1;margin-top:16px;background:transparent;border-radius:0;transition:opacity .22s}
+.oH .det.swap{opacity:0;transition:none}
+@media (prefers-reduced-motion:reduce){.oH .sheetbg path,.oH .det{transition:none}}
+
+/* ---------- N · แบบ Netflix: แถบหมุน ใบที่โฟกัสอยู่กลาง (ใหญ่) ใบข้างย่อ/จาง · ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว
+   เลื่อนเองทุก 6 วิ · ปัด/แตะใบข้าง/ลูกศรได้ · แตะแล้วหยุดเลื่อนเอง 15 วิ ---------- */
+.oN .stage{position:relative;height:800px;margin:0 calc(var(--gutter) * -1);overflow:hidden;touch-action:pan-y;cursor:grab}
+.oN .slide{position:absolute;left:50%;top:10px;width:700px;margin-left:-350px;display:flex;flex-direction:column;padding:14px;
+  color:var(--ink);border-radius:30px;background:#fff;cursor:pointer;
+  box-shadow:0 0 0 1px rgba(20,38,90,.10),0 2px 4px rgba(20,38,90,.06),0 10px 24px rgba(20,38,90,.10);
+  transition:transform .5s cubic-bezier(.3,.7,.2,1),opacity .5s}
+.oN .stage.drag .slide{transition:none}
+.oN .slide.cur{cursor:default;box-shadow:0 0 0 4px var(--ink),0 10px 28px rgba(20,38,90,.18)}
+.oN .slide .ph{height:190px;border-radius:20px;--lh:64px}
+.oN .slide .ph .ty{font-size:22px;left:14px;top:14px}
+/* หัวการ์ด: ชื่อแผน + เบี้ยรายปี */
+.oN .slide .hdr{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 12px 0}
+.oN .slide .hdr b{font-size:40px;font-weight:700;line-height:1.2}
+.oN .slide .hdr .p{font-size:22px;color:var(--ink-muted);white-space:nowrap;text-align:right}
+.oN .slide .hdr .p strong{font-size:38px;font-weight:700;color:var(--ink);line-height:1.1;margin-right:6px;font-variant-numeric:tabular-nums}   /* เบี้ยกับหน่วยบรรทัดเดียว */
+/* เนื้อการ์ด: บริษัท · ป้ายอายุ · ตัวเลขเด่น 3 ข้อ · เฉลี่ยรายเดือน + ปุ่ม */
+.oN .slide .bd{padding:0 12px 6px}
+.oN .slide .co{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:24px;font-weight:600;color:var(--ink-muted)}
+.oN .slide .co .lg{width:44px;height:44px}
+.oN .slide .co .lg img{inset:7px;width:30px;height:30px}
+.oN .slide .fit{margin-top:12px}
+.oN .slide .ben{margin-top:20px;gap:16px;padding-top:18px;border-top:1px solid rgba(20,38,90,.08)}
+.oN .slide .ben strong{font-size:30px}
+.oN .slide .ben strong em{font-size:20px;margin-left:5px}   /* 30px + หน่วย 20px บรรทัดเดียว · หลักล้านยังพอดีคอลัมน์ ~204 */
+.oN .slide .buy{margin-top:18px}
+.oN .slide .btn{height:80px;padding:0 26px;font-size:26px}
+/* ปุ่มเลื่อน: แถวควบคุมใต้การ์ด [<] จุดบอกตำแหน่ง [>] · ไม่ทับการ์ดข้าง ไม่ชิดขอบจอ · 72px ≈ 27 มม. บนจอ 32" */
+.oN .ctl{display:flex;align-items:center;justify-content:center;gap:28px;margin:6px 0 16px}
+.oN .ctl .arw{position:static;width:72px;height:72px;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22),0 2px 6px rgba(20,38,90,.10);transition:transform .15s}
+.oN .ctl .arw svg{width:36px;height:36px}
+.oN .ctl .arw:active{transform:scale(.94)}
+/* จุดบอกตำแหน่ง · จุดปัจจุบันเป็นแถบยาว มีแถบเวลานับถอยหลังก่อนเลื่อนเอง (หยุดเมื่อผู้ใช้แตะ) */
+.oN .dots{display:flex;justify-content:center;align-items:center;gap:10px}
+.oN .dots i{position:relative;width:14px;height:14px;border-radius:99px;background:rgba(20,38,90,.18);overflow:hidden;transition:width .3s}
+.oN .dots i.cur{width:64px}
+.oN .dots i.cur::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:0 50%;animation:nfbar var(--dur,6s) linear forwards}
+.oN .dots.paused i.cur::after{animation:none;transform:none}
+@keyframes nfbar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.oN .hint{display:flex;justify-content:center;align-items:center;gap:8px;font-size:22px;color:var(--ink-muted)}
+.oN .hint svg{width:24px;height:24px;stroke:var(--ink-muted)}
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <h1>เทียบรูปแบบส่วน "ข้อเสนอแนะนำ" · แนวตั้ง (ปัจจุบัน) · แนวนอน · แบบ Netflix</h1>
+  <p class="sub">ทุกจอใช้แผนแนะนำ 6 แผนชุดเดียวกัน และกดใช้งานได้ · แบบปัจจุบันคือหน้าจริงที่ฝังไว้ · แนวนอนกับแบบ Netflix เป็นจอจำลองไว้เทียบ ยังไม่ได้ลง UI จริง · "ดูขนาดจริง" เพื่อดูขนาดตัวอักษรบนจอ 32 นิ้ว</p>
+</header>
+
+<main class="opts" id="opts"></main>
+
+<script>
+const DATA = {"PLANS_REC":[{"co":"C","tag":"ประกันสุขภาพ","name":"Health Plus","cov":"ค่ารักษาผู้ป่วยใน สูงสุด 500,000 บาท/ปี","pr":"12,000"},{"co":"C","tag":"ประกันสุขภาพ","name":"Health Care Lite","cov":"ค่ารักษาผู้ป่วยใน สูงสุด 200,000 บาท/ปี","pr":"6,500"},{"co":"C","tag":"ประกันชีวิต","name":"Life Protect 20","cov":"ทุนประกัน 1,000,000 บาท ระยะ 20 ปี","pr":"18,000"},{"co":"C","tag":"ประกันสุขภาพ","name":"Health Prime","cov":"ค่ารักษาผู้ป่วยใน สูงสุด 1,000,000 บาท/ปี","pr":"19,500"},{"co":"C","tag":"ประกันอุบัติเหตุ","name":"Accident Care Plus","cov":"ค่ารักษาจากอุบัติเหตุ สูงสุด 50,000 บาท/ครั้ง","pr":"1,200"},{"co":"C","tag":"ประกันโรคร้ายแรง","name":"CI Protect 50","cov":"จ่ายเงินก้อนเมื่อตรวจพบ 50 โรคร้ายแรง","pr":"9,800"}],"COVER":{"Health Plus":[["ค่ารักษาผู้ป่วยใน (IPD)","สูงสุดต่อปี","500,000 บาท"],["ค่าห้องและค่าอาหาร","ต่อวัน สูงสุด 365 วัน","5,000 บาท"],["ค่าผ่าตัดและหัตถการ","","ตามจ่ายจริง"],["ค่ารักษาผู้ป่วยนอกหลังออกจากโรงพยาบาล","ภายใน 30 วัน","จ่ายจริง"]],"Health Care Lite":[["ค่ารักษาผู้ป่วยใน (IPD)","สูงสุดต่อปี","200,000 บาท"],["ค่าห้องและค่าอาหาร","ต่อวัน สูงสุด 180 วัน","2,500 บาท"],["ค่าผ่าตัดและหัตถการ","ต่อครั้ง","50,000 บาท"]],"Life Protect 20":[["ทุนประกันชีวิต","กรณีเสียชีวิตทุกกรณี","1,000,000 บาท"],["ทุพพลภาพถาวรสิ้นเชิง","","1,000,000 บาท"],["ระยะเวลาคุ้มครอง","","20 ปี"],["ระยะเวลาชำระเบี้ย","","10 ปี"]],"Health Prime":[["ค่ารักษาผู้ป่วยใน (IPD)","สูงสุดต่อปี","1,000,000 บาท"],["ค่าห้องและค่าอาหาร","ต่อวัน สูงสุด 365 วัน","8,000 บาท"],["ค่าผ่าตัดและหัตถการ","","ตามจ่ายจริง"],["ค่ารักษาผู้ป่วยนอก (OPD)","ต่อครั้ง","2,000 บาท"]],"Accident Care Plus":[["ค่ารักษาจากอุบัติเหตุ","ต่อครั้ง","50,000 บาท"],["เสียชีวิต / ทุพพลภาพจากอุบัติเหตุ","","300,000 บาท"],["ชดเชยรายได้ระหว่างนอนโรงพยาบาล","ต่อวัน","500 บาท"]],"CI Protect 50":[["ตรวจพบโรคร้ายแรง 50 โรค","จ่ายเงินก้อนครั้งเดียว","1,500,000 บาท"],["ตรวจพบโรคร้ายแรงระยะเริ่มต้น","","375,000 บาท"],["ยกเว้นเบี้ยเมื่อตรวจพบโรค","","คุ้มครองต่อโดยไม่ต้องจ่ายเบี้ย"]],"Cancer Care":[["ตรวจพบมะเร็งระยะเริ่มต้น","จ่ายครั้งเดียว","250,000 บาท"],["ตรวจพบมะเร็งระยะลุกลาม","จ่ายครั้งเดียว","1,000,000 บาท"],["ค่ายาเคมีบำบัด / รังสีรักษา","","ตามจ่ายจริง"]],"Accident Shield":[["ค่ารักษาจากอุบัติเหตุ","ต่อครั้ง","100,000 บาท"],["เสียชีวิต / ทุพพลภาพจากอุบัติเหตุ","","500,000 บาท"],["ชดเชยรายได้ระหว่างนอนโรงพยาบาล","ต่อวัน","1,000 บาท"]],"Critical Illness 30":[["ตรวจพบโรคร้ายแรง 30 โรค","จ่ายเงินก้อนครั้งเดียว","1,000,000 บาท"],["ตรวจพบโรคร้ายแรงระยะเริ่มต้น","","250,000 บาท"],["ยกเว้นเบี้ยหลังตรวจพบ","","มี"]],"Saving Life 15":[["ทุนประกันชีวิต","","300,000 บาท"],["เงินคืนระหว่างสัญญา","ทุก 3 ปี","2% ของทุน"],["เงินครบกำหนดสัญญา","ปีที่ 15","120% ของทุน"],["ลดหย่อนภาษี","ตามที่กฎหมายกำหนด","สูงสุด 100,000 บาท"]],"OPD Care":[["ค่ารักษาผู้ป่วยนอก (OPD)","ต่อครั้ง","1,500 บาท"],["จำนวนครั้งที่คุ้มครอง","ต่อปี","30 ครั้ง"],["ค่ายาและเวชภัณฑ์","","รวมในวงเงินต่อครั้ง"]],"Senior Health 60+":[["ค่ารักษาผู้ป่วยใน (IPD)","สูงสุดต่อปี","300,000 บาท"],["ค่าห้องและค่าอาหาร","ต่อวัน","3,000 บาท"],["ตรวจสุขภาพประจำปี","","1 ครั้ง/ปี"]],"Life Care 99":[["ทุนประกันชีวิต","คุ้มครองถึงอายุ 99 ปี","500,000 บาท"],["เงินครบกำหนดสัญญา","เมื่ออายุ 99 ปี","500,000 บาท"],["ระยะเวลาชำระเบี้ย","","20 ปี"]],"Family Health":[["ค่ารักษาผู้ป่วยใน (IPD)","ต่อคน ต่อปี","300,000 บาท"],["จำนวนสมาชิกที่คุ้มครอง","","สูงสุด 4 คน"],["ค่าห้องและค่าอาหาร","ต่อวัน","3,000 บาท"],["ค่ารักษาผู้ป่วยนอก (OPD)","ต่อครั้ง","1,000 บาท"]]},"TERMS":{"ประกันสุขภาพ":{"age":"แรกเกิด 15 วัน – 70 ปี","term":"1 ปี ต่ออายุได้ถึง 99 ปี","wait":"30 วัน (โรคทั่วไป) · 120 วัน (โรคเฉพาะ)","pay":"รายปี / รายเดือน","ex":["โรคหรืออาการที่เป็นมาก่อนทำประกัน (ต้องแถลงสุขภาพ)","การรักษาเพื่อความงามหรือศัลยกรรมตกแต่ง","การตั้งครรภ์ การคลอดบุตร และภาวะแทรกซ้อน","การบาดเจ็บจากการใช้สารเสพติดหรือแอลกอฮอล์"]},"ประกันชีวิต":{"age":"1 เดือน – 65 ปี","term":"ตามระยะของแบบประกัน","wait":"ไม่มี (คุ้มครองทันทีเมื่ออนุมัติ)","pay":"รายปี / ราย 6 เดือน","ex":["การฆ่าตัวตายภายใน 1 ปีแรกนับจากวันเริ่มสัญญา","การถูกฆาตกรรมโดยผู้รับประโยชน์","การปกปิดข้อมูลสุขภาพที่ควรแถลง"]},"ประกันอุบัติเหตุ":{"age":"6 – 70 ปี","term":"1 ปี ต่ออายุได้","wait":"ไม่มี (คุ้มครองทันที)","pay":"รายปี","ex":["การบาดเจ็บขณะเล่นกีฬาอันตราย เช่น ดำน้ำลึก กระโดดร่ม","การบาดเจ็บขณะเมาสุราหรือใช้สารเสพติด","สงคราม การจลาจล การก่อการร้าย"]},"ประกันโรคร้ายแรง":{"age":"15 วัน – 65 ปี","term":"1 ปี ต่ออายุได้ถึง 85 ปี","wait":"90 วัน นับจากวันเริ่มสัญญา","pay":"รายปี","ex":["โรคร้ายแรงที่ตรวจพบภายในระยะเวลารอคอย","โรคที่เป็นมาก่อนทำประกัน","การติดเชื้อ HIV หรือโรคเอดส์"]}}};
+const IC = {
+  check:'<path d="M4 12.5 9 17.5 20 6.5"/>',
+  chevL:'<path d="m14.5 5.5-6.5 6.5 6.5 6.5"/>', chevR:'<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>',
+  hand:'<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>',
+  user:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/>',
+  bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  cross:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  steth:'<path d="M11 2v2M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
+  heart:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/>',
+  pulse:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/><path d="M3.2 12h6.3l.5-1 2 4.5 2-7 1.5 3.5h5.3"/>',
+  shield:'<path d="M12 3 5 6v5.5c0 4.3 2.9 8.2 7 9.5 4.1-1.3 7-5.2 7-9.5V6l-7-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  bandage:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 6v12M18 6v12M10 10h.01M14 10h.01M10 14h.01M14 14h.01"/>',
+};
+const svg = (k, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
+const TINT = {'ประกันสุขภาพ':['#DCEBFB','#0D5BC6'], 'ประกันชีวิต':['#FDF0D9','#B45309'], 'ประกันอุบัติเหตุ':['#FBE6E1','#C2410C'], 'ประกันโรคร้ายแรง':['#FBE3EC','#BE185D']};
+const BEN_IC = [[/ผู้ป่วยใน/,'bed'],[/ห้อง/,'home'],[/ผ่าตัด|หัตถการ/,'cross'],[/ผู้ป่วยนอก/,'steth'],[/มะเร็ง|โรคร้ายแรง/,'pulse'],
+  [/อุบัติเหตุ/,'bandage'],[/ทุพพลภาพ/,'shield'],[/ชีวิต|เสียชีวิต/,'heart'],[/เงินคืน|ครบกำหนด|เบี้ย|รายได้/,'wallet'],[/ระยะเวลา/,'cal']];
+const fitOf = t => { const T = DATA.TERMS[t] || {}, out = [];
+  const age = (T.age || '').match(/(\d+)\s*ปี\s*$/); if (age) out.push(`สมัครได้ถึงอายุ ${age[1]} ปี`);
+  const rn = (T.term || '').match(/ต่ออายุได้ถึง (\d+) ปี/);
+  if (rn) out.push(`ต่ออายุได้ถึง ${rn[1]} ปี`); else { const w = (T.wait || '').match(/^ไม่มี \((.*)\)/); if (w) out.push(w[1]); }
+  return out; };
+const P = DATA.PLANS_REC.map(p => ({...p, tint: TINT[p.tag][0], deep: TINT[p.tag][1], fit: fitOf(p.tag),
+  rows: (DATA.COVER[p.name] || []).slice(0, 3).map(([k, sub, v]) => { const m = v.match(/^([\d,]+)\s*(.*)$/);
+    return {k, sub, v, ic: (BEN_IC.find(([re]) => re.test(k)) || [, 'shield'])[1], num: m && m[1], unit: m && m[2]}; })}));
+const BRAND = '#D31145';   /* AIA · สีหลักจากโลโก้ (INSURERS[].br ใน insurance.html) */
+const vars = p => `--tint:${p.tint};--deep:${p.deep};--brand:${BRAND}`;
+const perMonth = p => Math.round(parseInt(String(p.pr).replace(/,/g, ''), 10) / 12).toLocaleString('en-US');
+const price = p => p.pend ? `<span class="wt">${svg('clock', 2)}รอผลพิจารณา</span>` : `<strong>${p.pr}</strong>บาท/ปี`;
+const ph = (p, h) => `<span class="ph"${h ? ` style="height:${h}px"` : ''}><img class="brand" src="ins_logo_c.png" alt="AIA"><span class="ty">${p.tag}</span></span>`;
+const detail = p => `
+  <h3>บริษัท เอไอเอ จำกัด</h3>
+  ${p.fit.length ? `<div class="fit">${p.fit.map(f => `<span>${svg('check', 2.8)}${f}</span>`).join('')}</div>` : ''}
+  <div class="ben">${p.rows.map(r => `<div><i>${svg(r.ic)}</i>${r.num ? `<strong>${r.num}${r.unit ? `<em>${r.unit}</em>` : ''}</strong>`
+    : `<strong class="t">${r.v}</strong>`}<span>${r.k}</span>${r.sub ? `<small>${r.sub}</small>` : ''}</div>`).join('')}</div>
+  <div class="buy"><span class="mo">${p.pend ? 'รอผลพิจารณา' : `<small>เฉลี่ย</small><span><b>${perMonth(p)}</b>บาท/เดือน</span>`}</span>
+    <button class="btn sec">ดูรายละเอียด</button>${p.pend ? '' : '<button class="btn pri">สนใจแผนนี้</button>'}</div>`;
+
+const WHO = `<div class="who">
+  <div class="id"><span class="av">${svg('user', 1.8)}</span><div><div class="nm">ฐากูร ทดสอบ</div><div class="hn">HN 000890314</div></div></div>
+  <div class="kv"><div><span>เลขบัตรประชาชน</span><b>X-XXXX-XXXXX-12-3</b></div><div><span>อายุ</span><b>26 ปี 5 เดือน 13 วัน</b></div></div>
+  <div class="kv rgt"><div><span>สิทธิการรักษา</span><b>สิทธิหลักประกันสุขภาพแห่งชาติ (UC)</b></div></div></div>`;
+const screen = inner => `<div class="pp">
+  <img class="banner" src="hdr_banlat.png" alt=""><div class="bannerFade"></div><div class="veil"></div>${WHO}
+  <div class="scroll"><div class="stack">${inner}
+    <section class="more"><div class="hd"><h2>ข้อเสนออื่น</h2><p>แตะเพื่อดูรายละเอียด</p></div></section></div></div>
+  <div class="foot"><button class="cancel">ไม่สนใจ, พิมพ์บัตรคิว</button></div></div>`;
+
+/* ---------- H · แนวนอน ---------- */
+/* path รวม "การ์ดที่เลือก (ด้านบน) + แผง (ด้านล่าง)" พิกัดภายใน .wrap · คำสั่งชุดเดียวกันเสมอ (มุมที่ไม่ใช้ = รัศมี 0) ให้ transition ของ d ลื่น
+   แผง (x0..x1, y0..y1) · การ์ด (tx0..tx1, ty0..y0) · การ์ดชิดขอบแผง → มุมฝั่งนั้นเป็น 0 = เส้นตรง */
+function tabPathH(x0, x1, y0, y1, tx0, tx1, ty0){
+  const R = 24, F = 24, n = v => Math.round(v * 10) / 10;
+  const w = Math.max(0, tx1 - tx0), rt = Math.min(R, w / 2), dl = Math.max(0, tx0 - x0), dr = Math.max(0, x1 - tx1);
+  const fL = Math.min(F, dl / 2), rL = Math.min(R, dl / 2), fR = Math.min(F, dr / 2), rR = Math.min(R, dr / 2);
+  return `M${n(tx0+rt)} ${n(ty0)}H${n(tx1-rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx1)} ${n(ty0+rt)}V${n(y0-fR)}A${n(fR)} ${n(fR)} 0 0 0 ${n(tx1+fR)} ${n(y0)}`
+    + `H${n(x1-rR)}A${n(rR)} ${n(rR)} 0 0 1 ${n(x1)} ${n(y0+rR)}V${n(y1-R)}A${R} ${R} 0 0 1 ${n(x1-R)} ${n(y1)}H${n(x0+R)}A${R} ${R} 0 0 1 ${n(x0)} ${n(y1-R)}`
+    + `V${n(y0+rL)}A${n(rL)} ${n(rL)} 0 0 1 ${n(x0+rL)} ${n(y0)}H${n(tx0-fL)}A${n(fL)} ${n(fL)} 0 0 0 ${n(tx0)} ${n(y0-fL)}V${n(ty0+rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx0+rt)} ${n(ty0)}Z`;
+}
+const cardH = (q, i, on) => `<button class="card${on ? ' on' : ''}" data-i="${i}" aria-pressed="${on}" style="${vars(q)}">
+  <span class="ph"><img class="brand" src="ins_logo_c.png" alt="AIA"><span class="ty">${q.tag}</span><span class="ck">${svg('check', 3)}</span></span>
+  <span class="cap"><b>${q.name}</b><span class="p">${price(q)}</span></span></button>`;
+function mountH(frame){
+  let cur = 0, prog = false, progT = null, target = 0;
+  frame.innerHTML = screen(`<section class="rec oH">
+    <div class="hd hdH"><h2>ข้อเสนอแนะนำ</h2>
+      <div class="nav"><span class="cnt"></span><button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button><button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
+      <p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แตะแผนเพื่อดูรายละเอียด</p></div>
+    <div class="wrap">
+      <svg class="sheetbg" aria-hidden="true"><path/></svg>
+      <div class="rowbox">
+        <div class="strip">${P.map((q, i) => cardH(q, i, i === cur)).join('')}</div>
+        <span class="fadeR"></span>
+      </div>
+      <div class="det" aria-live="polite"></div>
+    </div></section>`);
+  const wrap = frame.querySelector('.wrap'), row = frame.querySelector('.rowbox'), strip = frame.querySelector('.strip'), det = frame.querySelector('.det');
+  const path = frame.querySelector('.sheetbg path'), cards = [...strip.children];
+  const prev = frame.querySelector('.prev'), next = frame.querySelector('.next'), fade = frame.querySelector('.fadeR');
+  const fill = () => { det.setAttribute('style', vars(P[cur])); det.innerHTML = detail(P[cur]); };
+  /* วาดแผ่น: ตำแหน่งการ์ดคิดจาก scrollLeft ที่ให้มา (ระหว่างเลื่อนอัตโนมัติใช้ค่าปลายทาง) · ส่วนที่เลื่อนพ้นแถวถูกตัดออก */
+  const sync = (animate, sl = strip.scrollLeft) => {
+    const c = cards[cur], x0 = 0, x1 = wrap.clientWidth, y0 = det.offsetTop, y1 = y0 + det.offsetHeight;
+    const cx = row.offsetLeft + strip.offsetLeft + c.offsetLeft - sl, clamp = v => Math.max(x0, Math.min(x1, v));
+    const d = `path("${tabPathH(x0, x1, y0, y1, clamp(cx), clamp(cx + c.offsetWidth), row.offsetTop + strip.offsetTop + c.offsetTop)}")`;
+    if (!animate) path.style.transition = 'none';
+    path.style.d = d;
+    if (!animate){ void path.getBoundingClientRect(); path.style.transition = ''; }
+  };
+  const cnt = frame.querySelector('.cnt');
+  const arrows = () => { const max = strip.scrollWidth - strip.clientWidth, sl = strip.scrollLeft, st = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+    prev.disabled = sl < 8; next.disabled = sl > max - 8; fade.hidden = next.disabled;
+    const per = Math.max(1, Math.floor((strip.clientWidth + 24) / st)), a = sl > max - 8 ? Math.max(1, P.length - per + 1) : Math.round(sl / st) + 1;
+    cnt.innerHTML = P.length > per ? `แผนที่ <b>${a}–${Math.min(P.length, a + per - 1)}</b> จาก ${P.length}` : '';
+    prev.parentElement.querySelectorAll('.arw').forEach(b => b.hidden = P.length <= per); };   /* แผนพอดีจอ = ไม่ต้องมีปุ่ม */
+  strip.addEventListener('scroll', () => { arrows(); if (!prog) sync(false); });
+  /* ตำแหน่งเลื่อนที่ทำให้เห็นการ์ดทั้งใบ (เลือกจากจุด snap = ขอบซ้ายการ์ด) · เห็นครบอยู่แล้ว = ไม่เลื่อน */
+  const scrollFor = c => { const sl = strip.scrollLeft, cw = strip.clientWidth, max = strip.scrollWidth - cw, L = c.offsetLeft, R = L + c.offsetWidth;
+    if (L >= sl - 1 && R <= sl + cw + 1) return sl;
+    const snaps = [...new Set(cards.map(k => Math.min(k.offsetLeft, max)))].filter(s => L >= s - 1 && R <= s + cw + 1);
+    return snaps.length ? snaps.reduce((a, b) => Math.abs(b - sl) < Math.abs(a - sl) ? b : a) : Math.min(L, max); };
+  const select = i => {
+    if (i === cur) return;
+    cur = i;
+    cards.forEach((c, k) => { c.classList.toggle('on', k === i); c.setAttribute('aria-pressed', k === i); });
+    det.classList.add('swap'); fill(); void det.offsetWidth; det.classList.remove('swap');
+    target = scrollFor(cards[i]);
+    if (Math.abs(target - strip.scrollLeft) > 1){
+      prog = true; strip.scrollTo({left: target, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+      clearTimeout(progT); progT = setTimeout(() => { prog = false; sync(false); }, 650);
+    }
+    sync(true, target);
+  };
+  const step = () => cards[1].offsetLeft - cards[0].offsetLeft;
+  prev.onclick = () => strip.scrollBy({left: -step(), behavior: 'smooth'});
+  next.onclick = () => strip.scrollBy({left: step(), behavior: 'smooth'});
+  /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) · ลากเกิน 6px = ไม่นับเป็นการแตะเลือก */
+  let x0 = null, s0 = 0, moved = false;
+  const sc = () => parseFloat(getComputedStyle(frame).getPropertyValue('--s')) || 1;
+  strip.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; x0 = e.clientX; s0 = strip.scrollLeft; moved = false; });
+  strip.addEventListener('pointermove', e => { if (x0 === null) return; const dx = (e.clientX - x0) / sc();
+    if (!moved && Math.abs(dx) > 6){ moved = true; strip.style.scrollSnapType = 'none'; } if (moved) strip.scrollLeft = s0 - dx; });
+  addEventListener('pointerup', () => { if (x0 === null) return; x0 = null;
+    if (moved){ const sl = strip.scrollLeft; strip.style.scrollSnapType = ''; strip.scrollLeft = sl; } });
+  strip.addEventListener('click', e => { if (moved){ e.stopPropagation(); moved = false; return; } const c = e.target.closest('[data-i]'); if (c) select(+c.dataset.i); }, true);
+  /* ขนาดเปลี่ยน (ฟอนต์โหลดเสร็จ · เนื้อหาแผงเปลี่ยน) → วาดใหม่ */
+  new ResizeObserver(() => sync(true, prog ? target : strip.scrollLeft)).observe(det);
+  fill(); arrows(); sync(false);
+  if (document.fonts) document.fonts.ready.then(() => sync(false));
+}
+
+/* ---------- N · แบบ Netflix ---------- */
+/* การ์ดใบเดียวครบทุกข้อมูล: ภาพ · ชื่อแผน/เบี้ย · บริษัท · ป้ายอายุ · ตัวเลขเด่น · เฉลี่ยรายเดือน + ปุ่ม */
+const slideCard = (p, i) => `<div class="slide" data-i="${i}" role="group" aria-label="${p.name}" style="${vars(p)}">${ph(p, 190)}
+  <div class="hdr"><b>${p.name}</b><span class="p">${p.pend ? `<span class="wt">${svg('clock', 2)}รอผลพิจารณา</span>` : `<strong>${p.pr}</strong>บาท/ปี`}</span></div>
+  <div class="bd">
+    <div class="co">บริษัท เอไอเอ จำกัด</div>
+    ${p.fit.length ? `<div class="fit">${p.fit.map(f => `<span>${svg('check', 2.8)}${f}</span>`).join('')}</div>` : ''}
+    <div class="ben">${p.rows.map(r => `<div><i>${svg(r.ic)}</i>${r.num ? `<strong>${r.num}${r.unit ? `<em>${r.unit}</em>` : ''}</strong>`
+      : `<strong class="t">${r.v}</strong>`}<span>${r.k}</span>${r.sub ? `<small>${r.sub}</small>` : ''}</div>`).join('')}</div>
+    <div class="buy"><span class="mo">${p.pend ? 'รอผลพิจารณา' : `<small>เฉลี่ย</small><span><b>${perMonth(p)}</b>บาท/เดือน</span>`}</span>
+      <button class="btn sec">ดูรายละเอียด</button>${p.pend ? '' : '<button class="btn pri">สนใจแผนนี้</button>'}</div>
+  </div></div>`;
+function mountN(frame){
+  const DUR = 6000;   /* เลื่อนเองทุก 6 วิ เฉพาะก่อนผู้ใช้แตะครั้งแรก (ดึงความสนใจ) · แตะ/ปัด/กดปุ่มครั้งแรก = หยุดเลื่อนเองถาวร ไม่เปลี่ยนการ์ดขณะกำลังอ่าน */
+  let cur = 0, timer = null, paused = false;
+  frame.innerHTML = screen(`<section class="rec oN">
+    <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แผนจะเลื่อนให้ดูเอง แตะหรือปัดเพื่อเลือก</p></div>
+    <div class="stage">${P.map(slideCard).join('')}
+      </div>
+    <div class="ctl"><button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button>
+      <div class="dots">${P.map(() => '<i></i>').join('')}</div>
+      <button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
+    <div class="hint">${svg('hand', 1.8)}ปัดซ้าย-ขวา หรือแตะการ์ดข้างๆ</div></section>`);
+  const stage = frame.querySelector('.stage'), slides = [...stage.querySelectorAll('.slide')], dots = frame.querySelector('.dots');
+  const n = P.length, GAP = 650;   /* ใบข้างโผล่ราว 200px ต่อข้าง */
+  const wrap = k => ((k % n) + n) % n;
+  const layout = (dx = 0) => slides.forEach((el, i) => {
+    let k = wrap(i - cur); if (k > n / 2) k -= n;                       /* ระยะจากใบกลาง แบบวนรอบ */
+    const a = Math.abs(k);
+    el.style.transform = `translateX(${k * GAP + dx}px) scale(${a === 0 ? 1 : .86})`;
+    el.style.opacity = a === 0 ? 1 : a === 1 ? .5 : 0;
+    el.style.zIndex = 10 - a; el.classList.toggle('cur', a === 0);
+    el.style.pointerEvents = a > 1 ? 'none' : '';
+    el.querySelectorAll('button').forEach(b => b.tabIndex = a === 0 ? 0 : -1);   /* ปุ่มกดได้เฉพาะใบกลาง */
+  });
+  const dotsPaint = () => { [...dots.children].forEach((d, i) => d.classList.toggle('cur', i === cur));
+    dots.style.setProperty('--dur', DUR + 'ms'); const c = dots.children[cur]; c.classList.remove('cur'); void c.offsetWidth; c.classList.add('cur'); };
+  const go = k => { cur = wrap(k); layout(); dotsPaint(); };
+  const tick = () => { clearTimeout(timer); if (!paused) timer = setTimeout(() => { go(cur + 1); tick(); }, DUR); };
+  const userAct = () => { paused = true; dots.classList.add('paused'); clearTimeout(timer); };
+  frame.querySelector('.prev').onclick = e => { e.stopPropagation(); userAct(); go(cur - 1); };
+  frame.querySelector('.next').onclick = e => { e.stopPropagation(); userAct(); go(cur + 1); };
+  /* ปัด/ลาก: เลื่อนตามนิ้ว ปล่อยแล้วเกิน 80px = ไปใบถัดไป/ก่อนหน้า · แตะใบข้าง = เลื่อนใบนั้นมากลาง · แตะใบกลาง = หยุดเลื่อนเอง (กำลังอ่าน) */
+  let x0 = null, dx = 0;
+  const sc = () => parseFloat(getComputedStyle(frame).getPropertyValue('--s')) || 1;
+  stage.addEventListener('pointerdown', e => { if (e.target.closest('.arw')) return; x0 = e.clientX; dx = 0; stage.classList.add('drag'); });
+  stage.addEventListener('pointermove', e => { if (x0 === null) return; dx = (e.clientX - x0) / sc(); if (Math.abs(dx) > 8) layout(dx); });
+  addEventListener('pointerup', e => { if (x0 === null) return; stage.classList.remove('drag'); x0 = null; userAct();
+    if (Math.abs(dx) > 80) go(cur + (dx < 0 ? 1 : -1));
+    else { const s = e.target.closest && e.target.closest('.slide'); if (s && Math.abs(dx) < 8 && +s.dataset.i !== cur) go(+s.dataset.i); else layout(); } });
+  /* ครั้งแรก: วางการ์ดเข้าที่ทันที (ไม่เลื่อนเข้ามา) */
+  stage.classList.add('drag'); layout(); void stage.offsetWidth; stage.classList.remove('drag');
+  dotsPaint(); tick();
+}
+
+/* ---------- ประกอบหน้า ---------- */
+const OPTS = [
+  {k:'ตอนนี้', title:'แนวตั้ง (แบบปัจจุบัน · หน้าจริง)', iframe:'insurance.html?s=select&idle=86400&mute=1',
+   idea:'การ์ดเรียงลงด้านซ้าย แผงรายละเอียดด้านขวาต่อเป็นแผ่นเดียวกับการ์ดที่เลือก แผงเลื่อนตามการ์ดที่เลือก',
+   yes:['เห็นราคาหลายแผนพร้อมกันในแนวตั้ง','แผ่นต่อกันชัดว่ารายละเอียดเป็นของแผนไหน'], no:['แผนเยอะ คอลัมน์ซ้ายยาว ต้องเลื่อนลง','ภาพการ์ดเล็ก (กว้าง 316)']},
+  {k:'H', title:'แนวนอน', mount: mountH,
+   idea:'การ์ดเรียงเป็นแถวแนวนอนด้านบน ปัดซ้าย-ขวาหรือกดลูกศรดูแผนอื่น การ์ดที่เลือกยื่นลงไปต่อกับแผ่นรายละเอียดเต็มกว้างด้านล่าง',
+   yes:['แผนเพิ่มกี่ตัว ความสูงหน้าจอเท่าเดิม ไม่ดัน "ข้อเสนออื่น" ลงไป','แผ่นรายละเอียดกว้างเต็ม แสดงตัวเลขเด่น 3 ข้อได้ใหญ่'],
+   no:['เห็นทีละ 3 แผนเศษ แผนที่เหลือต้องปัด (ใส่ลูกศร + ขอบจางช่วยบอก)','ชื่อแผนยาวต้องตัด "…" ในการ์ดแคบ']},
+  {k:'N', title:'แบบ Netflix (แถบหมุน โฟกัสกลาง)', mount: mountN,
+   idea:'ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว ใบที่โฟกัสอยู่กลาง ใบข้างย่อและจาง ก่อนผู้ใช้แตะ การ์ดจะเลื่อนเองทุก 6 วินาที (แถบใต้การ์ดนับถอยหลัง) พอแตะ ปัด หรือกดปุ่มครั้งแรก จะหยุดเลื่อนเองถาวร ปุ่มเลื่อนอยู่แถวควบคุมใต้การ์ด คู่กับจุดบอกตำแหน่ง',
+   yes:['ทุกอย่างของแผนอยู่ในการ์ดเดียว ไม่ต้องมองสลับสองที่','การ์ดใหญ่ที่สุด ดึงความสนใจ · แผนเพิ่มกี่ตัวก็ได้ แถบวนรอบ','เลือกแผนได้ 3 ทาง: แตะใบข้าง · ปัด · ปุ่ม [<] [>] ใต้การ์ด'],
+   no:['เห็นราคาทีละแผน เทียบหลายแผนยากกว่า','ก่อนแตะครั้งแรก การ์ดเปลี่ยนเอง คนที่ยืนอ่านเฉยๆ อาจอ่านไม่ทัน']},
+];
+const full = new URLSearchParams(location.search).get('full'), box = document.getElementById('opts');
+OPTS.filter(o => !full || o.k === full).forEach(o => {
+  const el = document.createElement('section'); el.className = 'opt';
+  el.innerHTML = `<h2><span class="k">${o.k}</span>${o.title}</h2><div class="frame"></div>
+    <a class="full" target="_blank" href="${o.iframe ? o.iframe : `?full=${o.k}`}">ดูขนาดจริง ↗</a>
+    <div class="why"><p>${o.idea}</p><ul>${o.yes.map(x => `<li class="y">${x}</li>`).join('')}${o.no.map(x => `<li class="n">${x}</li>`).join('')}</ul></div>`;
+  box.appendChild(el);
+  const frame = el.querySelector('.frame');
+  if (o.iframe) frame.innerHTML = `<iframe src="${o.iframe}" title="${o.title}"></iframe>`; else o.mount(frame);
+});
+if (full){
+  document.body.classList.add('fullmode');
+  const fitFull = () => document.querySelectorAll('.frame').forEach(fr => fr.style.setProperty('--s', Math.min(innerHeight / 1920, innerWidth / 1080)));
+  addEventListener('resize', fitFull); fitFull();
+}
+</script>
+</body>
+</html>
