@@ -400,6 +400,13 @@ body.bleed{padding:0;overflow:hidden}
 body.bleed .screen{border-radius:0;box-shadow:none}
 
 
+/* แจ้งผลตอนกลับหน้าแรก (ยกเลิก / หมดเวลา) · ป้ายกรมท่าใต้แบนเนอร์ หายเองใน 4 วิ
+   สไตล์นี้หายไปตอน commit 8fa68b4 ทำให้ข้อความแสดงเป็นตัวเล็กไม่มีสไตล์ซ่อนอยู่หลังการ์ดเสียบบัตร — ดึงกลับจาก 58fdb68 */
+.bye{position:absolute;left:50%;top:296px;z-index:8;transform:translateX(-50%);display:flex;align-items:center;gap:16px;white-space:nowrap;
+  padding:22px 40px 22px 32px;border-radius:99px;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);color:#fff;
+  font-size:30px;font-weight:600;box-shadow:0 16px 40px rgba(20,38,90,.3);animation:byeIn .35s cubic-bezier(.2,.8,.2,1)}
+.bye svg{width:36px;height:36px;stroke:#fff;flex:none}
+@keyframes byeIn{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
