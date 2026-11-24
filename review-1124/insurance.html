@@ -257,7 +257,7 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
    แถวการ์ดด้านบน ปัดซ้าย-ขวาได้ (ระบบจริงแสดงทุกแผนที่ผู้ป่วยเข้าเกณฑ์ จำนวนไม่แน่นอน) · แผงรายละเอียดเต็มกว้างด้านล่าง
    การ์ดที่เลือก + แผง = แผ่นขาวผืนเดียว วาดเป็นรูปทรงเดียวด้วย SVG (.sheetbg) อยู่ด้านหลัง · ขอบนอกมุมโค้ง 24 · รอยต่อมุมเว้า 24
    แตะเปลี่ยนแผน = รูปทรงค่อยๆ เลื่อนไปหาการ์ดใหม่ · ปัดแถว = รูปทรงเลื่อนตามการ์ดที่เลือก
-   ก่อนผู้ใช้แตะ เลือกใบถัดไปเองทุก 5 วิ ให้รู้ว่าปัดได้/แตะเลือกได้ · แตะ ปัด หรือเลื่อนครั้งแรก = หยุดเลื่อนเองถาวร
+   ก่อนผู้ใช้เลือก เลือกใบถัดไปเอง (ครั้งแรก 3 วิ แล้วทุก 5 วิ) ให้รู้ว่าปัดได้/แตะเลือกได้ · แตะการ์ด/กดปุ่ม/ปัดแถว = หยุดถาวร (เลื่อนหน้าขึ้น-ลงไม่นับ)
    ผู้ซื้อหลักอายุ 35–60 ปี: เนื้อหา ≥ 22px ตัวเลขสำคัญ ≥ 28px · การ์ดกว้าง 272 เห็น 3 ใบ + ใบที่ 4 โผล่ (บอกว่ามีต่อ) · ห่างกัน 24 กันแตะพลาด
    ระยะห่าง: หัวข้อ→แถว 28 · การ์ด→แผง 24 · ในแผง ขอบ 28/36 · ส่วนนี้→"ข้อเสนออื่น" 64 · ระยะบรรทัดข้อความไทย ≥ 1.35–1.4 */
 .pp .rec{position:relative;padding:0 var(--gutter) 16px}   /* ล่าง 16 + .more บน 48 = ห่างหัวข้อ "ข้อเสนออื่น" 64 */
@@ -867,7 +867,7 @@ const planCard = p => `
    ภาพปกการ์ด = พื้นสีแบรนด์ + โลโก้บริษัท · TAG_TINT = สีตามประเภทประกัน [พื้นป้าย, สีตัวอักษรประเภท] */
 const TAG_TINT = {'ประกันสุขภาพ':['#DCEBFB','#0D5BC6'], 'ประกันชีวิต':['#FDF0D9','#B45309'], 'ประกันอุบัติเหตุ':['#FBE6E1','#C2410C'], 'ประกันโรคร้ายแรง':['#FBE3EC','#BE185D']};
 let REC_SEL = null;    /* ชื่อแผนแนะนำที่เปิดดูอยู่ · ค่าเริ่มต้น = แผนแรก · กดย้อนกลับจากหน้ารายละเอียดแล้วยังอยู่ที่แผนเดิม */
-let REC_AUTO = true;   /* เลื่อนเองจนกว่าผู้ใช้แตะครั้งแรก · แตะแล้วไม่กลับมาเลื่อนเองอีก (รวมตอนกดย้อนกลับมาหน้านี้) */
+let REC_AUTO = true;   /* เลื่อนเองจนกว่าผู้ใช้เลือกเอง (แตะการ์ด/ปุ่ม หรือปัดแถว) · เลือกแล้วไม่กลับมาเลื่อนเองอีก (รวมตอนกดย้อนกลับมาหน้านี้) */
 const curRec = () => PLANS_REC.find(p => p.name === REC_SEL) || PLANS_REC[0];
 /* ป้ายเรื่องที่คนวัย 35–60 ห่วง: สมัครได้ถึงอายุเท่าไร · ต่ออายุได้ถึงเมื่อไร (หรือคุ้มครองทันที) — ดึงจาก TERMS ตามประเภทแผน */
 const fitOf = tag => { const T = TERMS[tag] || {}, out = [];
@@ -922,7 +922,7 @@ function mountRec(wrap, bindGo){
     if (!animate){ void path.getBoundingClientRect(); path.style.transition = ''; }
   };
   const edge = () => { fade.hidden = strip.scrollLeft > strip.scrollWidth - strip.clientWidth - 8; };   /* ขอบขวาจาง = ยังมีแผนต่อ */
-  strip.addEventListener('scroll', () => { edge(); if (!prog) sync(false); });
+  strip.addEventListener('scroll', () => { edge(); if (!prog){ if (touching) stopAuto(); sync(false); } });
   /* ตำแหน่งเลื่อนที่ทำให้เห็นการ์ดทั้งใบ (เลือกจากจุด snap = ขอบซ้ายการ์ด) · เห็นครบอยู่แล้ว = ไม่เลื่อน */
   const scrollFor = c => { const sl = strip.scrollLeft, cw = strip.clientWidth, max = strip.scrollWidth - cw, L = c.offsetLeft, R = L + c.offsetWidth;
     if (L >= sl - 1 && R <= sl + cw + 1) return sl;
@@ -941,20 +941,26 @@ function mountRec(wrap, bindGo){
     }
     sync(true, target);
   };
-  /* เลื่อนเองเมื่อยังไม่มีคนแตะ: ทุก 5 วิ เลือกใบถัดไป (ใบสุดท้ายวนกลับใบแรก) · แตะ/ปัด/เลื่อนครั้งแรก = หยุดถาวร */
-  const AUTO = 5000;
+  /* เลื่อนเองเมื่อยังไม่มีคนเลือก: ครั้งแรกหลัง 3 วิ แล้วทุก 5 วิ เลือกใบถัดไป (ใบสุดท้ายวนกลับใบแรก)
+     หยุดถาวรเมื่อผู้ใช้ตั้งใจเลือก: แตะการ์ด/กดปุ่มในส่วนนี้ หรือปัด/ลากแถวการ์ดซ้าย-ขวา
+     การเลื่อนหน้าขึ้น-ลง (นิ้วลากแนวตั้ง · ล้อเมาส์) ไม่นับ — เดิมนับด้วย ทำให้แค่เลื่อนหน้าผ่านก็หยุดเลื่อนเองถาวร */
+  const AUTO_FIRST = 3000, AUTO = 5000;
   const stopAuto = () => { REC_AUTO = false; clearTimeout(window._recAutoT); };
-  const autoNext = () => { clearTimeout(window._recAutoT);
-    if (REC_AUTO && !reduce && PLANS_REC.length > 1) window._recAutoT = setTimeout(() => { if (!REC_AUTO || !wrap.isConnected) return; select((cur + 1) % PLANS_REC.length); autoNext(); }, AUTO); };
+  const autoNext = (ms = AUTO) => { clearTimeout(window._recAutoT);
+    if (REC_AUTO && !reduce && PLANS_REC.length > 1) window._recAutoT = setTimeout(() => { if (!REC_AUTO || !wrap.isConnected) return; select((cur + 1) % PLANS_REC.length); autoNext(); }, ms); };
   const sec = wrap.closest('.rec');
-  sec.addEventListener('pointerdown', stopAuto, true);
-  sec.addEventListener('wheel', stopAuto, {capture: true, passive: true});
+  sec.addEventListener('click', stopAuto, true);                                   /* แตะการ์ด · กดปุ่ม */
+  strip.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) stopAuto(); }, {passive: true});   /* เลื่อนแนวนอน (ทัชแพด) */
+  let touching = false;                                                             /* นิ้วอยู่บนแถว + แถวเลื่อน = ปัดซ้าย-ขวา */
+  strip.addEventListener('touchstart', () => { touching = true; }, {passive: true});
+  addEventListener('touchend', () => { touching = false; }, {passive: true});
+  addEventListener('touchcancel', () => { touching = false; }, {passive: true});
   /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) · ลากเกิน 6px = ไม่นับเป็นการแตะเลือก */
   let x0 = null, s0 = 0, moved = false;
   const scale = () => wrap.getBoundingClientRect().width / wrap.offsetWidth || 1;
   strip.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; x0 = e.clientX; s0 = strip.scrollLeft; moved = false; });
   strip.addEventListener('pointermove', e => { if (x0 === null) return; const dx = (e.clientX - x0) / scale();
-    if (!moved && Math.abs(dx) > 6){ moved = true; strip.style.scrollSnapType = 'none'; } if (moved) strip.scrollLeft = s0 - dx; });
+    if (!moved && Math.abs(dx) > 6){ moved = true; stopAuto(); strip.style.scrollSnapType = 'none'; } if (moved) strip.scrollLeft = s0 - dx; });
   addEventListener('pointerup', () => { if (x0 === null) return; x0 = null;
     if (moved){ const sl = strip.scrollLeft; strip.style.scrollSnapType = ''; strip.scrollLeft = sl; } });
   strip.addEventListener('click', e => { if (moved){ e.stopPropagation(); moved = false; return; } const c = e.target.closest('[data-pick]'); if (c) select(cards.indexOf(c)); }, true);
@@ -965,7 +971,7 @@ function mountRec(wrap, bindGo){
   strip.scrollLeft = scrollFor(cards[cur]);   /* กดย้อนกลับมา: แผนที่เลือกไว้อยู่ในจอ */
   edge(); sync(false);
   if (document.fonts) document.fonts.ready.then(() => wrap.isConnected && sync(false));
-  autoNext();
+  autoNext(AUTO_FIRST);
 }
 
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
