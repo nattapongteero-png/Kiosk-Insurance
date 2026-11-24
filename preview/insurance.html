@@ -253,75 +253,84 @@ body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
 .pp .who .kv span{font-size:24px;color:var(--ink-soft);height:32px;line-height:32px;white-space:nowrap}
 .pp .who .rgt b{overflow:hidden;text-overflow:ellipsis}
 .pp .who .kv b{font-size:28px;font-weight:700;height:40px;line-height:40px;white-space:nowrap;font-variant-numeric:tabular-nums}
-/* ข้อเสนอแนะนำ (บนตู้จริง = "สิทธิประกันที่ใช้ได้") — แบบ master–detail
-   ซ้าย = การ์ด = หัวเรื่อง (ภาพปกสีแบรนด์ + โลโก้ · ประเภท ชื่อแผน เบี้ยรายปี) แตะเพื่อเลือก · ขวา = เนื้อหา (ชื่อบริษัท อายุรับประกัน/ต่ออายุ
-   ความคุ้มครองหลัก เบี้ยเฉลี่ยรายเดือน ปุ่มดูรายละเอียด/สนใจแผนนี้) — ไม่ซ้ำข้อมูลกัน
-   ผู้ซื้อหลักอายุ 35–60 ปี (สายตายาวเริ่ม ~40): เนื้อหา ≥ 26px สีเข้ม · ทุกอย่างอยู่ในจอ ไม่ต้องปัด · การ์ดที่เลือกอยู่มีขอบกรมหนา + เครื่องหมายถูก
-   ระยะห่าง (ตาราง 8): หัวข้อ→เนื้อหา 32 · ภาพ↔ภาพ 24 (~9 มม. บนจอ 32" กันแตะพลาด) · ซ้าย↔ขวา 32 · ในแผงขวา ขอบ 32
-   ส่วนนี้→"ข้อเสนออื่น" 64 · ห่างระหว่างส่วน > ระหว่างการ์ด > ภายในการ์ด ให้แยกกลุ่มได้ด้วยตา */
+/* ข้อเสนอแนะนำ (บนตู้จริง = "สิทธิประกันที่ใช้ได้") — แบบแนวนอน
+   แถวการ์ดด้านบน ปัดซ้าย-ขวาได้ (ระบบจริงแสดงทุกแผนที่ผู้ป่วยเข้าเกณฑ์ จำนวนไม่แน่นอน) · แผงรายละเอียดเต็มกว้างด้านล่าง
+   การ์ดที่เลือก + แผง = แผ่นขาวผืนเดียว วาดเป็นรูปทรงเดียวด้วย SVG (.sheetbg) อยู่ด้านหลัง · ขอบนอกมุมโค้ง 24 · รอยต่อมุมเว้า 24
+   แตะเปลี่ยนแผน = รูปทรงค่อยๆ เลื่อนไปหาการ์ดใหม่ · ปัดแถว = รูปทรงเลื่อนตามการ์ดที่เลือก
+   ก่อนผู้ใช้เลือก เลือกใบถัดไปเอง (ครั้งแรก 3 วิ แล้วทุก 5 วิ) ให้รู้ว่าปัดได้/แตะเลือกได้ · แตะการ์ด/กดปุ่ม/ปัดแถว = หยุดถาวร (เลื่อนหน้าขึ้น-ลงไม่นับ)
+   ผู้ซื้อหลักอายุ 35–60 ปี: เนื้อหา ≥ 22px ตัวเลขสำคัญ ≥ 28px · การ์ดกว้าง 272 เห็น 3 ใบ + ใบที่ 4 โผล่ (บอกว่ามีต่อ) · ห่างกัน 24 กันแตะพลาด
+   ระยะห่าง: หัวข้อ→แถว 28 · การ์ด→แผง 24 · ในแผง ขอบ 28/36 · ส่วนนี้→"ข้อเสนออื่น" 64 · ระยะบรรทัดข้อความไทย ≥ 1.35–1.4 */
 .pp .rec{position:relative;padding:0 var(--gutter) 16px}   /* ล่าง 16 + .more บน 48 = ห่างหัวข้อ "ข้อเสนออื่น" 64 */
 .pp .hd h2{font-size:48px;font-weight:700;line-height:68px;white-space:nowrap}
 .pp .hd p{font-size:32px;font-weight:500;color:rgba(20,38,90,.8);white-space:nowrap}
-.pp .rec .hd{padding-top:8px;margin-bottom:32px}
-/* แผ่นเดียวกัน (แบบแถบแฟ้ม): การ์ดที่เลือก + แผงรายละเอียด = แผ่นขาวผืนเดียว วาดเป็นรูปทรงเดียวด้วย SVG (.sheetbg) อยู่ด้านหลัง
-   ขอบนอกมุมโค้ง 24 · รอยต่อมุมเว้า 28 (ไม่เกินช่องว่าง 32 จึงไม่ล้นไปชนการ์ดข้างเคียง) · เส้นขอบ + เงาวาดรอบรูปทรงรวม ไม่มีตะเข็บ
-   แตะเปลี่ยนแผน: รูปทรงค่อยๆ เลื่อนไปหาการ์ดใบใหม่ 0.28 วิ (path ใช้คำสั่งชุดเดียวกันทุกตำแหน่ง จึงเปลี่ยนรูปต่อเนื่องได้)
-   แผงรายละเอียดสูงเท่าเนื้อหา และเลื่อนไปอยู่ข้างการ์ดที่เลือก → รองรับกี่แผนก็ได้ (ระบบจริงแสดงทุกแผนที่ผู้ป่วยเข้าเกณฑ์) */
-.pp .rec .md{position:relative;display:grid;grid-template-columns:340px minmax(0,1fr);gap:32px;align-items:start}
+.pp .rec .hd{padding-top:8px;margin-bottom:28px}
+.pp .rec .hd p{white-space:normal}
+.pp .rec .hd p b{color:var(--ink)}
+.pp .rec .rwrap{position:relative}
 .pp .rec .sheetbg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:0;
   filter:drop-shadow(0 1px 2px rgba(20,38,90,.06)) drop-shadow(0 4px 12px rgba(20,38,90,.08))}
-.pp .rec .sheetbg path{fill:#fff;stroke:rgba(20,38,90,.11);stroke-width:1.5;transition:d .28s cubic-bezier(.3,.7,.2,1)}
-.pp .rec .picks{position:relative;z-index:1;display:flex;flex-direction:column;gap:24px}
-/* การ์ดภาพ (ซ้าย) = หัวเรื่องของแผน: ภาพ (ป้ายประเภทบนภาพ) + ชื่อแผน + เบี้ย — ข้อมูลที่ใช้เทียบกันระหว่างแผน */
-.pp .rec .pick{position:relative;display:flex;flex-direction:column;border:0;padding:12px;font:inherit;text-align:left;cursor:pointer;color:var(--ink);
-  border-radius:24px;background:rgba(255,255,255,.8);
-  box-shadow:0 0 0 1px rgba(20,38,90,.10),0 1px 2px rgba(20,38,90,.06),0 4px 12px rgba(20,38,90,.07);
-  transition:transform .2s cubic-bezier(.2,.8,.2,1)}
-.pp .rec .pick:active{transform:scale(.98)}
-.pp .rec .pick.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
-.pp .rec .pick.on:active{transform:none}
+.pp .rec .sheetbg path{fill:#fff;stroke:rgba(20,38,90,.11);stroke-width:1.5;transition:d .38s cubic-bezier(.3,.7,.2,1)}
+.pp .rec .rrow{position:relative;z-index:1}
+.pp .rec .rstrip{position:relative;display:flex;align-items:stretch;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:4px 0 8px;touch-action:pan-x pan-y}
+.pp .rec .rstrip::-webkit-scrollbar{display:none}
+/* การ์ด = หัวเรื่อง: ภาพปก (สีแบรนด์ + โลโก้) + ป้ายประเภท + ชื่อแผน + เบี้ยรายปี */
+.pp .rec .rc{position:relative;flex:0 0 272px;scroll-snap-align:start;display:flex;flex-direction:column;border:0;padding:12px;font:inherit;text-align:left;
+  cursor:pointer;color:var(--ink);border-radius:22px;background:rgba(255,255,255,.8);
+  box-shadow:0 0 0 1px rgba(20,38,90,.10),0 1px 3px rgba(20,38,90,.07);transition:transform .2s cubic-bezier(.2,.8,.2,1);-webkit-user-drag:none;user-select:none}
+.pp .rec .rc:active{transform:scale(.98)}
+.pp .rec .rc.on{background:transparent;box-shadow:none}   /* พื้น/ขอบ/เงาของใบที่เลือกมาจากแผ่น SVG */
+.pp .rec .rc.on:active{transform:none}
 /* ภาพปก = พื้นสีแบรนด์บริษัทประกัน (INSURERS[].br) + โลโก้สีขาวตรงกลาง · โลโก้มีที่นี่ที่เดียวในส่วนนี้ */
-.pp .rec .pick .ph{position:relative;height:144px;border-radius:16px;overflow:hidden;
+.pp .rec .rc .ph{position:relative;height:130px;border-radius:16px;overflow:hidden;
   background:radial-gradient(120% 140% at 18% 0%,rgba(255,255,255,.20),rgba(255,255,255,0) 62%),rgb(var(--brand))}
-.pp .rec .pick .ph .brand{position:absolute;left:50%;top:54%;height:44px;width:auto;transform:translate(-50%,-50%);pointer-events:none;
+.pp .rec .rc .ph .brand{position:absolute;left:50%;top:54%;height:42px;width:auto;transform:translate(-50%,-50%);pointer-events:none;-webkit-user-drag:none;
   filter:brightness(0) invert(1)}   /* โลโก้สี → ขาวล้วน อ่านชัดบนพื้นสีแบรนด์ */
-.pp .rec .pick .ty{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 10px;border-radius:99px;
+.pp .rec .rc .ty{position:absolute;left:10px;top:10px;display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 10px;border-radius:99px;
   background:rgba(255,255,255,.94);font-size:20px;font-weight:700;color:var(--deep);white-space:nowrap}
-.pp .rec .pick .ty::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
-.pp .rec .pick .cap{display:flex;flex-direction:column;gap:6px;padding:14px 8px 6px}
-.pp .rec .pick .cap b{font-size:30px;font-weight:700;line-height:1.25;text-wrap:pretty;overflow-wrap:anywhere}
-.pp .rec .pick .cap .p{font-size:22px;color:var(--ink-muted);white-space:nowrap}
-.pp .rec .pick .cap .p strong{font-size:30px;font-weight:700;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
-.pp .rec .pick .cap .wt{display:inline-flex;align-items:center;gap:8px;font-size:24px;font-weight:600;color:#7A5717}
-.pp .rec .pick .cap .wt svg{width:26px;height:26px;stroke:#A87C2A}
-/* เครื่องหมายถูกมุมขวาบนของภาพ ย้ำว่าแผนไหนเลือกอยู่ */
-.pp .rec .pick .ck{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;display:none;place-items:center;
-  background:var(--ink);box-shadow:0 0 0 3px #fff}
-.pp .rec .pick.on .ck{display:grid}
-.pp .rec .pick .ck svg{width:26px;height:26px;stroke:#fff}
-/* แผงรายละเอียด (ขวา) = เนื้อหาของแผนที่เลือก · ไม่ซ้ำชื่อ/ประเภท/เบี้ยรายปีที่อยู่บนการ์ดแล้ว · เริ่มที่ "ได้อะไร" */
-.pp .rec .sel{position:relative;z-index:1;display:flex;flex-direction:column;min-width:0;padding:32px;transition:margin-top .28s cubic-bezier(.3,.7,.2,1)}
-.pp .rec .sel h3{font-size:34px;font-weight:700;line-height:1.28}   /* หัวแผง = ชื่อบริษัทประกัน (โลโก้อยู่บนภาพปกการ์ด · ชื่อแผนอยู่บนการ์ด) */
-.pp .rec .sel .fit{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 10px}
-.pp .rec .sel .fit span{display:inline-flex;align-items:center;gap:6px;padding:5px 14px 5px 9px;border-radius:99px;background:var(--tint);
-  font-size:22px;font-weight:600;white-space:nowrap}   /* 22px ให้ป้าย 2 อันอยู่บรรทัดเดียวในแผงกว้าง 484 */
-.pp .rec .sel .fit svg{width:22px;height:22px;stroke:var(--deep)}
-.pp .rec .sel h4{font-size:26px;font-weight:700;margin:24px 0 4px}
-.pp .rec .sel .r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-top:1px solid rgba(20,38,90,.08)}
-.pp .rec .sel .r:first-child{border-top:0}
-.pp .rec .sel .r .k{font-size:26px;line-height:1.35;color:#34466F;text-wrap:pretty}
-.pp .rec .sel .r .k small{display:block;font-size:22px;color:var(--ink-muted)}
-.pp .rec .sel .r .v{font-size:28px;font-weight:700;white-space:nowrap}
-.pp .rec .sel .mo{margin-top:16px;padding-top:16px;border-top:1px solid rgba(20,38,90,.08);font-size:24px;color:var(--ink-muted)}
-.pp .rec .sel .mo b{font-size:32px;font-weight:700;color:var(--ink);margin:0 8px;font-variant-numeric:tabular-nums}
+.pp .rec .rc .ty::before{content:"";width:10px;height:10px;border-radius:50%;background:currentColor}
+.pp .rec .rc .ck{position:absolute;bottom:10px;right:10px;width:42px;height:42px;border-radius:50%;display:none;place-items:center;background:var(--ink);box-shadow:0 0 0 3px #fff}
+.pp .rec .rc.on .ck{display:grid}
+.pp .rec .rc .ck svg{width:24px;height:24px;stroke:#fff}
+.pp .rec .rc .cap{flex:1;padding:12px 8px 4px;display:flex;flex-direction:column;gap:4px}
+.pp .rec .rc .cap b{font-size:28px;font-weight:700;line-height:1.25;text-wrap:pretty}   /* ชื่อยาวตัดบรรทัดได้ ไม่ตัด "…" · การ์ดทุกใบสูงเท่ากัน */
+.pp .rec .rc .cap .p{margin-top:auto;font-size:21px;color:var(--ink-muted);white-space:nowrap}
+.pp .rec .rc .cap .p strong{font-size:28px;font-weight:700;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
+.pp .rec .rc .cap .wt{margin-top:auto;display:inline-flex;align-items:center;gap:8px;font-size:22px;font-weight:600;color:#7A5717}
+.pp .rec .rc .cap .wt svg{width:24px;height:24px;stroke:#A87C2A}
+.pp .rec .rfade{position:absolute;right:0;top:0;bottom:8px;width:64px;pointer-events:none;background:linear-gradient(90deg,rgba(242,246,251,0),rgba(242,246,251,.95))}
+.pp .rec .rfade[hidden]{display:none}
+/* แผงรายละเอียด = เนื้อหาของแผนที่เลือก: ชื่อบริษัท · ป้ายอายุ · ตัวเลขเด่น 3 ข้อ · เฉลี่ยรายเดือน + ปุ่ม
+   ไม่ซ้ำชื่อแผน/ประเภท/เบี้ยรายปีที่อยู่บนการ์ดแล้ว · พื้นมาจากแผ่น SVG · เนื้อหาเปลี่ยนแบบจางเข้า */
+.pp .rec .rdet{position:relative;z-index:1;margin-top:16px;padding:28px 36px 30px;transition:opacity .22s}
+.pp .rec .rdet.swap{opacity:0;transition:none}
+.pp .rec .rdet h3{font-size:32px;font-weight:700;line-height:1.28}
+.pp .rec .rdet .fit{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 10px}
+.pp .rec .rdet .fit span{display:inline-flex;align-items:center;gap:6px;padding:5px 14px 5px 9px;border-radius:99px;background:var(--tint);font-size:22px;font-weight:600;white-space:nowrap}
+.pp .rec .rdet .fit svg{width:22px;height:22px;stroke:var(--deep)}
+/* ตัวเลขเด่น 3 ข้อ: รายการ 3 แถว แถวละข้อ อ่านในบรรทัดเดียว [ไอคอน] ชื่อ + เงื่อนไข ··· จำนวนเงิน (ชิดขวา ตัวเลขตรงแนวเดียวกัน เทียบง่าย)
+   ระยะบรรทัดภาษาไทย ≥ 1.4 กันสระบน/วรรณยุกต์ชนบรรทัดบน · ชื่อยาวตัดบรรทัดได้ จำนวนเงินไม่ตัด */
+.pp .rec .rben{margin-top:18px;display:flex;flex-direction:column}
+.pp .rec .rben > div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;column-gap:16px;padding:12px 0;border-top:1px solid rgba(20,38,90,.07)}
+.pp .rec .rben > div:first-child{border-top:0;padding-top:4px}
+.pp .rec .rben i{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--tint)}
+.pp .rec .rben i svg{width:24px;height:24px;stroke:var(--deep)}
+.pp .rec .rben .k{font-size:24px;line-height:1.4;color:#34466F;text-wrap:pretty}
+.pp .rec .rben .k small{display:inline-block;margin-left:10px;font-size:21px;line-height:1.4;color:var(--ink-muted)}   /* เงื่อนไขต่อท้ายชื่อ ไม่พอที่ = ลงบรรทัดใหม่ทั้งก้อน */
+.pp .rec .rben .v{text-align:right;font-size:30px;font-weight:700;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pp .rec .rben .v em{font-style:normal;font-size:21px;font-weight:600;margin-left:6px;color:var(--ink-muted)}
+.pp .rec .rben .v.t{font-size:24px;line-height:1.4;white-space:normal;max-width:340px;text-wrap:pretty}   /* ค่าที่เป็นข้อความ เช่น "ตามจ่ายจริง" */
+.pp .rec .rbuy{display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:20px;border-top:1px solid rgba(20,38,90,.08)}
+.pp .rec .rbuy .mo{flex:1;display:flex;flex-direction:column;line-height:1.35;font-size:24px;color:var(--ink-muted);white-space:nowrap}   /* 2 บรรทัด: "เฉลี่ย" / ตัวเลข + หน่วย */
+.pp .rec .rbuy .mo small{font-size:22px}
+.pp .rec .rbuy .mo b{font-size:34px;font-weight:700;color:var(--ink);margin-right:8px;font-variant-numeric:tabular-nums}
 /* ปุ่ม: ดูรายละเอียด (รอง) + สนใจแผนนี้ (หลัก → บันทึกความสนใจ บริษัทติดต่อกลับ) ตัดสินใจได้จากหน้านี้ */
-.pp .rec .sel .act{display:flex;gap:16px;margin-top:16px}
-.pp .rec .sel .act button{flex:1;height:84px;border:0;border-radius:99px;font:inherit;font-size:28px;font-weight:700;cursor:pointer;white-space:nowrap;
-  display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
-.pp .rec .sel .act button:active{transform:scale(.97)}
-.pp .rec .sel .act .sec{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px rgba(20,38,90,.2)}
-.pp .rec .sel .act .pri{color:#fff;background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);box-shadow:0 2px 6px rgba(20,38,90,.2)}
-@media (prefers-reduced-motion:reduce){.pp .rec .sheetbg path,.pp .rec .sel{transition:none}}
+.pp .rec .rbtn{height:84px;padding:0 30px;border:0;border-radius:99px;font:inherit;font-size:28px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--ink);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.pp .rec .rbtn:active{transform:scale(.97)}
+.pp .rec .rbtn.sec{background:#fff;box-shadow:inset 0 0 0 2px rgba(20,38,90,.2)}
+.pp .rec .rbtn.pri{color:#fff;background:linear-gradient(180deg,#223A7A 0%,var(--ink) 100%);box-shadow:0 2px 6px rgba(20,38,90,.2)}
+@media (prefers-reduced-motion:reduce){.pp .rec .sheetbg path,.pp .rec .rdet{transition:none}}
 
 /* แบบประกันอื่น */
 /* Figma: หัวข้อ y845 (ห่างส่วนแนะนำ 48) · กริดเริ่ม y976 · ท้ายรายการเว้น 80 */
@@ -771,6 +780,16 @@ const ICON = {
   close:'<path d="M18 6 6 18M6 6l12 12"/>',
   down:'<path d="M12 5v13M6 12.5l6 6 6-6"/>',
   chev:'<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>',
+  /* ไอคอนตัวเลขเด่นในแผงข้อเสนอแนะนำ (BEN_IC) */
+  bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  cross:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+  steth:'<path d="M11 2v2M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',
+  heart:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/>',
+  pulse:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/><path d="M3.2 12h6.3l.5-1 2 4.5 2-7 1.5 3.5h5.3"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  bandage:'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 6v12M18 6v12M10 10h.01M14 10h.01M10 14h.01M14 14h.01"/>',
   phone:'<rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10.5 18.5h3"/>',
   doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h6M10 16h6"/>',
 };
@@ -844,10 +863,11 @@ const planCard = p => `
     <span class="cov">${p.cov}</span>
     ${p.pend ? `<span class="wait">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="pr"><span>เบี้ยเริ่มต้น</span><strong>${p.pr}</strong><span>บาท/ปี</span></span>`}
   </button>`;
-/* ข้อเสนอแนะนำแบบ master–detail: ซ้าย = การ์ด (recPick) แตะเพื่อเลือก · ขวา = รายละเอียดแผนที่เลือก (recSel)
+/* ข้อเสนอแนะนำแบบแนวนอน: แถวการ์ด (recCard) ด้านบน · แผงรายละเอียดแผนที่เลือก (recDet) ด้านล่าง · ต่อกันเป็นแผ่นเดียว (mountRec)
    ภาพปกการ์ด = พื้นสีแบรนด์ + โลโก้บริษัท · TAG_TINT = สีตามประเภทประกัน [พื้นป้าย, สีตัวอักษรประเภท] */
 const TAG_TINT = {'ประกันสุขภาพ':['#DCEBFB','#0D5BC6'], 'ประกันชีวิต':['#FDF0D9','#B45309'], 'ประกันอุบัติเหตุ':['#FBE6E1','#C2410C'], 'ประกันโรคร้ายแรง':['#FBE3EC','#BE185D']};
-let REC_SEL = null;   /* ชื่อแผนแนะนำที่เปิดดูอยู่ · ค่าเริ่มต้น = แผนแรก · กดย้อนกลับจากหน้ารายละเอียดแล้วยังอยู่ที่แผนเดิม */
+let REC_SEL = null;    /* ชื่อแผนแนะนำที่เปิดดูอยู่ · ค่าเริ่มต้น = แผนแรก · กดย้อนกลับจากหน้ารายละเอียดแล้วยังอยู่ที่แผนเดิม */
+let REC_AUTO = true;   /* เลื่อนเองจนกว่าผู้ใช้เลือกเอง (แตะการ์ด/ปุ่ม หรือปัดแถว) · เลือกแล้วไม่กลับมาเลื่อนเองอีก (รวมตอนกดย้อนกลับมาหน้านี้) */
 const curRec = () => PLANS_REC.find(p => p.name === REC_SEL) || PLANS_REC[0];
 /* ป้ายเรื่องที่คนวัย 35–60 ห่วง: สมัครได้ถึงอายุเท่าไร · ต่ออายุได้ถึงเมื่อไร (หรือคุ้มครองทันที) — ดึงจาก TERMS ตามประเภทแผน */
 const fitOf = tag => { const T = TERMS[tag] || {}, out = [];
@@ -856,72 +876,102 @@ const fitOf = tag => { const T = TERMS[tag] || {}, out = [];
   if (rn) out.push(`ต่ออายุได้ถึง ${rn[1]} ปี`); else { const w = (T.wait || '').match(/^ไม่มี \((.*)\)/); if (w) out.push(w[1]); }
   return out; };
 const perMonth = pr => Math.round(parseInt(String(pr).replace(/,/g, ''), 10) / 12).toLocaleString('en-US');
-/* การ์ดซ้าย = หัวเรื่อง: ภาพปก (สีแบรนด์ + โลโก้) + ป้ายประเภท + ชื่อแผน + เบี้ยรายปี */
-const recPick = p => { const [tint, deep] = TAG_TINT[p.tag] || TAG_TINT['ประกันสุขภาพ'], on = p === curRec(); return `
-  <button class="pick${on ? ' on' : ''}" data-pick="${p.name}" aria-pressed="${on}" style="--tint:${tint};--deep:${deep};--brand:${INSURERS[p.co].br}">
-    <span class="ph"><img class="brand" src="${INSURERS[p.co].logo}" alt="${INSURERS[p.co].name}" onerror="this.remove()"><span class="ty">${p.tag}</span><span class="ck">${svg('check',3)}</span></span>
+const recVars = p => { const [tint, deep] = TAG_TINT[p.tag] || TAG_TINT['ประกันสุขภาพ']; return `--tint:${tint};--deep:${deep};--brand:${INSURERS[p.co].br}`; };
+/* ไอคอนตัวเลขเด่น: เลือกจากชื่อความคุ้มครอง */
+const BEN_IC = [[/ผู้ป่วยใน/,'bed'],[/ห้อง/,'home'],[/ผ่าตัด|หัตถการ/,'cross'],[/ผู้ป่วยนอก|ครั้งที่/,'steth'],[/มะเร็ง|โรคร้ายแรง/,'pulse'],
+  [/อุบัติเหตุ/,'bandage'],[/ทุพพลภาพ/,'shield'],[/ชีวิต|เสียชีวิต/,'heart'],[/เงินคืน|ครบกำหนด|เบี้ย|รายได้/,'wallet'],[/สมาชิก/,'user'],[/ระยะเวลา/,'cal']];
+/* การ์ด = หัวเรื่อง: ภาพปก (สีแบรนด์ + โลโก้) + ป้ายประเภท + ชื่อแผน + เบี้ยรายปี */
+const recCard = p => { const on = p === curRec(), co = INSURERS[p.co]; return `
+  <button class="rc${on ? ' on' : ''}" data-pick="${p.name}" aria-pressed="${on}" style="${recVars(p)}">
+    <span class="ph"><img class="brand" src="${co.logo}" alt="${co.name}" onerror="this.remove()"><span class="ty">${p.tag}</span><span class="ck">${svg('check',3)}</span></span>
     <span class="cap"><b>${p.name}</b>${p.pend ? `<span class="wt">${svg('clock',2)}รอผลพิจารณา</span>` : `<span class="p"><strong>${p.pr}</strong>บาท/ปี</span>`}</span>
   </button>`; };
-/* แผงขวา = เนื้อหา: ชื่อบริษัทประกัน · ป้ายอายุ · ความคุ้มครอง 3 รายการแรก · เบี้ยเฉลี่ยรายเดือน · ปุ่ม
-   ไม่ซ้ำชื่อแผน/ประเภท/เบี้ยรายปีที่อยู่บนการ์ดซ้ายซึ่งต่อเป็นแผ่นเดียวกันอยู่แล้ว · ทั้งหมด + เงื่อนไข + ข้อยกเว้น อยู่ในหน้ารายละเอียด */
-const recSel = p => { const fit = fitOf(p.tag); return `
+/* แผง = เนื้อหา: ชื่อบริษัท · ป้ายอายุ · ตัวเลขเด่น 3 ข้อแรก · เฉลี่ยรายเดือน + ปุ่ม · ทั้งหมด + เงื่อนไข + ข้อยกเว้น อยู่ในหน้ารายละเอียด */
+const recDet = p => { const fit = fitOf(p.tag); return `
       <h3>${INSURERS[p.co].name}</h3>
       ${fit.length ? `<div class="fit">${fit.map(f => `<span>${svg('check',2.8)}${f}</span>`).join('')}</div>` : ''}
-      <h4>ความคุ้มครองหลัก</h4>
-      <div class="rws">${(COVER[p.name] || []).slice(0, 3).map(r => row(...r)).join('')}</div>
-      <div class="mo">${p.pend ? 'รอผลพิจารณา' : `เฉลี่ย<b>${perMonth(p.pr)}</b>บาท/เดือน`}</div>
-      <div class="act">
-        <button class="sec" data-go="${p.pend ? 'slow' : 'detail'}" data-plan="${p.name}">ดูรายละเอียด</button>
-        ${p.pend ? '' : `<button class="pri" data-go="done" data-plan="${p.name}">สนใจแผนนี้</button>`}
-      </div>`; };
-const recVars = p => { const [tint, deep] = TAG_TINT[p.tag] || TAG_TINT['ประกันสุขภาพ']; return `--tint:${tint};--deep:${deep}`; };
+      <div class="rben">${(COVER[p.name] || []).slice(0, 3).map(([k, sub, v]) => { const m = v.match(/^([\d,]+)(?:\s+(.+))?$/), ic = (BEN_IC.find(([re]) => re.test(k)) || [, 'shield'])[1];
+        return `<div><i>${svg(ic)}</i><span class="k">${k}${sub ? `<small>${sub}</small>` : ''}</span>${m ? `<strong class="v">${m[1]}${m[2] ? `<em>${m[2]}</em>` : ''}</strong>` : `<strong class="v t">${v}</strong>`}</div>`; }).join('')}</div>
+      <div class="rbuy"><span class="mo">${p.pend ? 'รอผลพิจารณา' : `<small>เฉลี่ย</small><span><b>${perMonth(p.pr)}</b>บาท/เดือน</span>`}</span>
+        <button class="rbtn sec" data-go="${p.pend ? 'slow' : 'detail'}" data-plan="${p.name}">ดูรายละเอียด</button>
+        ${p.pend ? '' : `<button class="rbtn pri" data-go="done" data-plan="${p.name}">สนใจแผนนี้</button>`}</div>`; };
 
-/* วาดแผ่นเดียวกัน: path รวม "แผงรายละเอียด + การ์ดที่เลือก" (พิกัดภายใน .md)
-   แผง (x0..x1, y0..y1) · การ์ด (tx0..x0, ty0..ty1) · มุมนอก R · มุมเว้า F · ถ้าขอบการ์ดชิดขอบแผง (dt/db = 0) มุมฝั่งนั้นเป็น 0 = เส้นตรง
-   คำสั่งชุดเดียวกันเสมอ (มุมที่ไม่ใช้ = รัศมี 0) ให้ CSS transition ของ d เปลี่ยนรูปได้ลื่น */
-const SHEET_R = 24, SHEET_F = 28;
-function sheetPath(x0, x1, y0, y1, tx0, ty0, ty1){
-  const R = SHEET_R, dt = Math.max(0, ty0 - y0), db = Math.max(0, y1 - ty1);
-  const rT = Math.min(R, dt / 2), fT = Math.min(SHEET_F, dt / 2), rB = Math.min(R, db / 2), fB = Math.min(SHEET_F, db / 2);
-  const n = v => Math.round(v * 10) / 10;
-  return `M${n(x1-R)} ${n(y0)}A${R} ${R} 0 0 1 ${n(x1)} ${n(y0+R)}V${n(y1-R)}A${R} ${R} 0 0 1 ${n(x1-R)} ${n(y1)}`
-    + `H${n(x0+rB)}A${n(rB)} ${n(rB)} 0 0 1 ${n(x0)} ${n(y1-rB)}V${n(ty1+fB)}A${n(fB)} ${n(fB)} 0 0 0 ${n(x0-fB)} ${n(ty1)}`
-    + `H${n(tx0+R)}A${R} ${R} 0 0 1 ${n(tx0)} ${n(ty1-R)}V${n(ty0+R)}A${R} ${R} 0 0 1 ${n(tx0+R)} ${n(ty0)}`
-    + `H${n(x0-fT)}A${n(fT)} ${n(fT)} 0 0 0 ${n(x0)} ${n(ty0-fT)}V${n(y0+rT)}A${n(rT)} ${n(rT)} 0 0 1 ${n(x0+rT)} ${n(y0)}Z`;
+/* path รวม "การ์ดที่เลือก (ด้านบน) + แผง (ด้านล่าง)" พิกัดภายใน .rwrap · คำสั่งชุดเดียวกันเสมอ (มุมที่ไม่ใช้ = รัศมี 0) ให้ transition ของ d ลื่น
+   แผง (x0..x1, y0..y1) · การ์ด (tx0..tx1, ty0..y0) · การ์ดชิดขอบแผง → มุมฝั่งนั้นเป็น 0 = เส้นตรง */
+function recSheetPath(x0, x1, y0, y1, tx0, tx1, ty0){
+  const R = 24, F = 24, n = v => Math.round(v * 10) / 10;
+  const w = Math.max(0, tx1 - tx0), rt = Math.min(R, w / 2), dl = Math.max(0, tx0 - x0), dr = Math.max(0, x1 - tx1);
+  const fL = Math.min(F, dl / 2), rL = Math.min(R, dl / 2), fR = Math.min(F, dr / 2), rR = Math.min(R, dr / 2);
+  return `M${n(tx0+rt)} ${n(ty0)}H${n(tx1-rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx1)} ${n(ty0+rt)}V${n(y0-fR)}A${n(fR)} ${n(fR)} 0 0 0 ${n(tx1+fR)} ${n(y0)}`
+    + `H${n(x1-rR)}A${n(rR)} ${n(rR)} 0 0 1 ${n(x1)} ${n(y0+rR)}V${n(y1-R)}A${R} ${R} 0 0 1 ${n(x1-R)} ${n(y1)}H${n(x0+R)}A${R} ${R} 0 0 1 ${n(x0)} ${n(y1-R)}`
+    + `V${n(y0+rL)}A${n(rL)} ${n(rL)} 0 0 1 ${n(x0+rL)} ${n(y0)}H${n(tx0-fL)}A${n(fL)} ${n(fL)} 0 0 0 ${n(tx0)} ${n(y0-fL)}V${n(ty0+rt)}A${n(rt)} ${n(rt)} 0 0 1 ${n(tx0+rt)} ${n(ty0)}Z`;
 }
-/* แผงเลื่อนไปให้ขอบบนตรงกับการ์ดที่เลือก (ไม่เกินขอบล่างคอลัมน์การ์ด) แล้ววาด path ใหม่ · animate = เคลื่อนแบบลื่น */
-function syncRecSheet(animate){
-  const md = document.querySelector('.pp .rec .md'); if (!md) return;
-  const picks = md.querySelector('.picks'), tab = md.querySelector('.pick.on'), sel = md.querySelector('.sel'), path = md.querySelector('.sheetbg path');
-  if (!picks || !tab || !sel || !path) return null;
-  const colH = picks.offsetHeight, H = sel.offsetHeight;
-  const ty0 = picks.offsetTop + tab.offsetTop, ty1 = ty0 + tab.offsetHeight, tx0 = picks.offsetLeft + tab.offsetLeft;
-  let off = Math.max(0, Math.min(ty0, colH - H));
-  const gap = SHEET_R + SHEET_F;
-  if (ty0 - off > 0 && ty0 - off < gap) off = ty0;                                    /* ขอบบนเกือบตรงกัน → ให้ตรงกันพอดี */
-  if (off + H - ty1 > 0 && off + H - ty1 < gap && ty1 - H >= 0) off = ty1 - H;         /* ขอบล่างเกือบตรงกัน → ให้ตรงกันพอดี */
-  const d = `path("${sheetPath(sel.offsetLeft, sel.offsetLeft + sel.offsetWidth, off, off + H, tx0, ty0, ty1)}")`;
-  if (!animate){ path.style.transition = sel.style.transition = 'none'; }
-  sel.style.marginTop = off + 'px';
-  path.style.d = d;
-  if (!animate){ void md.offsetWidth; path.style.transition = sel.style.transition = ''; }
-  return {md, top: Math.min(off, ty0), bottom: Math.max(off + H, ty1)};   /* ขอบเขตแผ่นเดียวกัน (พิกัดใน .md · ค่าปลายทางของ animation) */
-}
-/* หลังแตะเลือกแผน: ถ้าแผ่นที่เลือก (การ์ด + แผง) ยังเห็นไม่ครบ เลื่อนให้มาอยู่กลางพื้นที่ที่มองเห็น
-   เห็นครบอยู่แล้ว = ไม่เลื่อน (จอขยับเองบ่อยทำให้ผู้ใช้วัย 35–60 หลงตำแหน่ง)
-   พื้นที่ที่มองเห็น = ใต้ขอบจางบนของพื้นที่เลื่อน 96 ถึงเหนือแถบปุ่มล่าง (ส่วนที่ยังอ่านได้ ~200 จากขอบล่าง)
-   สูงเกินพื้นที่ = ชิดบน ให้เห็นหัวการ์ดก่อน */
-const REC_VIEW_TOP = 96, REC_VIEW_BOTTOM = 200;
-function focusRecSheet(box){
-  if (!box) return;
-  const sc = box.md.closest('.scroll'); if (!sc) return;
-  let y = 0; for (let el = box.md; el && el !== sc; el = el.offsetParent) y += el.offsetTop;   /* ตำแหน่ง .md ในเนื้อหาที่เลื่อน */
-  const top = y + box.top, bottom = y + box.bottom, h = bottom - top;
-  const vTop = sc.scrollTop + REC_VIEW_TOP, vBottom = sc.scrollTop + sc.clientHeight - REC_VIEW_BOTTOM, vH = vBottom - vTop;
-  if (top >= vTop && bottom <= vBottom) return;
-  const target = h <= vH ? top - REC_VIEW_TOP - (vH - h) / 2 : top - REC_VIEW_TOP;
-  const max = sc.scrollHeight - sc.clientHeight;
-  sc.scrollTo({top: Math.max(0, Math.min(max, target)), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+/* ผูกการทำงานของส่วนข้อเสนอแนะนำ (เรียกจาก wire ทุกครั้งที่ render หน้าเลือกแผน) */
+function mountRec(wrap, bindGo){
+  const row = wrap.querySelector('.rrow'), strip = wrap.querySelector('.rstrip'), det = wrap.querySelector('.rdet'), fade = wrap.querySelector('.rfade');
+  const path = wrap.querySelector('.sheetbg path'), cards = [...strip.children];
+  let cur = Math.max(0, PLANS_REC.indexOf(curRec())), prog = false, progT = null, target = 0;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* วาดแผ่น: ตำแหน่งการ์ดคิดจาก scrollLeft ที่ให้มา (ระหว่างเลื่อนอัตโนมัติใช้ค่าปลายทาง) · ส่วนที่เลื่อนพ้นแถวถูกตัดออก */
+  const sync = (animate, sl = strip.scrollLeft) => {
+    const c = cards[cur]; if (!c) return;
+    const x0 = 0, x1 = wrap.clientWidth, y0 = det.offsetTop, y1 = y0 + det.offsetHeight;
+    const cx = row.offsetLeft + strip.offsetLeft + c.offsetLeft - sl, clamp = v => Math.max(x0, Math.min(x1, v));
+    if (!animate) path.style.transition = 'none';
+    path.style.d = `path("${recSheetPath(x0, x1, y0, y1, clamp(cx), clamp(cx + c.offsetWidth), row.offsetTop + strip.offsetTop + c.offsetTop)}")`;
+    if (!animate){ void path.getBoundingClientRect(); path.style.transition = ''; }
+  };
+  const edge = () => { fade.hidden = strip.scrollLeft > strip.scrollWidth - strip.clientWidth - 8; };   /* ขอบขวาจาง = ยังมีแผนต่อ */
+  strip.addEventListener('scroll', () => { edge(); if (!prog){ if (touching) stopAuto(); sync(false); } });
+  /* ตำแหน่งเลื่อนที่ทำให้เห็นการ์ดทั้งใบ (เลือกจากจุด snap = ขอบซ้ายการ์ด) · เห็นครบอยู่แล้ว = ไม่เลื่อน */
+  const scrollFor = c => { const sl = strip.scrollLeft, cw = strip.clientWidth, max = strip.scrollWidth - cw, L = c.offsetLeft, R = L + c.offsetWidth;
+    if (L >= sl - 1 && R <= sl + cw + 1) return sl;
+    const snaps = [...new Set(cards.map(k => Math.min(k.offsetLeft, max)))].filter(s => L >= s - 1 && R <= s + cw + 1);
+    return snaps.length ? snaps.reduce((a, b) => Math.abs(b - sl) < Math.abs(a - sl) ? b : a) : Math.min(L, max); };
+  const select = i => {
+    if (i === cur) return;
+    cur = i; REC_SEL = PLANS_REC[i].name;
+    cards.forEach((c, k) => { c.classList.toggle('on', k === i); c.setAttribute('aria-pressed', k === i); });
+    wrap.setAttribute('style', recVars(PLANS_REC[i]));
+    det.classList.add('swap'); det.innerHTML = recDet(PLANS_REC[i]); bindGo(det); void det.offsetWidth; det.classList.remove('swap');
+    target = scrollFor(cards[i]);
+    if (Math.abs(target - strip.scrollLeft) > 1){
+      prog = true; strip.scrollTo({left: target, behavior: reduce ? 'auto' : 'smooth'});
+      clearTimeout(progT); progT = setTimeout(() => { prog = false; sync(false); }, 650);
+    }
+    sync(true, target);
+  };
+  /* เลื่อนเองเมื่อยังไม่มีคนเลือก: ครั้งแรกหลัง 3 วิ แล้วทุก 5 วิ เลือกใบถัดไป (ใบสุดท้ายวนกลับใบแรก)
+     หยุดถาวรเมื่อผู้ใช้ตั้งใจเลือก: แตะการ์ด/กดปุ่มในส่วนนี้ หรือปัด/ลากแถวการ์ดซ้าย-ขวา
+     การเลื่อนหน้าขึ้น-ลง (นิ้วลากแนวตั้ง · ล้อเมาส์) ไม่นับ — เดิมนับด้วย ทำให้แค่เลื่อนหน้าผ่านก็หยุดเลื่อนเองถาวร */
+  const AUTO_FIRST = 3000, AUTO = 5000;
+  const stopAuto = () => { REC_AUTO = false; clearTimeout(window._recAutoT); };
+  const autoNext = (ms = AUTO) => { clearTimeout(window._recAutoT);
+    if (REC_AUTO && !reduce && PLANS_REC.length > 1) window._recAutoT = setTimeout(() => { if (!REC_AUTO || !wrap.isConnected) return; select((cur + 1) % PLANS_REC.length); autoNext(); }, ms); };
+  const sec = wrap.closest('.rec');
+  sec.addEventListener('click', stopAuto, true);                                   /* แตะการ์ด · กดปุ่ม */
+  strip.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) stopAuto(); }, {passive: true});   /* เลื่อนแนวนอน (ทัชแพด) */
+  let touching = false;                                                             /* นิ้วอยู่บนแถว + แถวเลื่อน = ปัดซ้าย-ขวา */
+  strip.addEventListener('touchstart', () => { touching = true; }, {passive: true});
+  addEventListener('touchend', () => { touching = false; }, {passive: true});
+  addEventListener('touchcancel', () => { touching = false; }, {passive: true});
+  /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) · ลากเกิน 6px = ไม่นับเป็นการแตะเลือก */
+  let x0 = null, s0 = 0, moved = false;
+  const scale = () => wrap.getBoundingClientRect().width / wrap.offsetWidth || 1;
+  strip.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; x0 = e.clientX; s0 = strip.scrollLeft; moved = false; });
+  strip.addEventListener('pointermove', e => { if (x0 === null) return; const dx = (e.clientX - x0) / scale();
+    if (!moved && Math.abs(dx) > 6){ moved = true; stopAuto(); strip.style.scrollSnapType = 'none'; } if (moved) strip.scrollLeft = s0 - dx; });
+  addEventListener('pointerup', () => { if (x0 === null) return; x0 = null;
+    if (moved){ const sl = strip.scrollLeft; strip.style.scrollSnapType = ''; strip.scrollLeft = sl; } });
+  strip.addEventListener('click', e => { if (moved){ e.stopPropagation(); moved = false; return; } const c = e.target.closest('[data-pick]'); if (c) select(cards.indexOf(c)); }, true);
+  /* ขนาดเปลี่ยน (ฟอนต์โหลดเสร็จ · สลับภาษา · เนื้อหาแผงเปลี่ยน) → วาดใหม่ */
+  if (window._recRO) window._recRO.disconnect();
+  window._recRO = new ResizeObserver(() => sync(true, prog ? target : strip.scrollLeft));
+  window._recRO.observe(det);
+  strip.scrollLeft = scrollFor(cards[cur]);   /* กดย้อนกลับมา: แผนที่เลือกไว้อยู่ในจอ */
+  edge(); sync(false);
+  if (document.fonts) document.fonts.ready.then(() => wrap.isConnected && sync(false));
+  autoNext(AUTO_FIRST);
 }
 
 /* หัวจอ + ผู้ยืนยันตัวตน + พื้นไล่สี — ใช้ร่วมทุกหน้าใน flow ประกัน */
@@ -949,11 +999,11 @@ const selectScreen = () => `
 ${ppHead()}
     <div class="scroll"><div class="stack">
     <section class="rec">
-      <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>แตะแผนทางซ้ายเพื่อดูรายละเอียด</p></div>
-      <div class="md" style="${recVars(curRec())}">
+      <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>ท่านเข้าเกณฑ์ <b>${PLANS_REC.length} แผน</b> · แตะเพื่อดูรายละเอียด ปัดซ้าย-ขวาดูแผนอื่น</p></div>
+      <div class="rwrap" style="${recVars(curRec())}">
         <svg class="sheetbg" aria-hidden="true"><path/></svg>
-        <div class="picks">${PLANS_REC.map(recPick).join('')}</div>
-        <div class="sel" id="recSel" aria-live="polite">${recSel(curRec())}</div>
+        <div class="rrow"><div class="rstrip">${PLANS_REC.map(recCard).join('')}</div><span class="rfade"></span></div>
+        <div class="rdet" aria-live="polite">${recDet(curRec())}</div>
       </div>
     </section>
 
@@ -1260,25 +1310,8 @@ function wire(){
     el.onclick = () => { if (el.disabled) return; if (el.dataset.plan) CHOSEN = el.dataset.plan; render(el.dataset.go); };
   });
   bindGo(scr);
-  /* ข้อเสนอแนะนำ: แตะการ์ดภาพ → ย้ายเครื่องหมายเลือก + เปลี่ยนแผงรายละเอียดขวา (ไม่ render ทั้งจอ ตำแหน่งเลื่อนไม่หาย) */
-  scr.querySelectorAll('[data-pick]').forEach(el => el.onclick = () => {
-    if (el.classList.contains('on')) return;
-    REC_SEL = el.dataset.pick;
-    scr.querySelectorAll('[data-pick]').forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
-    const box = document.getElementById('recSel');
-    box.innerHTML = recSel(curRec());
-    box.parentElement.setAttribute('style', recVars(curRec()));
-    bindGo(box);
-    focusRecSheet(syncRecSheet(true));
-  });
-  /* แผ่นเดียวกัน: วาดครั้งแรก + วาดใหม่เมื่อขนาดเปลี่ยน (ฟอนต์โหลดเสร็จ · สลับภาษา · เปลี่ยนแผน) */
-  if (window._recRO) window._recRO.disconnect();
-  const md = scr.querySelector('.pp .rec .md');
-  if (md){
-    syncRecSheet(false);
-    window._recRO = new ResizeObserver(() => syncRecSheet(true));
-    window._recRO.observe(md.querySelector('.picks')); window._recRO.observe(md.querySelector('.sel'));
-  }
+  /* ข้อเสนอแนะนำ (แนวนอน): แถวการ์ด + แผ่นรายละเอียด + เลื่อนเอง — ดู mountRec */
+  { const rw = scr.querySelector('.pp .rec .rwrap'); if (rw) mountRec(rw, bindGo); else clearTimeout(window._recAutoT); }
 
   /* ออกจาก flow ประกัน → ระบบลงทะเบียน (หน้าเลือกบริการ) */
   scr.querySelectorAll('[data-home]').forEach(el => { el.onclick = () => { if (!el.disabled) toPrint(); }; });

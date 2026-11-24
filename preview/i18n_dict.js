@@ -246,9 +246,11 @@ window.I18N_EN = {
 "ยังไม่สนใจ, ไปที่ระบบลงทะเบียน": "Not now, go to registration",
 "เบี้ยเริ่มต้น": "From",
 "บาท/ปี": "THB/yr",
-"แตะแผนทางซ้ายเพื่อดูรายละเอียด": "Tap a plan on the left for details",
+"บาท": "THB",
 "ความคุ้มครองหลัก": "Main coverage",
 "ดูรายละเอียดทั้งหมด": "See full details",
+"ท่านเข้าเกณฑ์": "You qualify for",
+"· แตะเพื่อดูรายละเอียด ปัดซ้าย-ขวาดูแผนอื่น": "· Tap for details, swipe for more",
 "ค่ารักษาผู้ป่วยใน สูงสุด 1,000,000 บาท/ปี": "Inpatient care up to 1,000,000 THB/yr",
 "ค่ารักษาจากอุบัติเหตุ สูงสุด 50,000 บาท/ครั้ง": "Accident treatment up to 50,000 THB/visit",
 "จ่ายเงินก้อนเมื่อตรวจพบ 50 โรคร้ายแรง": "Lump sum on diagnosis of 50 critical illnesses",
@@ -480,6 +482,7 @@ window.I18N_EN = {
 "บริษัทยังพิจารณาข้อเสนออยู่": "The insurer is still reviewing"
 };
 window.I18N_RULES = [
+  [/^(\d+) แผน$/, m => `${m[1]} plan${m[1] === '1' ? '' : 's'}`],
   [/^สมัครได้ถึงอายุ (\d+) ปี$/, m => `Apply up to age ${m[1]}`],
   [/^ต่ออายุได้ถึง (\d+) ปี$/, m => `Renewable to age ${m[1]}`],
   [/^(\d+) ปี (\d+) เดือน (\d+) วัน$/, m => `${m[1]} yrs ${m[2]} mos ${m[3]} days`],

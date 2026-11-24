@@ -148,17 +148,6 @@ body.fullmode .frame{border-radius:0}
 .oH .card .cap .p strong{font-size:28px;font-weight:700;color:var(--ink);margin-right:6px;font-variant-numeric:tabular-nums}
 .oH .fadeR{position:absolute;right:0;top:0;bottom:8px;width:64px;pointer-events:none;background:linear-gradient(90deg,rgba(242,246,251,0),rgba(242,246,251,.95))}
 .oH .fadeR[hidden]{display:none}
-/* ปุ่มเลื่อน: อยู่แถวหัวข้อด้านขวา ไม่ทับการ์ด/ไม่ชิดภาพ (แตะพลาดไม่กลายเป็นเลือกแผน) · 72px ≈ 27 มม. บนจอ 32"
-   + ตัวนับ "แผนที่ 1–3 จาก 6" บอกว่ามีอีกกี่แผน · สุดทางแล้วปุ่มจาง (ไม่ซ่อน ตำแหน่งไม่กระโดด) · ปัดแถวได้เหมือนเดิม */
-.oH .hdH{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:24px}
-.oH .hdH p{grid-column:1 / -1}
-.oH .nav{display:flex;align-items:center;gap:16px}
-.oH .nav .cnt{font-size:24px;font-weight:600;color:var(--ink-muted);white-space:nowrap;margin-right:4px}
-.oH .nav .cnt b{color:var(--ink)}
-.oH .nav .arw{position:static;width:72px;height:72px;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22),0 2px 6px rgba(20,38,90,.10);transition:transform .15s,opacity .2s}
-.oH .nav .arw svg{width:36px;height:36px}
-.oH .nav .arw:active{transform:scale(.94)}
-.oH .nav .arw:disabled{opacity:.3;cursor:default;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22)}
 /* แผงรายละเอียด: ห่างการ์ด 24 (padding ล่างแถว 8 + 16) · พื้นมาจากแผ่น SVG · เนื้อหาเปลี่ยนแบบจางเข้า */
 .oH .det{position:relative;z-index:1;margin-top:16px;background:transparent;border-radius:0;transition:opacity .22s}
 .oH .det.swap{opacity:0;transition:none}
@@ -210,8 +199,8 @@ body.fullmode .frame{border-radius:0}
 <body>
 
 <header class="intro">
-  <h1>เทียบรูปแบบส่วน "ข้อเสนอแนะนำ" · แนวตั้ง (ปัจจุบัน) · แนวนอน · แบบ Netflix</h1>
-  <p class="sub">ทุกจอใช้แผนแนะนำ 6 แผนชุดเดียวกัน และกดใช้งานได้ · แบบปัจจุบันคือหน้าจริงที่ฝังไว้ · แนวนอนกับแบบ Netflix เป็นจอจำลองไว้เทียบ ยังไม่ได้ลง UI จริง · "ดูขนาดจริง" เพื่อดูขนาดตัวอักษรบนจอ 32 นิ้ว</p>
+  <h1>เทียบรูปแบบส่วน "ข้อเสนอแนะนำ" · แนวนอน (หน้าจริง) · แบบ Netflix</h1>
+  <p class="sub">ทุกจอใช้แผนแนะนำ 6 แผนชุดเดียวกัน และกดใช้งานได้ · แนวนอนคือหน้าจริงที่ฝังไว้ (ใช้แทนแบบแนวตั้งแล้ว) · แบบ Netflix เป็นจอจำลองไว้เทียบ ยังไม่ได้ลง UI จริง · "ดูขนาดจริง" เพื่อดูขนาดตัวอักษรบนจอ 32 นิ้ว</p>
 </header>
 
 <main class="opts" id="opts"></main>
@@ -287,9 +276,7 @@ const cardH = (q, i, on) => `<button class="card${on ? ' on' : ''}" data-i="${i}
 function mountH(frame){
   let cur = 0, prog = false, progT = null, target = 0;
   frame.innerHTML = screen(`<section class="rec oH">
-    <div class="hd hdH"><h2>ข้อเสนอแนะนำ</h2>
-      <div class="nav"><span class="cnt"></span><button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button><button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
-      <p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แตะแผนเพื่อดูรายละเอียด</p></div>
+    <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แตะแผนเพื่อดูรายละเอียด ปัดซ้าย-ขวาดูแผนอื่น</p></div>
     <div class="wrap">
       <svg class="sheetbg" aria-hidden="true"><path/></svg>
       <div class="rowbox">
@@ -300,7 +287,7 @@ function mountH(frame){
     </div></section>`);
   const wrap = frame.querySelector('.wrap'), row = frame.querySelector('.rowbox'), strip = frame.querySelector('.strip'), det = frame.querySelector('.det');
   const path = frame.querySelector('.sheetbg path'), cards = [...strip.children];
-  const prev = frame.querySelector('.prev'), next = frame.querySelector('.next'), fade = frame.querySelector('.fadeR');
+  const fade = frame.querySelector('.fadeR');
   const fill = () => { det.setAttribute('style', vars(P[cur])); det.innerHTML = detail(P[cur]); };
   /* วาดแผ่น: ตำแหน่งการ์ดคิดจาก scrollLeft ที่ให้มา (ระหว่างเลื่อนอัตโนมัติใช้ค่าปลายทาง) · ส่วนที่เลื่อนพ้นแถวถูกตัดออก */
   const sync = (animate, sl = strip.scrollLeft) => {
@@ -311,12 +298,7 @@ function mountH(frame){
     path.style.d = d;
     if (!animate){ void path.getBoundingClientRect(); path.style.transition = ''; }
   };
-  const cnt = frame.querySelector('.cnt');
-  const arrows = () => { const max = strip.scrollWidth - strip.clientWidth, sl = strip.scrollLeft, st = cards[1] ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
-    prev.disabled = sl < 8; next.disabled = sl > max - 8; fade.hidden = next.disabled;
-    const per = Math.max(1, Math.floor((strip.clientWidth + 24) / st)), a = sl > max - 8 ? Math.max(1, P.length - per + 1) : Math.round(sl / st) + 1;
-    cnt.innerHTML = P.length > per ? `แผนที่ <b>${a}–${Math.min(P.length, a + per - 1)}</b> จาก ${P.length}` : '';
-    prev.parentElement.querySelectorAll('.arw').forEach(b => b.hidden = P.length <= per); };   /* แผนพอดีจอ = ไม่ต้องมีปุ่ม */
+  const arrows = () => { fade.hidden = strip.scrollLeft > strip.scrollWidth - strip.clientWidth - 8; };   /* ขอบขวาจาง = ยังมีแผนต่อ · สุดทางแล้วซ่อน */
   strip.addEventListener('scroll', () => { arrows(); if (!prog) sync(false); });
   /* ตำแหน่งเลื่อนที่ทำให้เห็นการ์ดทั้งใบ (เลือกจากจุด snap = ขอบซ้ายการ์ด) · เห็นครบอยู่แล้ว = ไม่เลื่อน */
   const scrollFor = c => { const sl = strip.scrollLeft, cw = strip.clientWidth, max = strip.scrollWidth - cw, L = c.offsetLeft, R = L + c.offsetWidth;
@@ -335,9 +317,13 @@ function mountH(frame){
     }
     sync(true, target);
   };
-  const step = () => cards[1].offsetLeft - cards[0].offsetLeft;
-  prev.onclick = () => strip.scrollBy({left: -step(), behavior: 'smooth'});
-  next.onclick = () => strip.scrollBy({left: step(), behavior: 'smooth'});
+  /* เลื่อนเองเมื่อยังไม่มีคนแตะ: ทุก 5 วิ เลือกการ์ดใบถัดไป (แผ่นเลื่อนตาม + แถวเลื่อนให้เห็นทั้งใบ · ใบสุดท้ายวนกลับใบแรก)
+     ให้ผู้ใช้เห็นว่าแถวปัดได้และการ์ดแตะเลือกได้ · แตะ/ปัด/เลื่อนครั้งแรก = หยุดเลื่อนเองถาวร ไม่เปลี่ยนการ์ดขณะกำลังอ่าน */
+  const AUTO = 5000; let auto = !matchMedia('(prefers-reduced-motion: reduce)').matches, autoT = null;
+  const stopAuto = () => { auto = false; clearTimeout(autoT); };
+  const autoNext = () => { clearTimeout(autoT); if (auto) autoT = setTimeout(() => { if (!auto || !frame.isConnected) return; select((cur + 1) % P.length); autoNext(); }, AUTO); };
+  frame.addEventListener('pointerdown', stopAuto, true);
+  frame.addEventListener('wheel', stopAuto, {capture: true, passive: true});
   /* ลากด้วยเมาส์ได้ (บนจอสัมผัสปัดได้เองอยู่แล้ว) · ลากเกิน 6px = ไม่นับเป็นการแตะเลือก */
   let x0 = null, s0 = 0, moved = false;
   const sc = () => parseFloat(getComputedStyle(frame).getPropertyValue('--s')) || 1;
@@ -351,6 +337,7 @@ function mountH(frame){
   new ResizeObserver(() => sync(true, prog ? target : strip.scrollLeft)).observe(det);
   fill(); arrows(); sync(false);
   if (document.fonts) document.fonts.ready.then(() => sync(false));
+  autoNext();
 }
 
 /* ---------- N · แบบ Netflix ---------- */
@@ -410,13 +397,11 @@ function mountN(frame){
 
 /* ---------- ประกอบหน้า ---------- */
 const OPTS = [
-  {k:'ตอนนี้', title:'แนวตั้ง (แบบปัจจุบัน · หน้าจริง)', iframe:'insurance.html?s=select&idle=86400&mute=1',
-   idea:'การ์ดเรียงลงด้านซ้าย แผงรายละเอียดด้านขวาต่อเป็นแผ่นเดียวกับการ์ดที่เลือก แผงเลื่อนตามการ์ดที่เลือก',
-   yes:['เห็นราคาหลายแผนพร้อมกันในแนวตั้ง','แผ่นต่อกันชัดว่ารายละเอียดเป็นของแผนไหน'], no:['แผนเยอะ คอลัมน์ซ้ายยาว ต้องเลื่อนลง','ภาพการ์ดเล็ก (กว้าง 316)']},
-  {k:'H', title:'แนวนอน', mount: mountH,
-   idea:'การ์ดเรียงเป็นแถวแนวนอนด้านบน ปัดซ้าย-ขวาหรือกดลูกศรดูแผนอื่น การ์ดที่เลือกยื่นลงไปต่อกับแผ่นรายละเอียดเต็มกว้างด้านล่าง',
-   yes:['แผนเพิ่มกี่ตัว ความสูงหน้าจอเท่าเดิม ไม่ดัน "ข้อเสนออื่น" ลงไป','แผ่นรายละเอียดกว้างเต็ม แสดงตัวเลขเด่น 3 ข้อได้ใหญ่'],
-   no:['เห็นทีละ 3 แผนเศษ แผนที่เหลือต้องปัด (ใส่ลูกศร + ขอบจางช่วยบอก)','ชื่อแผนยาวต้องตัด "…" ในการ์ดแคบ']},
+  {k:'ตอนนี้', title:'แนวนอน (หน้าจริง)', iframe:'insurance.html?s=select&idle=86400&mute=1',
+   idea:'ใช้แบบแนวนอนในหน้าจริงแล้ว การ์ดเรียงเป็นแถวแนวนอน ปัดซ้าย-ขวาดูแผนอื่น การ์ดที่เลือกต่อเป็นแผ่นเดียวกับรายละเอียดด้านล่าง ก่อนผู้ใช้แตะ จะเลือกใบถัดไปเองทุก 5 วินาที แตะ ปัด หรือเลื่อนครั้งแรกแล้วหยุดถาวร',
+   yes:['แผนเพิ่มกี่ตัว ความสูงหน้าจอเท่าเดิม','การเลื่อนเองบอกผู้ใช้ว่าแถวปัดได้และการ์ดแตะเลือกได้','กด "สนใจแผนนี้" ได้จากหน้านี้เลย'],
+   no:['เห็นทีละ 3 แผนเศษ แผนที่เหลือต้องปัดหรือรอให้เลื่อนเอง']},
+
   {k:'N', title:'แบบ Netflix (แถบหมุน โฟกัสกลาง)', mount: mountN,
    idea:'ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว ใบที่โฟกัสอยู่กลาง ใบข้างย่อและจาง ก่อนผู้ใช้แตะ การ์ดจะเลื่อนเองทุก 6 วินาที (แถบใต้การ์ดนับถอยหลัง) พอแตะ ปัด หรือกดปุ่มครั้งแรก จะหยุดเลื่อนเองถาวร ปุ่มเลื่อนอยู่แถวควบคุมใต้การ์ด คู่กับจุดบอกตำแหน่ง',
    yes:['ทุกอย่างของแผนอยู่ในการ์ดเดียว ไม่ต้องมองสลับสองที่','การ์ดใหญ่ที่สุด ดึงความสนใจ · แผนเพิ่มกี่ตัวก็ได้ แถบวนรอบ','เลือกแผนได้ 3 ทาง: แตะใบข้าง · ปัด · ปุ่ม [<] [>] ใต้การ์ด'],
