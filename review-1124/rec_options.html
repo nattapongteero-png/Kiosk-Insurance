@@ -190,17 +190,19 @@ body.fullmode .frame{border-radius:0}
 .oN .slide .ben strong em{font-size:20px;margin-left:5px}   /* 30px + หน่วย 20px บรรทัดเดียว · หลักล้านยังพอดีคอลัมน์ ~204 */
 .oN .slide .buy{margin-top:18px}
 .oN .slide .btn{height:80px;padding:0 26px;font-size:26px}
-.oN .arw{top:110px}
-.oN .arw.prev{left:24px}
-.oN .arw.next{right:24px}
+/* ปุ่มเลื่อน: แถวควบคุมใต้การ์ด [<] จุดบอกตำแหน่ง [>] · ไม่ทับการ์ดข้าง ไม่ชิดขอบจอ · 72px ≈ 27 มม. บนจอ 32" */
+.oN .ctl{display:flex;align-items:center;justify-content:center;gap:28px;margin:6px 0 16px}
+.oN .ctl .arw{position:static;width:72px;height:72px;box-shadow:inset 0 0 0 2px rgba(20,38,90,.22),0 2px 6px rgba(20,38,90,.10);transition:transform .15s}
+.oN .ctl .arw svg{width:36px;height:36px}
+.oN .ctl .arw:active{transform:scale(.94)}
 /* จุดบอกตำแหน่ง · จุดปัจจุบันเป็นแถบยาว มีแถบเวลานับถอยหลังก่อนเลื่อนเอง (หยุดเมื่อผู้ใช้แตะ) */
-.oN .dots{display:flex;justify-content:center;align-items:center;gap:10px;margin:2px 0 18px}
+.oN .dots{display:flex;justify-content:center;align-items:center;gap:10px}
 .oN .dots i{position:relative;width:14px;height:14px;border-radius:99px;background:rgba(20,38,90,.18);overflow:hidden;transition:width .3s}
 .oN .dots i.cur{width:64px}
 .oN .dots i.cur::after{content:"";position:absolute;inset:0;background:var(--ink);transform-origin:0 50%;animation:nfbar var(--dur,6s) linear forwards}
 .oN .dots.paused i.cur::after{animation:none;transform:none}
 @keyframes nfbar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.oN .hint{display:flex;justify-content:center;align-items:center;gap:8px;font-size:22px;color:var(--ink-muted);margin:-8px 0 0}
+.oN .hint{display:flex;justify-content:center;align-items:center;gap:8px;font-size:22px;color:var(--ink-muted)}
 .oN .hint svg{width:24px;height:24px;stroke:var(--ink-muted)}
 </style>
 </head>
@@ -362,13 +364,15 @@ const slideCard = (p, i) => `<div class="slide" data-i="${i}" role="group" aria-
       <button class="btn sec">ดูรายละเอียด</button>${p.pend ? '' : '<button class="btn pri">สนใจแผนนี้</button>'}</div>
   </div></div>`;
 function mountN(frame){
-  const DUR = 6000, RESUME = 15000;   /* เลื่อนเองทุก 6 วิ · ผู้ใช้แตะ/ปัด → หยุด 15 วิแล้วเลื่อนต่อ */
-  let cur = 0, timer = null, paused = false, resumeT = null;
+  const DUR = 6000;   /* เลื่อนเองทุก 6 วิ เฉพาะก่อนผู้ใช้แตะครั้งแรก (ดึงความสนใจ) · แตะ/ปัด/กดปุ่มครั้งแรก = หยุดเลื่อนเองถาวร ไม่เปลี่ยนการ์ดขณะกำลังอ่าน */
+  let cur = 0, timer = null, paused = false;
   frame.innerHTML = screen(`<section class="rec oN">
     <div class="hd"><h2>ข้อเสนอแนะนำ</h2><p>ท่านเข้าเกณฑ์ <b>${P.length} แผน</b> · แผนจะเลื่อนให้ดูเอง แตะหรือปัดเพื่อเลือก</p></div>
     <div class="stage">${P.map(slideCard).join('')}
-      <button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button><button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
-    <div class="dots">${P.map(() => '<i></i>').join('')}</div>
+      </div>
+    <div class="ctl"><button class="arw prev" aria-label="แผนก่อนหน้า">${svg('chevL', 2.6)}</button>
+      <div class="dots">${P.map(() => '<i></i>').join('')}</div>
+      <button class="arw next" aria-label="แผนถัดไป">${svg('chevR', 2.6)}</button></div>
     <div class="hint">${svg('hand', 1.8)}ปัดซ้าย-ขวา หรือแตะการ์ดข้างๆ</div></section>`);
   const stage = frame.querySelector('.stage'), slides = [...stage.querySelectorAll('.slide')], dots = frame.querySelector('.dots');
   const n = P.length, GAP = 650;   /* ใบข้างโผล่ราว 200px ต่อข้าง */
@@ -386,8 +390,7 @@ function mountN(frame){
     dots.style.setProperty('--dur', DUR + 'ms'); const c = dots.children[cur]; c.classList.remove('cur'); void c.offsetWidth; c.classList.add('cur'); };
   const go = k => { cur = wrap(k); layout(); dotsPaint(); };
   const tick = () => { clearTimeout(timer); if (!paused) timer = setTimeout(() => { go(cur + 1); tick(); }, DUR); };
-  const userAct = () => { paused = true; dots.classList.add('paused'); clearTimeout(timer); clearTimeout(resumeT);
-    resumeT = setTimeout(() => { paused = false; dots.classList.remove('paused'); dotsPaint(); tick(); }, RESUME); };
+  const userAct = () => { paused = true; dots.classList.add('paused'); clearTimeout(timer); };
   frame.querySelector('.prev').onclick = e => { e.stopPropagation(); userAct(); go(cur - 1); };
   frame.querySelector('.next').onclick = e => { e.stopPropagation(); userAct(); go(cur + 1); };
   /* ปัด/ลาก: เลื่อนตามนิ้ว ปล่อยแล้วเกิน 80px = ไปใบถัดไป/ก่อนหน้า · แตะใบข้าง = เลื่อนใบนั้นมากลาง · แตะใบกลาง = หยุดเลื่อนเอง (กำลังอ่าน) */
@@ -413,9 +416,9 @@ const OPTS = [
    yes:['แผนเพิ่มกี่ตัว ความสูงหน้าจอเท่าเดิม ไม่ดัน "ข้อเสนออื่น" ลงไป','แผ่นรายละเอียดกว้างเต็ม แสดงตัวเลขเด่น 3 ข้อได้ใหญ่'],
    no:['เห็นทีละ 3 แผนเศษ แผนที่เหลือต้องปัด (ใส่ลูกศร + ขอบจางช่วยบอก)','ชื่อแผนยาวต้องตัด "…" ในการ์ดแคบ']},
   {k:'N', title:'แบบ Netflix (แถบหมุน โฟกัสกลาง)', mount: mountN,
-   idea:'ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว (ภาพ ชื่อแผน เบี้ย บริษัท ป้ายอายุ ตัวเลขเด่น ปุ่ม) ใบที่โฟกัสอยู่กลาง ใบข้างย่อและจาง ถ้าไม่แตะจะเลื่อนไปใบถัดไปเองทุก 6 วินาที (แถบใต้การ์ดนับถอยหลัง) ปัด แตะใบข้าง หรือกดลูกศรได้ แตะแล้วหยุดเลื่อนเอง 15 วินาที',
-   yes:['ทุกอย่างของแผนอยู่ในการ์ดเดียว ไม่ต้องมองสลับสองที่','การ์ดใหญ่ที่สุด ดึงความสนใจ · แผนเพิ่มกี่ตัวก็ได้ แถบวนรอบ'],
-   no:['เห็นราคาทีละแผน เทียบหลายแผนยากกว่า','การ์ดเปลี่ยนเองขณะผู้ใช้กำลังอ่าน อาจทำให้คนวัย 35–60 สับสน (จึงหยุดเมื่อแตะ)']},
+   idea:'ข้อมูลทั้งหมดของแผนอยู่ในการ์ดใบเดียว ใบที่โฟกัสอยู่กลาง ใบข้างย่อและจาง ก่อนผู้ใช้แตะ การ์ดจะเลื่อนเองทุก 6 วินาที (แถบใต้การ์ดนับถอยหลัง) พอแตะ ปัด หรือกดปุ่มครั้งแรก จะหยุดเลื่อนเองถาวร ปุ่มเลื่อนอยู่แถวควบคุมใต้การ์ด คู่กับจุดบอกตำแหน่ง',
+   yes:['ทุกอย่างของแผนอยู่ในการ์ดเดียว ไม่ต้องมองสลับสองที่','การ์ดใหญ่ที่สุด ดึงความสนใจ · แผนเพิ่มกี่ตัวก็ได้ แถบวนรอบ','เลือกแผนได้ 3 ทาง: แตะใบข้าง · ปัด · ปุ่ม [<] [>] ใต้การ์ด'],
+   no:['เห็นราคาทีละแผน เทียบหลายแผนยากกว่า','ก่อนแตะครั้งแรก การ์ดเปลี่ยนเอง คนที่ยืนอ่านเฉยๆ อาจอ่านไม่ทัน']},
 ];
 const full = new URLSearchParams(location.search).get('full'), box = document.getElementById('opts');
 OPTS.filter(o => !full || o.k === full).forEach(o => {
