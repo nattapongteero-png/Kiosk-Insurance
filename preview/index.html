@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kiosk ส่งตรวจ — หน้าเลือกบริการ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- ฟอนต์ Sarabun เก็บในเครื่อง (fonts/) ไม่พึ่งอินเทอร์เน็ต — เดิมโหลดจาก Google Fonts ถ้าช้า/หลุดจะค้างเป็นฟอนต์ไทยไม่มีหัวของเครื่อง
+     preload ชุดอักษรไทยที่ใช้บ่อย ให้ฟอนต์พร้อมตั้งแต่วาดหน้าครั้งแรก -->
+<link rel="preload" href="fonts/sarabun-500-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-600-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-700-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/sarabun.css">
 <style>
 :root{
   /* ---- Design tokens (ใช้ชุดเดียวกับฝั่ง Kotlin) ---- */
@@ -35,7 +38,7 @@
   --r-md:24px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#20262E;font-family:"Noto Sans Thai",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 12px 60px;gap:16px}
+body{background:#20262E;font-family:"Sarabun",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 12px 60px;gap:16px}
 
 .toolbar{color:#C7CDD6;font-size:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
 .toolbar b{color:#fff;font-weight:600}
