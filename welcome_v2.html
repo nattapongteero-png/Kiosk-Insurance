@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kiosk — หน้าต้อนรับ (แบบ Figma 26-36)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- ฟอนต์ Sarabun เก็บในเครื่อง (fonts/) ไม่พึ่งอินเทอร์เน็ต — เดิมโหลดจาก Google Fonts ถ้าช้า/หลุดจะค้างเป็นฟอนต์ไทยไม่มีหัวของเครื่อง
+     preload ชุดอักษรไทยที่ใช้บ่อย ให้ฟอนต์พร้อมตั้งแต่วาดหน้าครั้งแรก -->
+<link rel="preload" href="fonts/sarabun-500-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-600-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/sarabun-700-thai.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/sarabun.css">
 <style>
 :root{
   /* ---- ระยะห่างตาม 8-point grid: 8 · 16 · 24 · 32 · 40 · 48 · 64 · 80 ---- */
@@ -22,7 +25,7 @@
   --glass:rgba(255,255,255,.72); --glass-border:rgba(255,255,255,.95);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
+body{background:#161A1F;font-family:"Sarabun",system-ui,sans-serif;
   display:flex;flex-direction:column;align-items:center;padding:20px 12px;gap:0}
 .stage{width:1080px;height:var(--H,1920px);transform-origin:top center;flex:none}
 .screen{position:relative;width:1080px;height:var(--H,1920px);overflow:hidden;border-radius:10px;
@@ -114,7 +117,7 @@ body{background:#161A1F;font-family:"Noto Sans Thai",system-ui,sans-serif;
           mask-image:linear-gradient(180deg,transparent 206px,#000 358px)}
 .panelCard .wm img{position:absolute;left:-77px;top:100px;width:760px;height:760px}
 .panelCard .wm img.flip{left:683px;transform:scaleX(-1)}
-.copy h2{font-size:72px;font-weight:700;line-height:88px;color:var(--ink);letter-spacing:-1px;white-space:nowrap}
+.copy h2{font-size:68px;font-weight:700;line-height:88px;color:var(--ink);letter-spacing:-1px;white-space:nowrap}
 .copy .rule{width:88px;height:6px;border-radius:3px;margin:24px 0 24px;
   background:linear-gradient(90deg,#B4780C 0%,#E0A93A 55%,#CC9017 100%);
   box-shadow:0 2px 8px rgba(204,144,23,.30)}
@@ -397,6 +400,13 @@ body.bleed{padding:0;overflow:hidden}
 body.bleed .screen{border-radius:0;box-shadow:none}
 
 
+/* แจ้งผลตอนกลับหน้าแรก (ยกเลิก / หมดเวลา) · ป้ายกรมท่าใต้แบนเนอร์ หายเองใน 4 วิ
+   สไตล์นี้หายไปตอน commit 8fa68b4 ทำให้ข้อความแสดงเป็นตัวเล็กไม่มีสไตล์ซ่อนอยู่หลังการ์ดเสียบบัตร — ดึงกลับจาก 58fdb68 */
+.bye{position:absolute;left:50%;top:296px;z-index:8;transform:translateX(-50%);display:flex;align-items:center;gap:16px;white-space:nowrap;
+  padding:22px 40px 22px 32px;border-radius:99px;background:linear-gradient(135deg,#223A7A 0%,var(--ink) 100%);color:#fff;
+  font-size:30px;font-weight:600;box-shadow:0 16px 40px rgba(20,38,90,.3);animation:byeIn .35s cubic-bezier(.2,.8,.2,1)}
+.bye svg{width:36px;height:36px;stroke:#fff;flex:none}
+@keyframes byeIn{from{opacity:0;transform:translate(-50%,-16px)}to{opacity:1;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
@@ -678,7 +688,7 @@ body.bleed .screen{border-radius:0;box-shadow:none}
           <button class="kpScan" id="kpScan" aria-label="สแกนบาร์โค้ด HN (ต้นแบบ: แตะเพื่อจำลองการสแกน)">
             <span class="bc"><svg viewBox="0 0 120 80" aria-hidden="true"><rect x="1" y="1" width="118" height="78" rx="10" fill="#fff" stroke="#DCE7F4" stroke-width="2"/>
               <path d="M18 16v40M24 16v40M28 16v40M35 16v40M40 16v40M44 16v40M52 16v40M56 16v40M63 16v40M67 16v40M74 16v40M80 16v40M84 16v40M91 16v40M96 16v40M102 16v40" stroke="#14265A" stroke-width="3"/>
-              <text x="60" y="71" text-anchor="middle" font-size="10" font-weight="700" fill="#14265A" font-family="Noto Sans Thai,sans-serif">HN 000890314</text></svg><i class="beam"></i></span>
+              <text x="60" y="71" text-anchor="middle" font-size="10" font-weight="700" fill="#14265A" font-family="Sarabun,sans-serif">HN 000890314</text></svg><i class="beam"></i></span>
             <span class="tx"><b>สแกนบาร์โค้ด HN</b><span>ยื่นบาร์โค้ดบนบัตรโรงพยาบาลที่ช่องสแกนใต้จอ</span></span>
           </button>
           <div class="kpOr"><i></i><span>หรือกรอกเลข HN</span><i></i></div>
